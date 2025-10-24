@@ -1,48 +1,37 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post
-} from '@nestjs/common'
-
-import { User } from 'prisma/swagger/models/user.entity'
+import { Body, Controller, Post, Req, Res } from '@nestjs/common'
 
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import { CreateUserDto } from '@/user/dto/create-user.dto'
 
 import { AuthService } from './auth.service'
-import { UpdateAuthDto } from './dto/update-auth.dto'
+import { LoginRequestDto } from './dto/login-request.dto'
+import { LoginResponseDto } from './dto/login-response.dto'
+import { RegisterResponseDto } from './dto/register-response.dto'
+
+import type { Request, Response } from 'express'
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  @ApiOkResponseWrapped(User)
-  register(@Body() dto: CreateUserDto) {
-    return this.authService.register(dto)
+  @ApiOkResponseWrapped(RegisterResponseDto)
+  register(
+    @Res({ passthrough: true }) res: Response,
+    @Body() dto: CreateUserDto
+  ) {
+    return this.authService.register(res, dto)
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll()
+  @Post('login')
+  @ApiOkResponseWrapped(LoginResponseDto)
+  login(@Res() res: Response, @Body() dto: LoginRequestDto) {
+    return this.authService.login(res, dto)
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id)
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto)
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id)
+  @Post('refresh')
+  @ApiOkResponseWrapped(LoginResponseDto)
+  refresh(@Req() req: Request, @Res() res: Response) {
+    return this.authService.refresh(req, res)
   }
 }

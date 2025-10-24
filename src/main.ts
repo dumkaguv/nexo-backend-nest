@@ -1,5 +1,7 @@
-import { BadRequestException, ValidationPipe } from '@nestjs/common'
+import { ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
+
+import cookieParser from 'cookie-parser'
 
 import { AppModule } from './app.module'
 import { AllExceptionsFilter } from './common/filters'
@@ -11,6 +13,8 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api')
 
+  app.use(cookieParser())
+
   app.enableCors({
     origin: process.env.FRONT_URL,
     credentials: true,
@@ -20,21 +24,9 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // удаляет лишние поля из запроса
-      forbidNonWhitelisted: true, // если есть лишние поля — выбросить ошибку
-      transform: true, // автоматически преобразует типы, например "id" в число
-      exceptionFactory: (errors) => {
-        // errors — массив ValidationError, можно кастомно вернуть объект
-        const formatted = errors.map((err) => ({
-          field: err.property,
-          constraints: err.constraints
-        }))
-
-        return new BadRequestException({
-          message: 'Validation failed',
-          errors: formatted
-        })
-      }
+      whitelist: true,
+      forbidNonWhitelisted: false,
+      transform: true
     })
   )
 

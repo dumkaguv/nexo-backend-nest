@@ -40,7 +40,7 @@ export class UserService {
 
     // todo: tokens
 
-    return { user }
+    return user
   }
 
   findAll(query: FindAllQueryDto) {
