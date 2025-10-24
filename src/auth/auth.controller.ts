@@ -1,11 +1,13 @@
 import { Body, Controller, Post, Req, Res } from '@nestjs/common'
 
 import { ApiOkResponseWrapped } from '@/common/decorators'
+import { EmptyResponseDto } from '@/common/dtos'
 import { CreateUserDto } from '@/user/dto/create-user.dto'
 
 import { AuthService } from './auth.service'
 import { LoginRequestDto } from './dto/login-request.dto'
 import { LoginResponseDto } from './dto/login-response.dto'
+import { RefreshResponseDto } from './dto/refresh-response.dto'
 import { RegisterResponseDto } from './dto/register-response.dto'
 
 import type { Request, Response } from 'express'
@@ -25,13 +27,22 @@ export class AuthController {
 
   @Post('login')
   @ApiOkResponseWrapped(LoginResponseDto)
-  login(@Res() res: Response, @Body() dto: LoginRequestDto) {
+  login(
+    @Res({ passthrough: true }) res: Response,
+    @Body() dto: LoginRequestDto
+  ) {
     return this.authService.login(res, dto)
   }
 
+  @Post('logout')
+  @ApiOkResponseWrapped(EmptyResponseDto)
+  logout(@Res({ passthrough: true }) res: Response) {
+    return this.authService.logout(res)
+  }
+
   @Post('refresh')
-  @ApiOkResponseWrapped(LoginResponseDto)
-  refresh(@Req() req: Request, @Res() res: Response) {
+  @ApiOkResponseWrapped(RefreshResponseDto)
+  refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     return this.authService.refresh(req, res)
   }
 }

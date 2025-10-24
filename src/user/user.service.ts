@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
 import { hashSync } from 'bcrypt'
 import { v4 } from 'uuid'
 
@@ -11,7 +12,18 @@ import { UpdateUserDto } from './dto/update-user.dto'
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly selectFieldsWithoutPassword: Prisma.UserSelect
+
+  constructor(private readonly prisma: PrismaService) {
+    this.selectFieldsWithoutPassword = {
+      id: true,
+      email: true,
+      userName: true,
+      activationLink: true,
+      createdAt: true,
+      updatedAt: true
+    }
+  }
 
   async create(createUserDto: CreateUserDto) {
     const { userName, email, password } = createUserDto
@@ -31,7 +43,8 @@ export class UserService {
     const activationLink = v4()
 
     const user = await this.prisma.user.create({
-      data: { ...createUserDto, password: hashPassword, activationLink }
+      data: { ...createUserDto, password: hashPassword, activationLink },
+      select: this.selectFieldsWithoutPassword
     })
 
     // todo: profile creation
@@ -47,19 +60,28 @@ export class UserService {
     return paginate({
       prisma: this.prisma,
       model: 'user',
+      select: this.selectFieldsWithoutPassword,
       ...query
     })
   }
 
   findOne(id: number) {
     return this.prisma.user.findFirstOrThrow({
+      select: this.selectFieldsWithoutPassword,
       where: { id }
     })
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
-    console.log(updateUserDto)
     return this.prisma.user.update({
+      select: {
+        id: true,
+        email: true,
+        userName: true,
+        activationLink: true,
+        createdAt: true,
+        updatedAt: true
+      },
       where: { id },
       data: { ...updateUserDto }
     })

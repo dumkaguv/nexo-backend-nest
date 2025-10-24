@@ -58,7 +58,7 @@ export class AuthService {
 
   async register(res: Response, dto: CreateUserDto) {
     const user = await this.userService.create(dto)
-    const accessToken = await this.auth(res, user.id)
+    const { accessToken } = await this.auth(res, user.id)
 
     return { user, accessToken }
   }
@@ -79,13 +79,24 @@ export class AuthService {
     return await this.auth(res, user.id)
   }
 
+  logout(res: Response) {
+    this.setCookie(res, this.REFRESH_TOKEN_COOKIE_NAME, '0')
+
+    return {}
+  }
+
   async refresh(req: Request, res: Response) {
     const refreshToken = req.cookies[this.REFRESH_TOKEN_COOKIE_NAME]
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token is not valid')
     }
 
-    const payload: JwtPayload = await this.jwtService.verifyAsync(refreshToken)
+    const payload: JwtPayload = await this.jwtService.verifyAsync(
+      refreshToken,
+      {
+        secret: this.JWT_REFRESH_SECRET
+      }
+    )
     if (payload) {
       const user = await this.userService.findOne(Number(payload.id))
 
@@ -93,15 +104,19 @@ export class AuthService {
     }
   }
 
+  validate(id: number) {
+    return this.userService.findOne(id)
+  }
+
   private async auth(res: Response, id: number) {
-    const { accessToken, refreshToken } = await this.generateTokens(String(id))
+    const { accessToken, refreshToken } = await this.generateTokens(id)
 
     this.setCookie(res, refreshToken, this.JWT_REFRESH_TTL)
 
-    return accessToken
+    return { accessToken }
   }
 
-  private async generateTokens(userId: string) {
+  private async generateTokens(userId: number) {
     const payload: JwtPayload = { id: userId }
 
     const accessToken = await this.jwtService.signAsync(payload, {
@@ -119,11 +134,12 @@ export class AuthService {
 
   private setCookie(res: Response, token: string, ttl: StringValue | string) {
     const expires = new Date(Date.now() + ms(ttl as StringValue))
+    const url = new URL(this.FRONT_URL)
 
     res.cookie(this.REFRESH_TOKEN_COOKIE_NAME, token, {
       httpOnly: true,
-      domain: this.FRONT_URL,
-      expires: expires,
+      domain: url.hostname,
+      expires,
       secure: !isDev(this.configService),
       sameSite: isDev(this.configService) ? 'none' : 'lax'
     })

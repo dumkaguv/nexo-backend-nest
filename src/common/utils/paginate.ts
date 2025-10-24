@@ -13,6 +13,7 @@ type PaginateParams = {
   pageSize?: number
   order?: string
   search?: string
+  select?: object
 }
 
 export async function paginate({
@@ -21,7 +22,8 @@ export async function paginate({
   page,
   pageSize,
   order,
-  search
+  search,
+  select
 }: PaginateParams) {
   const skip = ((page ?? DEFAULT_PAGE) - 1) * (pageSize ?? DEFAULT_PAGE_SIZE)
   const take = pageSize ?? DEFAULT_PAGE_SIZE
@@ -60,7 +62,8 @@ export async function paginate({
       skip,
       take,
       orderBy,
-      where
+      where,
+      select
     }),
     modelClient.count({ where })
   ])

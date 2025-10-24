@@ -23,8 +23,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       this.logger.warn('Resource not found', exception)
       return response.status(404).json({
         message: 'Resource not found',
-        error: 'Not Found',
-        statusCode: 404
+        status: 404
       })
     }
 

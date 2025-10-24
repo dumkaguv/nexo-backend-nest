@@ -15,6 +15,7 @@ import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger'
 
 import { UserDto } from 'prisma/swagger/models/user.dto'
 
+import { Authorization } from '@/auth/decorators'
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import { ApiPaginated } from '@/common/decorators/api-paginated.decorator'
 import { FindAllQueryDto } from '@/common/dtos'
@@ -24,6 +25,7 @@ import { UpdateUserDto } from './dto/update-user.dto'
 import { UserService } from './user.service'
 
 @Controller('users')
+@Authorization()
 @ApiTags('Users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
