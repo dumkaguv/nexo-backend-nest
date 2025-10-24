@@ -7,12 +7,12 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"prisma/**/*.ts\"",
     "start": "nest start",
     "dev": "nest start --watch",
     "debug": "nest start --debug --watch",
     "prod": "node dist/main",
-    "lint": "eslint \"{prisma,src,apps,libs,test}/**/*.ts\" --fix",
+    "lint": "eslint \"{prisma,src,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -30,9 +30,9 @@
     "lint-staged": "lint-staged"
   },
   "lint-staged": {
-    "{prisma,test,src}/**/*.{ts}": [
-      "prettier --ignore-path .prettierignore --write",
-      "eslint --fix"
+    "{prisma,test,src}/**/*.{ts,js,json}": [
+      "npm run format",
+      "npm run lint"
     ]
   },
   "prisma": {
@@ -85,6 +85,7 @@
     "eslint-plugin-unicorn": "^61.0.2",
     "eslint-plugin-unused-imports": "^4.3.0",
     "globals": "^16.4.0",
+    "husky": "^9.1.7",
     "jest": "^30.0.0",
     "lint-staged": "^16.2.6",
     "prettier": "^3.4.2",

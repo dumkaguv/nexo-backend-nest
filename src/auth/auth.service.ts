@@ -123,7 +123,7 @@ export class AuthService {
     res.cookie(this.REFRESH_TOKEN_COOKIE_NAME, token, {
       httpOnly: true,
       domain: this.FRONT_URL,
-      expires,
+      expires: expires,
       secure: !isDev(this.configService),
       sameSite: isDev(this.configService) ? 'none' : 'lax'
     })
