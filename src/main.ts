@@ -4,7 +4,7 @@ import { NestFactory } from '@nestjs/core'
 
 import cookieParser from 'cookie-parser'
 
-import { AppModule } from './app.module'
+import { AppModule } from './app/app.module'
 import { AllExceptionsFilter } from './common/filters'
 import { ResponseInterceptor } from './common/interceptors'
 import { setupSwagger } from './common/utils'
@@ -38,9 +38,7 @@ async function bootstrap() {
 
   setupSwagger(app)
 
-  app.getHttpAdapter().get('/', (_req, res) => {
-    res.redirect('/api')
-  })
+  app.getHttpAdapter().get('/', (_req, res) => res.redirect('/api'))
 
   await app.listen(config.get<string>('PORT') ?? 3000)
 }
