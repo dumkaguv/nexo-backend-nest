@@ -14,6 +14,11 @@ export class CreateUserDto {
   userName: string
 
   @IsString()
+  @Length(2, 255)
+  @ApiProperty({ type: 'string' })
+  fullName: string
+
+  @IsString()
   @Length(8, 255)
   @Matches(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/,

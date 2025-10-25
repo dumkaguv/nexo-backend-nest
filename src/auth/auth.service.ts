@@ -33,7 +33,7 @@ export class AuthService {
   }
 
   async register(res: Response, dto: CreateUserDto) {
-    const user = await this.userService.create(dto)
+    const { user } = await this.userService.create(dto)
     const { accessToken } = await this.auth(res, user.id)
 
     return { user, accessToken }

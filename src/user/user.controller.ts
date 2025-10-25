@@ -7,32 +7,25 @@ import {
   HttpStatus,
   Param,
   Patch,
-  Post,
   Query
 } from '@nestjs/common'
 
-import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger'
+import { ApiTags } from '@nestjs/swagger'
 
+import { Authorization } from '@/auth/decorators'
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import { ApiPaginated } from '@/common/decorators/api-paginated.decorator'
 import { FindAllQueryDto } from '@/common/dtos'
 
-import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UserResponseDto } from './dto/user-response.dto'
 import { UserService } from './user.service'
 
 @Controller('users')
+@Authorization()
 @ApiTags('Users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Post()
-  @ApiOkResponseWrapped(UserResponseDto)
-  @ApiExcludeEndpoint()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto)
-  }
 
   @Get()
   @ApiPaginated(UserResponseDto)

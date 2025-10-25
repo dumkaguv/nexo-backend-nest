@@ -6,6 +6,7 @@ import { AuthModule } from '@/auth/auth.module'
 import { AllExceptionsFilter } from '@/common/filters'
 import { ResponseInterceptor } from '@/common/interceptors'
 import { PrismaModule } from '@/prisma/prisma.module'
+import { ProfileModule } from '@/profile/profile.module'
 import { TokenModule } from '@/token/token.module'
 import { UserModule } from '@/user/user.module'
 
@@ -20,7 +21,8 @@ import { AppController } from './app.controller'
     }),
     AuthModule,
     TokenModule,
-    UserModule
+    UserModule,
+    ProfileModule
   ],
   controllers: [AppController],
   providers: [ResponseInterceptor, AllExceptionsFilter]

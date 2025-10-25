@@ -3,7 +3,6 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common'
-import { Prisma } from '@prisma/client'
 import { compareSync, hashSync } from 'bcrypt'
 import { v4 } from 'uuid'
 
@@ -11,29 +10,21 @@ import { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
 import { PrismaService } from '@/prisma/prisma.service'
 
+import { ProfileService } from '@/profile/profile.service'
+
+import { selectFieldsWithoutPassword } from './constants'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 
 @Injectable()
 export class UserService {
-  private readonly selectFieldsWithoutPassword: Omit<
-    Prisma.UserSelectScalar,
-    'password'
-  >
-
-  constructor(private readonly prisma: PrismaService) {
-    this.selectFieldsWithoutPassword = {
-      id: true,
-      email: true,
-      userName: true,
-      activationLink: true,
-      createdAt: true,
-      updatedAt: true
-    }
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly profileService: ProfileService
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const { userName, email, password } = createUserDto
+    const { userName, fullName, email, password } = createUserDto
 
     const candidate = await this.prisma.user.findFirst({
       where: {
@@ -50,38 +41,35 @@ export class UserService {
     const activationLink = v4()
 
     const user = await this.prisma.user.create({
-      data: { ...createUserDto, password: hashPassword, activationLink },
-      select: this.selectFieldsWithoutPassword
+      data: { userName, email, password: hashPassword, activationLink },
+      select: selectFieldsWithoutPassword
     })
-
-    // todo: profile creation
+    const profile = await this.profileService.create(user.id, fullName)
 
     // todo: email service
 
-    // todo: tokens
-
-    return user
+    return { user, profile }
   }
 
   findAll(query: FindAllQueryDto) {
     return paginate({
       prisma: this.prisma,
       model: 'user',
-      select: this.selectFieldsWithoutPassword,
+      select: selectFieldsWithoutPassword,
       ...query
     })
   }
 
   findOne(id: number) {
     return this.prisma.user.findFirstOrThrow({
-      select: this.selectFieldsWithoutPassword,
+      select: selectFieldsWithoutPassword,
       where: { id }
     })
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
     return this.prisma.user.update({
-      select: this.selectFieldsWithoutPassword,
+      select: selectFieldsWithoutPassword,
       where: { id },
       data: { ...updateUserDto }
     })

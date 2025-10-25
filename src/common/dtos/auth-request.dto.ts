@@ -1,7 +1,7 @@
 import type { Request } from 'express'
 
 export type AuthRequest = {
-  user?: {
+  user: {
     id: number
     exp: number
     iat: number
