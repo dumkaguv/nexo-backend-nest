@@ -14,7 +14,7 @@ import { ProfileService } from './profile.service'
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
-  @Get()
+  @Get('me')
   @ApiOkResponseWrapped(ProfileResponseDto)
   findOne(@Req() req: AuthRequest) {
     const userId = req.user.id

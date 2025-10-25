@@ -1,49 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, OmitType } from '@nestjs/swagger'
+import { Type } from 'class-transformer'
+import { ProfileDto } from 'prisma/swagger/models/profile.dto'
+import { UserDto } from 'prisma/swagger/models/user.dto'
 
-export class UserResponseDto {
-  @ApiProperty({
-    type: 'integer',
-    format: 'int32'
-  })
-  id: number
-
-  @ApiProperty({
-    type: 'string'
-  })
-  userName: string
-
-  @ApiProperty({
-    type: 'string'
-  })
-  email: string
-
-  @ApiProperty({
-    type: 'string',
-    nullable: true
-  })
-  activationLink: string | null
-
-  @ApiProperty({
-    type: 'boolean'
-  })
-  isActivated: boolean
-
-  @ApiProperty({
-    type: 'string',
-    format: 'date-time'
-  })
-  createdAt: Date
-
-  @ApiProperty({
-    type: 'string',
-    format: 'date-time'
-  })
-  updatedAt: Date
-
-  @ApiProperty({
-    type: 'string',
-    format: 'date-time',
-    nullable: true
-  })
-  activatedAt: Date | null
+export class UserResponseDto extends OmitType(UserDto, ['password'] as const) {
+  @ApiProperty({ type: () => ProfileDto })
+  @Type(() => ProfileDto)
+  profile: ProfileDto
 }

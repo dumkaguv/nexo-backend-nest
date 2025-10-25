@@ -1,13 +1,10 @@
-import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger'
-import { UserDto } from 'prisma/swagger/models/user.dto'
+import { ApiProperty } from '@nestjs/swagger'
 
-export class UserWithoutPasswordDto extends PartialType(
-  OmitType(UserDto, ['password'] as const)
-) {}
+import { UserResponseDto } from '@/user/dto/user-response.dto'
 
 export class RegisterResponseDto {
-  @ApiProperty({ type: UserWithoutPasswordDto })
-  user: UserWithoutPasswordDto
+  @ApiProperty({ type: UserResponseDto })
+  user: UserResponseDto
 
   @ApiProperty({ type: 'string' })
   accessToken: string

@@ -10,18 +10,13 @@ import { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
 import { PrismaService } from '@/prisma/prisma.service'
 
-import { ProfileService } from '@/profile/profile.service'
-
 import { selectFieldsWithoutPassword } from './constants'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 
 @Injectable()
 export class UserService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly profileService: ProfileService
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
     const { userName, fullName, email, password } = createUserDto
@@ -40,36 +35,41 @@ export class UserService {
     const hashPassword = hashSync(password, 10)
     const activationLink = v4()
 
-    const user = await this.prisma.user.create({
-      data: { userName, email, password: hashPassword, activationLink },
-      select: selectFieldsWithoutPassword
+    const userWithProfile = await this.prisma.user.create({
+      data: {
+        userName,
+        email,
+        password: hashPassword,
+        activationLink,
+        profile: { create: { fullName } }
+      },
+      select: { ...selectFieldsWithoutPassword, profile: true }
     })
-    const profile = await this.profileService.create(user.id, fullName)
 
     // todo: email service
 
-    return { user, profile }
+    return userWithProfile
   }
 
   findAll(query: FindAllQueryDto) {
     return paginate({
       prisma: this.prisma,
       model: 'user',
-      select: selectFieldsWithoutPassword,
+      select: { ...selectFieldsWithoutPassword, profile: true },
       ...query
     })
   }
 
   findOne(id: number) {
     return this.prisma.user.findFirstOrThrow({
-      select: selectFieldsWithoutPassword,
+      select: { ...selectFieldsWithoutPassword, profile: true },
       where: { id }
     })
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
     return this.prisma.user.update({
-      select: selectFieldsWithoutPassword,
+      select: { ...selectFieldsWithoutPassword, profile: true },
       where: { id },
       data: { ...updateUserDto }
     })
@@ -84,6 +84,7 @@ export class UserService {
   async comparePasswords(email: string, password: string) {
     const { password: passwordFromDb, ...userWithoutPassword } =
       await this.prisma.user.findUniqueOrThrow({
+        include: { profile: true },
         where: { email }
       })
     const isValidPassword = compareSync(password, passwordFromDb)

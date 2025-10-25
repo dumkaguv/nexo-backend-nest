@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common'
 
 import { ConfigService } from '@nestjs/config'
 
+import { User } from '@prisma/client'
 import ms, { type StringValue } from 'ms'
 
 import { isDev } from '@/common/utils'
@@ -33,10 +34,10 @@ export class AuthService {
   }
 
   async register(res: Response, dto: CreateUserDto) {
-    const { user } = await this.userService.create(dto)
-    const { accessToken } = await this.auth(res, user.id)
+    const userWithProfile = await this.userService.create(dto)
+    const { accessToken } = await this.auth(res, userWithProfile.id)
 
-    return { user, accessToken }
+    return { ...userWithProfile, accessToken }
   }
 
   async login(res: Response, dto: LoginRequestDto) {
@@ -61,7 +62,7 @@ export class AuthService {
     } = await this.tokenService.refresh(refreshToken)
 
     if (id) {
-      return this.auth(res, id)
+      return this.auth(res, id, false)
     }
   }
 
@@ -69,13 +70,18 @@ export class AuthService {
     return this.userService.findOne(id)
   }
 
-  private async auth(res: Response, id: number) {
+  private async auth(res: Response, id: number, returnUser: boolean = true) {
     const { accessToken, refreshToken } = await this.tokenService.generate(id)
     await this.tokenService.save(refreshToken, id)
 
+    let user: Omit<User, 'password'> | undefined = undefined
+    if (returnUser) {
+      user = await this.userService.findOne(id)
+    }
+
     this.setCookie(res, refreshToken, this.JWT_REFRESH_TTL)
 
-    return { accessToken }
+    return { user, accessToken }
   }
 
   private setCookie(res: Response, token: string, ttl: StringValue | string) {

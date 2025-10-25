@@ -1,9 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger'
 
-import { UserWithoutPasswordDto } from './register-response.dto'
+import { Type } from 'class-transformer'
+
+import { UserResponseDto } from '@/user/dto/user-response.dto'
 
 export class LoginResponseDto {
-  user: UserWithoutPasswordDto
+  @ApiProperty({ type: () => UserResponseDto })
+  @Type(() => UserResponseDto)
+  user: UserResponseDto
 
   @ApiProperty({ type: 'string' })
   accessToken: string
