@@ -32,20 +32,19 @@ export class ResponseInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map((response) => {
+        const cleanedResponse = removeForeignKeysFromResponse(response)
+
         if (usePagination) {
           const total = response.total || 0
           const pageSize = Number(request.query.pageSize || DEFAULT_PAGE_SIZE)
-
           const page = Number(request.query.page || DEFAULT_PAGE)
           const totalPages = Math.ceil(total / pageSize)
           const nextPage = page < totalPages ? page + 1 : null
           const prevPage = page > 1 ? page - 1 : null
 
-          const data = removeForeignKeysFromResponse(response.data)
-
           return {
             message,
-            data,
+            data: cleanedResponse.data,
             total,
             page,
             totalPages,
@@ -57,7 +56,7 @@ export class ResponseInterceptor implements NestInterceptor {
 
         return {
           message,
-          data: response || {}
+          data: cleanedResponse
         }
       })
     )

@@ -27,7 +27,7 @@ import { PostService } from './post.service'
 
 @Controller('posts')
 @Authorization()
-@ApiTags('posts')
+@ApiTags('Posts')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 

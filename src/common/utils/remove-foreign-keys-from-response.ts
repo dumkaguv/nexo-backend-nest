@@ -12,12 +12,14 @@ export function removeForeignKeysFromResponse(entity: any): any {
   if (entity && typeof entity === 'object') {
     const copy: Record<string, any> = {}
 
-    for (const [key, value] of Object.entries(entity)) {
-      if (key.endsWith('Id')) {
-        continue
-      }
+    for (const key of Reflect.ownKeys(entity)) {
+      const value = (entity as any)[key]
 
-      copy[key] = removeForeignKeysFromResponse(value)
+      if (typeof key === 'string') {
+        if (key.length > 2 && key.toLowerCase().endsWith('id')) continue
+
+        copy[key] = removeForeignKeysFromResponse(value)
+      }
     }
 
     return copy
