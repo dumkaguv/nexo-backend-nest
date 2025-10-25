@@ -11,8 +11,7 @@ import { paginate } from '@/common/utils'
 import { PrismaService } from '@/prisma/prisma.service'
 
 import { selectFieldsWithoutPassword } from './constants'
-import { CreateUserDto } from './dto/create-user.dto'
-import { UpdateUserDto } from './dto/update-user.dto'
+import { CreateUserDto, UpdateUserDto } from './dto'
 
 @Injectable()
 export class UserService {

@@ -5,7 +5,7 @@ import { Authorization } from '@/auth/decorators'
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import { type AuthRequest } from '@/common/dtos'
 
-import { ProfileResponseDto } from './dto/profile-response.dto'
+import { ProfileResponseDto } from './dto'
 import { ProfileService } from './profile.service'
 
 @Controller('profile')

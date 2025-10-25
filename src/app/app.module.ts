@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config'
 import { AuthModule } from '@/auth/auth.module'
 import { AllExceptionsFilter } from '@/common/filters'
 import { ResponseInterceptor } from '@/common/interceptors'
+import { PostModule } from '@/post/post.module'
 import { PrismaModule } from '@/prisma/prisma.module'
 import { ProfileModule } from '@/profile/profile.module'
 import { TokenModule } from '@/token/token.module'
@@ -22,7 +23,8 @@ import { AppController } from './app.controller'
     AuthModule,
     TokenModule,
     UserModule,
-    ProfileModule
+    ProfileModule,
+    PostModule
   ],
   controllers: [AppController],
   providers: [ResponseInterceptor, AllExceptionsFilter]

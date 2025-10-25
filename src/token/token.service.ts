@@ -4,10 +4,9 @@ import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 
 import { PrismaService } from '@/prisma/prisma.service'
-
 import { UserService } from '@/user/user.service'
 
-import { JwtPayload } from './types'
+import type { JwtPayload } from './types'
 
 @Injectable()
 export class TokenService {

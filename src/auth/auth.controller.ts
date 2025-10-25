@@ -2,13 +2,10 @@ import { Body, Controller, Post, Req, Res } from '@nestjs/common'
 
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import { type AuthRequest, EmptyResponseDto } from '@/common/dtos'
-import { CreateUserDto } from '@/user/dto/create-user.dto'
+import { CreateUserDto } from '@/user/dto'
 
 import { AuthService } from './auth.service'
-import { LoginRequestDto } from './dto/login-request.dto'
-import { LoginResponseDto } from './dto/login-response.dto'
-import { RefreshResponseDto } from './dto/refresh-response.dto'
-import { RegisterResponseDto } from './dto/register-response.dto'
+import { LoginRequestDto, LoginResponseDto, RefreshResponseDto } from './dto'
 
 import type { Request, Response } from 'express'
 
@@ -17,7 +14,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  @ApiOkResponseWrapped(RegisterResponseDto)
+  @ApiOkResponseWrapped(LoginResponseDto)
   register(
     @Res({ passthrough: true }) res: Response,
     @Body() dto: CreateUserDto

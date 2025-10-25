@@ -7,11 +7,11 @@ import ms, { type StringValue } from 'ms'
 
 import { isDev } from '@/common/utils'
 import { TokenService } from '@/token/token.service'
-import { CreateUserDto } from '@/user/dto/create-user.dto'
+import { CreateUserDto } from '@/user/dto'
 
 import { UserService } from '@/user/user.service'
 
-import { LoginRequestDto } from './dto/login-request.dto'
+import { LoginRequestDto } from './dto'
 
 import type { Request, Response } from 'express'
 

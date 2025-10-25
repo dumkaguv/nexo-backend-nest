@@ -11,6 +11,8 @@ import { type Observable, map } from 'rxjs'
 
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from 'src/common/constants'
 
+import { removeForeignKeysFromResponse } from '@/common/utils'
+
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
   constructor(private reflector: Reflector) {}
@@ -29,9 +31,9 @@ export class ResponseInterceptor implements NestInterceptor {
       this.reflector.get<boolean>('usePagination', handler) || false
 
     return next.handle().pipe(
-      map((data) => {
+      map((response) => {
         if (usePagination) {
-          const total = data.total || 0
+          const total = response.total || 0
           const pageSize = Number(request.query.pageSize || DEFAULT_PAGE_SIZE)
 
           const page = Number(request.query.page || DEFAULT_PAGE)
@@ -39,9 +41,11 @@ export class ResponseInterceptor implements NestInterceptor {
           const nextPage = page < totalPages ? page + 1 : null
           const prevPage = page > 1 ? page - 1 : null
 
+          const data = removeForeignKeysFromResponse(response.data)
+
           return {
             message,
-            data: data.data,
+            data,
             total,
             page,
             totalPages,
@@ -53,7 +57,7 @@ export class ResponseInterceptor implements NestInterceptor {
 
         return {
           message,
-          data: data || {}
+          data: response || {}
         }
       })
     )

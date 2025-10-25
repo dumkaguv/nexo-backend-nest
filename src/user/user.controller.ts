@@ -17,8 +17,7 @@ import { ApiOkResponseWrapped } from '@/common/decorators'
 import { ApiPaginated } from '@/common/decorators/api-paginated.decorator'
 import { FindAllQueryDto } from '@/common/dtos'
 
-import { UpdateUserDto } from './dto/update-user.dto'
-import { UserResponseDto } from './dto/user-response.dto'
+import { UpdateUserDto, UserResponseDto } from './dto'
 import { UserService } from './user.service'
 
 @Controller('users')
