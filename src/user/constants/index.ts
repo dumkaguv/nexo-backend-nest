@@ -11,3 +11,15 @@ export const selectFieldsWithoutPassword: Omit<
   createdAt: true,
   updatedAt: true
 } as const
+
+export const selectUserWithRelations: Omit<Prisma.UserSelect, 'password'> = {
+  ...selectFieldsWithoutPassword,
+  profile: true,
+  posts: true,
+  likesOnPosts: true,
+  followers: true,
+  following: true,
+  comments: true,
+  sentMessages: true,
+  receivedMessages: true
+} as const

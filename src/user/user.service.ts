@@ -10,7 +10,10 @@ import { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
 import { PrismaService } from '@/prisma/prisma.service'
 
-import { selectFieldsWithoutPassword } from './constants'
+import {
+  selectFieldsWithoutPassword,
+  selectUserWithRelations
+} from './constants'
 import { CreateUserDto, UpdateUserDto } from './dto'
 
 @Injectable()
@@ -62,6 +65,13 @@ export class UserService {
   findOne(id: number) {
     return this.prisma.user.findFirstOrThrow({
       select: { ...selectFieldsWithoutPassword, profile: true },
+      where: { id }
+    })
+  }
+
+  findOneWithRelations(id: number) {
+    return this.prisma.user.findFirstOrThrow({
+      select: selectUserWithRelations,
       where: { id }
     })
   }

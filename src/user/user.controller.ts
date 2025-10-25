@@ -17,7 +17,11 @@ import { ApiOkResponseWrapped } from '@/common/decorators'
 import { ApiPaginated } from '@/common/decorators/api-paginated.decorator'
 import { FindAllQueryDto } from '@/common/dtos'
 
-import { UpdateUserDto, UserResponseDto } from './dto'
+import {
+  UpdateUserDto,
+  UserResponseDto,
+  UserResponseWithRelationsDto
+} from './dto'
 import { UserService } from './user.service'
 
 @Controller('users')
@@ -36,6 +40,12 @@ export class UserController {
   @ApiOkResponseWrapped(UserResponseDto)
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id)
+  }
+
+  @Get('detailed/:id')
+  @ApiOkResponseWrapped(UserResponseWithRelationsDto)
+  findOneDetailed(@Param('id') id: string) {
+    return this.userService.findOneWithRelations(+id)
   }
 
   @Patch(':id')
