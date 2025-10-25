@@ -2,6 +2,6 @@ import { Controller } from '@nestjs/common'
 
 import { ApiExcludeController } from '@nestjs/swagger'
 
-@Controller()
+@Controller('tokens')
 @ApiExcludeController()
-export class AppController {}
+export class TokenController {}

@@ -9,6 +9,7 @@ import { AllExceptionsFilter } from './common/filters'
 import { ResponseInterceptor } from './common/interceptors'
 import { PostModule } from './post/post.module'
 import { PrismaModule } from './prisma/prisma.module'
+import { TokenModule } from './token/token.module'
 import { UserModule } from './user/user.module'
 
 @Module({
@@ -20,7 +21,8 @@ import { UserModule } from './user/user.module'
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env'
-    })
+    }),
+    TokenModule
   ],
   controllers: [AppController],
   providers: [AppService, ResponseInterceptor, AllExceptionsFilter]

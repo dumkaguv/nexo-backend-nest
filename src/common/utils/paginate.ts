@@ -11,7 +11,7 @@ type PaginateParams = {
   model: keyof PrismaClient
   page?: number
   pageSize?: number
-  order?: string
+  ordering?: string
   search?: string
   select?: object
 }
@@ -21,7 +21,7 @@ export async function paginate({
   model,
   page,
   pageSize,
-  order,
+  ordering,
   search,
   select
 }: PaginateParams) {
@@ -29,9 +29,9 @@ export async function paginate({
   const take = pageSize ?? DEFAULT_PAGE_SIZE
 
   let orderBy: Record<string, 'asc' | 'desc'> | undefined
-  if (order) {
-    const direction = order.startsWith('-') ? 'desc' : 'asc'
-    const field = order.replace(/^-/, '')
+  if (ordering) {
+    const direction = ordering.startsWith('-') ? 'desc' : 'asc'
+    const field = ordering.replace(/^-/, '')
     orderBy = { [field]: direction }
   }
 

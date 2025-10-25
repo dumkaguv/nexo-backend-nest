@@ -1,58 +1,34 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException
-} from '@nestjs/common'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 
 import { ConfigService } from '@nestjs/config'
-
-import { JwtService } from '@nestjs/jwt'
-
-import { compareSync } from 'bcrypt'
 
 import ms, { type StringValue } from 'ms'
 
 import { isDev } from '@/common/utils'
-import { PrismaService } from '@/prisma/prisma.service'
+import { TokenService } from '@/token/token.service'
 import { CreateUserDto } from '@/user/dto/create-user.dto'
 
 import { UserService } from '@/user/user.service'
 
 import { LoginRequestDto } from './dto/login-request.dto'
 
-import type { JwtPayload } from './types'
 import type { Request, Response } from 'express'
 
 @Injectable()
 export class AuthService {
-  private readonly JWT_REFRESH_SECRET: string
-  private readonly JWT_ACCESS_SECRET: string
   private readonly JWT_REFRESH_TTL: string
-  private readonly JWT_ACCESS_TTL: string
-
   private readonly FRONT_URL: string
-
   private readonly REFRESH_TOKEN_COOKIE_NAME: string
 
   constructor(
-    private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
-    private readonly jwtService: JwtService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly tokenService: TokenService
   ) {
-    this.JWT_REFRESH_SECRET =
-      configService.getOrThrow<string>('JWT_REFRESH_SECRET')
-    this.JWT_ACCESS_SECRET =
-      configService.getOrThrow<string>('JWT_ACCESS_SECRET')
     this.JWT_REFRESH_TTL = configService.getOrThrow<string>(
       'JWT_REFRESH_TOKEN_TTL'
     )
-    this.JWT_ACCESS_TTL = configService.getOrThrow<string>(
-      'JWT_ACCESS_TOKEN_TTL'
-    )
-
     this.FRONT_URL = configService.getOrThrow<string>('FRONT_URL')
-
     this.REFRESH_TOKEN_COOKIE_NAME = 'refreshToken'
   }
 
@@ -65,24 +41,13 @@ export class AuthService {
 
   async login(res: Response, dto: LoginRequestDto) {
     const { email, password } = dto
+    const user = await this.userService.comparePasswords(email, password)
 
-    const user = await this.prisma.user.findUniqueOrThrow({
-      select: { id: true, password: true },
-      where: { email }
-    })
-
-    const isValidPassword = compareSync(password, user.password)
-    if (!isValidPassword) {
-      throw new NotFoundException()
-    }
-
-    return await this.auth(res, user.id)
+    return this.auth(res, user.id)
   }
 
-  logout(res: Response) {
-    this.setCookie(res, this.REFRESH_TOKEN_COOKIE_NAME, '0')
-
-    return {}
+  logout(refreshToken: string) {
+    this.tokenService.remove(refreshToken)
   }
 
   async refresh(req: Request, res: Response) {
@@ -91,16 +56,12 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token is not valid')
     }
 
-    const payload: JwtPayload = await this.jwtService.verifyAsync(
-      refreshToken,
-      {
-        secret: this.JWT_REFRESH_SECRET
-      }
-    )
-    if (payload) {
-      const user = await this.userService.findOne(Number(payload.id))
+    const {
+      user: { id }
+    } = await this.tokenService.refresh(refreshToken)
 
-      return this.auth(res, user.id)
+    if (id) {
+      return this.auth(res, id)
     }
   }
 
@@ -109,27 +70,12 @@ export class AuthService {
   }
 
   private async auth(res: Response, id: number) {
-    const { accessToken, refreshToken } = await this.generateTokens(id)
+    const { accessToken, refreshToken } = await this.tokenService.generate(id)
+    await this.tokenService.save(refreshToken, id)
 
     this.setCookie(res, refreshToken, this.JWT_REFRESH_TTL)
 
     return { accessToken }
-  }
-
-  private async generateTokens(userId: number) {
-    const payload: JwtPayload = { id: userId }
-
-    const accessToken = await this.jwtService.signAsync(payload, {
-      secret: this.JWT_ACCESS_SECRET,
-      expiresIn: this.JWT_ACCESS_TTL as '2h'
-    })
-
-    const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: this.JWT_REFRESH_SECRET,
-      expiresIn: this.JWT_REFRESH_TTL as '7d'
-    })
-
-    return { accessToken, refreshToken }
   }
 
   private setCookie(res: Response, token: string, ttl: StringValue | string) {

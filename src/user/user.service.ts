@@ -1,6 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common'
 import { Prisma } from '@prisma/client'
-import { hashSync } from 'bcrypt'
+import { compareSync, hashSync } from 'bcrypt'
 import { v4 } from 'uuid'
 
 import { FindAllQueryDto } from '@/common/dtos'
@@ -12,7 +16,10 @@ import { UpdateUserDto } from './dto/update-user.dto'
 
 @Injectable()
 export class UserService {
-  private readonly selectFieldsWithoutPassword: Prisma.UserSelect
+  private readonly selectFieldsWithoutPassword: Omit<
+    Prisma.UserSelectScalar,
+    'password'
+  >
 
   constructor(private readonly prisma: PrismaService) {
     this.selectFieldsWithoutPassword = {
@@ -74,14 +81,7 @@ export class UserService {
 
   update(id: number, updateUserDto: UpdateUserDto) {
     return this.prisma.user.update({
-      select: {
-        id: true,
-        email: true,
-        userName: true,
-        activationLink: true,
-        createdAt: true,
-        updatedAt: true
-      },
+      select: this.selectFieldsWithoutPassword,
       where: { id },
       data: { ...updateUserDto }
     })
@@ -91,5 +91,18 @@ export class UserService {
     return this.prisma.user.delete({
       where: { id }
     })
+  }
+
+  async comparePasswords(email: string, password: string) {
+    const { password: passwordFromDb, ...userWithoutPassword } =
+      await this.prisma.user.findUniqueOrThrow({
+        where: { email }
+      })
+    const isValidPassword = compareSync(password, passwordFromDb)
+    if (!isValidPassword) {
+      throw new NotFoundException()
+    }
+
+    return userWithoutPassword
   }
 }

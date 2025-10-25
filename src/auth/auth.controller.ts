@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Req, Res } from '@nestjs/common'
 
 import { ApiOkResponseWrapped } from '@/common/decorators'
-import { EmptyResponseDto } from '@/common/dtos'
+import { type AuthRequest, EmptyResponseDto } from '@/common/dtos'
 import { CreateUserDto } from '@/user/dto/create-user.dto'
 
 import { AuthService } from './auth.service'
@@ -36,8 +36,11 @@ export class AuthController {
 
   @Post('logout')
   @ApiOkResponseWrapped(EmptyResponseDto)
-  logout(@Res({ passthrough: true }) res: Response) {
-    return this.authService.logout(res)
+  logout(@Req() req: AuthRequest, @Res({ passthrough: true }) res: Response) {
+    const { refreshToken } = req.cookies
+    res.clearCookie('refreshToken')
+
+    return this.authService.logout(refreshToken)
   }
 
   @Post('refresh')

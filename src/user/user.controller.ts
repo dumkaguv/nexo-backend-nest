@@ -13,44 +13,41 @@ import {
 
 import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger'
 
-import { UserDto } from 'prisma/swagger/models/user.dto'
-
-import { Authorization } from '@/auth/decorators'
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import { ApiPaginated } from '@/common/decorators/api-paginated.decorator'
 import { FindAllQueryDto } from '@/common/dtos'
 
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
+import { UserResponseDto } from './dto/user-response.dto'
 import { UserService } from './user.service'
 
 @Controller('users')
-@Authorization()
 @ApiTags('Users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @ApiOkResponseWrapped(UserDto)
+  @ApiOkResponseWrapped(UserResponseDto)
   @ApiExcludeEndpoint()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto)
   }
 
   @Get()
-  @ApiPaginated(UserDto)
-  findAll(@Query() query: FindAllQueryDto<UserDto>) {
+  @ApiPaginated(UserResponseDto)
+  findAll(@Query() query: FindAllQueryDto<UserResponseDto>) {
     return this.userService.findAll(query)
   }
 
   @Get(':id')
-  @ApiOkResponseWrapped(UserDto)
+  @ApiOkResponseWrapped(UserResponseDto)
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id)
   }
 
   @Patch(':id')
-  @ApiOkResponseWrapped(UserDto)
+  @ApiOkResponseWrapped(UserResponseDto)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(+id, updateUserDto)
   }

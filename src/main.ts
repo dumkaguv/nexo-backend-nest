@@ -1,4 +1,5 @@
 import { ValidationPipe } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 
 import cookieParser from 'cookie-parser'
@@ -10,15 +11,16 @@ import { setupSwagger } from './common/utils'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
+  const config = app.get(ConfigService)
 
   app.setGlobalPrefix('api')
 
   app.use(cookieParser())
 
   app.enableCors({
-    origin: process.env.FRONT_URL,
+    origin: config.getOrThrow<string>('FRONT_URL'),
     credentials: true,
-    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
   })
 
@@ -40,6 +42,6 @@ async function bootstrap() {
     res.redirect('/api')
   })
 
-  await app.listen(process.env.PORT ?? 3000)
+  await app.listen(config.get<string>('PORT') ?? 3000)
 }
 bootstrap()

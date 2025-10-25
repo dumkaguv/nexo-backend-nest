@@ -31,22 +31,29 @@ export class ResponseInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data) => {
         if (usePagination) {
-          const page = Number(request.query.page || DEFAULT_PAGE)
-          const pageSize = Number(request.query.pageSize || DEFAULT_PAGE_SIZE)
           const total = data.total || 0
+          const pageSize = Number(request.query.pageSize || DEFAULT_PAGE_SIZE)
+
+          const page = Number(request.query.page || DEFAULT_PAGE)
+          const totalPages = Math.ceil(total / pageSize)
+          const nextPage = page < totalPages ? page + 1 : null
+          const prevPage = page > 1 ? page - 1 : null
 
           return {
             message,
             data: data.data,
             total,
             page,
-            pageSize
+            totalPages,
+            pageSize,
+            nextPage,
+            prevPage
           }
         }
 
         return {
           message,
-          data
+          data: data || {}
         }
       })
     )
