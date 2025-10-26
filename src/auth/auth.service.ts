@@ -88,14 +88,16 @@ export class AuthService {
 
   private setCookie(res: Response, token: string, ttl: StringValue | string) {
     const expires = new Date(Date.now() + ms(ttl as StringValue))
+    const maxAge = ms(ttl as StringValue) as number
     const url = new URL(this.FRONT_URL)
 
-    res.cookie('refreshToken', token, {
+    res.cookie(this.REFRESH_TOKEN_COOKIE_NAME, token, {
       httpOnly: true,
-      domain: url.hostname,
+      maxAge,
       expires,
       secure: !isDev(this.configService),
-      sameSite: isDev(this.configService) ? 'none' : 'lax'
+      sameSite: 'lax',
+      domain: url.hostname
     })
   }
 }
