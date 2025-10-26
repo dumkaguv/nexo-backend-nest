@@ -6,7 +6,7 @@ export const selectFieldsWithoutPassword: Omit<
 > = {
   id: true,
   email: true,
-  userName: true,
+  username: true,
   activationLink: true,
   createdAt: true,
   updatedAt: true
