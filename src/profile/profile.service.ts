@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common'
 
-import { UpdateProfileDto } from 'prisma/swagger/models/update-profile.dto'
-
 import { PrismaService } from '@/prisma/prisma.service'
-import { selectFieldsWithoutPassword } from '@/user/constants'
 import { UserService } from '@/user/user.service'
+
+import { UpdatePayloadProfileDto } from './dto/update-payload-profile.dto'
 
 @Injectable()
 export class ProfileService {
@@ -23,11 +22,10 @@ export class ProfileService {
     })
   }
 
-  update(userId: number, dto: UpdateProfileDto) {
+  update(userId: number, dto: UpdatePayloadProfileDto) {
     return this.prisma.profile.update({
       data: dto,
-      where: { userId },
-      select: { user: { select: selectFieldsWithoutPassword } }
+      where: { userId }
     })
   }
 }

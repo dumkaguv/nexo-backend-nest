@@ -14,15 +14,13 @@ import {
 
 import { ApiTags } from '@nestjs/swagger'
 
-import { CreatePostDto } from 'prisma/swagger/models/create-post.dto'
-
 import { UpdatePostDto } from 'prisma/swagger/models/update-post.dto'
 
 import { Authorization } from '@/auth/decorators'
 import { ApiOkResponseWrapped, ApiPaginated } from '@/common/decorators'
 import { type AuthRequest, FindAllQueryDto } from '@/common/dtos'
 
-import { PostResponseDto } from './dto'
+import { CreatePayloadPostDto, PostResponseDto } from './dto'
 import { PostService } from './post.service'
 
 @Controller('posts')
@@ -45,7 +43,7 @@ export class PostController {
 
   @Post()
   @ApiOkResponseWrapped(PostResponseDto)
-  create(@Req() req: AuthRequest, @Body() dto: CreatePostDto) {
+  create(@Req() req: AuthRequest, @Body() dto: CreatePayloadPostDto) {
     const userId = req.user.id
 
     return this.postService.create(userId, dto)

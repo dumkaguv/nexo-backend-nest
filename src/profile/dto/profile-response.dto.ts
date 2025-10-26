@@ -1,3 +1,3 @@
-import { UserResponseDto } from '@/user/dto/user-response.dto'
+import { UserResponseDto } from '@/user/dto'
 
 export class ProfileResponseDto extends UserResponseDto {}

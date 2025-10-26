@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common'
 
-import { CreatePostDto } from 'prisma/swagger/models/create-post.dto'
-
 import { UpdatePostDto } from 'prisma/swagger/models/update-post.dto'
 
 import { FindAllQueryDto } from '@/common/dtos'
@@ -10,7 +8,7 @@ import { PrismaService } from '@/prisma/prisma.service'
 
 import { selectFieldsWithoutPassword } from '@/user/constants'
 
-import { PostResponseDto } from './dto'
+import { CreatePayloadPostDto, PostResponseDto } from './dto'
 
 @Injectable()
 export class PostService {
@@ -21,12 +19,13 @@ export class PostService {
       prisma: this.prisma,
       model: 'post',
       include: {
-        user: { select: selectFieldsWithoutPassword },
+        user: { select: { ...selectFieldsWithoutPassword, profile: true } },
         files: true,
         likes: true,
         comments: true
       },
-      ...query
+      ...query,
+      ordering: query.ordering ? query.ordering : '-createdAt'
     })
   }
 
@@ -36,7 +35,7 @@ export class PostService {
     })
   }
 
-  create(userId: number, dto: CreatePostDto) {
+  create(userId: number, dto: CreatePayloadPostDto) {
     return this.prisma.post.create({
       data: { userId, ...dto }
     })

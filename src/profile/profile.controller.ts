@@ -1,14 +1,13 @@
 import { Body, Controller, Get, Patch, Req } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
-import { UpdateProfileDto } from 'prisma/swagger/models/update-profile.dto'
-
 import { Authorization } from '@/auth/decorators'
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import { type AuthRequest } from '@/common/dtos'
 
 import { UserResponseWithRelationsDto } from '@/user/dto'
 
+import { UpdatePayloadProfileDto } from './dto/update-payload-profile.dto'
 import { ProfileService } from './profile.service'
 
 @Controller('profile')
@@ -26,9 +25,10 @@ export class ProfileController {
   }
 
   @Patch()
-  @ApiOkResponseWrapped(UpdateProfileDto)
-  update(@Req() req: AuthRequest, @Body() dto: UpdateProfileDto) {
+  @ApiOkResponseWrapped(UpdatePayloadProfileDto)
+  update(@Req() req: AuthRequest, @Body() dto: UpdatePayloadProfileDto) {
     const userId = req.user.id
+    console.log(dto)
 
     return this.profileService.update(+userId, dto)
   }
