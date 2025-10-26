@@ -38,7 +38,7 @@ export class TokenService {
 
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.JWT_ACCESS_SECRET,
-      expiresIn: this.JWT_ACCESS_TTL as '2h'
+      expiresIn: this.JWT_ACCESS_TTL as '15m'
     })
 
     const refreshToken = await this.jwtService.signAsync(payload, {
@@ -66,7 +66,7 @@ export class TokenService {
     })
   }
 
-  private async validateRefreshToken(refreshToken: string) {
+  async validateRefreshToken(refreshToken: string) {
     return await this.jwtService.verifyAsync(refreshToken, {
       secret: this.JWT_REFRESH_SECRET
     })

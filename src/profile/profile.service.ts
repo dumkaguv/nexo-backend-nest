@@ -4,16 +4,17 @@ import { UpdateProfileDto } from 'prisma/swagger/models/update-profile.dto'
 
 import { PrismaService } from '@/prisma/prisma.service'
 import { selectFieldsWithoutPassword } from '@/user/constants'
+import { UserService } from '@/user/user.service'
 
 @Injectable()
 export class ProfileService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userService: UserService
+  ) {}
 
   findOne(userId: number) {
-    return this.prisma.profile.findFirstOrThrow({
-      include: { user: { select: selectFieldsWithoutPassword } },
-      where: { userId }
-    })
+    return this.userService.findOneWithRelations(userId)
   }
 
   create(userId: number, fullName: string) {

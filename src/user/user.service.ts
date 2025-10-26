@@ -45,7 +45,7 @@ export class UserService {
         activationLink,
         profile: { create: { fullName } }
       },
-      select: { ...selectFieldsWithoutPassword, profile: true }
+      select: selectUserWithRelations
     })
 
     // todo: email service
@@ -57,7 +57,7 @@ export class UserService {
     return paginate({
       prisma: this.prisma,
       model: 'user',
-      select: { ...selectFieldsWithoutPassword, profile: true },
+      select: selectUserWithRelations,
       ...query
     })
   }
@@ -78,7 +78,7 @@ export class UserService {
 
   update(id: number, updateUserDto: UpdateUserDto & { password?: string }) {
     return this.prisma.user.update({
-      select: { ...selectFieldsWithoutPassword, profile: true },
+      select: selectUserWithRelations,
       where: { id },
       data: { ...updateUserDto }
     })

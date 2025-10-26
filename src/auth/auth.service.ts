@@ -42,7 +42,7 @@ export class AuthService {
 
   async login(res: Response, dto: LoginRequestDto) {
     const { email, password } = dto
-    const user = await this.userService.comparePasswords(email, password)
+    const user = await this.userService.comparePasswords(password, email)
 
     return this.auth(res, user.id)
   }
@@ -52,7 +52,9 @@ export class AuthService {
   }
 
   async refresh(req: Request, res: Response) {
-    const refreshToken = req.cookies[this.REFRESH_TOKEN_COOKIE_NAME]
+    const refreshToken = req.cookies[this.REFRESH_TOKEN_COOKIE_NAME] as
+      | string
+      | undefined
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token is not valid')
     }
@@ -88,7 +90,7 @@ export class AuthService {
     const expires = new Date(Date.now() + ms(ttl as StringValue))
     const url = new URL(this.FRONT_URL)
 
-    res.cookie(this.REFRESH_TOKEN_COOKIE_NAME, token, {
+    res.cookie('refreshToken', token, {
       httpOnly: true,
       domain: url.hostname,
       expires,

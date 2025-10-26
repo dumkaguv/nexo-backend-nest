@@ -32,31 +32,31 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @ApiPaginated(UserResponseDto)
-  findAll(@Query() query: FindAllQueryDto<UserResponseDto>) {
+  @ApiPaginated(UserResponseWithRelationsDto)
+  findAll(@Query() query: FindAllQueryDto<UserResponseWithRelationsDto>) {
     return this.userService.findAll(query)
   }
 
   @Get(':id')
-  @ApiOkResponseWrapped(UserResponseDto)
+  @ApiOkResponseWrapped(UserResponseWithRelationsDto)
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id)
   }
 
-  @Get('detailed/:id')
-  @ApiOkResponseWrapped(UserResponseWithRelationsDto)
-  findOneDetailed(@Param('id') id: string) {
-    return this.userService.findOneWithRelations(+id)
+  @Get('minified/:id')
+  @ApiOkResponseWrapped(UserResponseDto)
+  findOneMinified(@Param('id') id: string) {
+    return this.userService.findOne(+id)
   }
 
   @Patch(':id')
-  @ApiOkResponseWrapped(UserResponseDto)
+  @ApiOkResponseWrapped(UserResponseWithRelationsDto)
   update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.userService.update(+id, dto)
   }
 
   @Patch(':id/change-password')
-  @ApiOkResponseWrapped(UserResponseDto)
+  @ApiOkResponseWrapped(UserResponseWithRelationsDto)
   changePassword(
     @Param('id') id: string,
     @Body() { oldPassword, newPassword }: ChangePasswordDto
