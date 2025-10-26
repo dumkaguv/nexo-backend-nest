@@ -9,7 +9,7 @@ export class UserDto {
   @ApiProperty({
     type: 'string'
   })
-  userName: string
+  username: string
   @ApiProperty({
     type: 'string'
   })

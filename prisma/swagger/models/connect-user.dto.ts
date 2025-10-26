@@ -1,17 +1,17 @@
 import { ApiExtraModels, ApiProperty } from '@nestjs/swagger'
 
-export class UserUserNameEmailUniqueInputDto {
+export class UserUsernameEmailUniqueInputDto {
   @ApiProperty({
     type: 'string'
   })
-  userName: string
+  username: string
   @ApiProperty({
     type: 'string'
   })
   email: string
 }
 
-@ApiExtraModels(UserUserNameEmailUniqueInputDto)
+@ApiExtraModels(UserUsernameEmailUniqueInputDto)
 export class ConnectUserDto {
   @ApiProperty({
     type: 'integer',
@@ -23,15 +23,15 @@ export class ConnectUserDto {
     type: 'string',
     required: false
   })
-  userName?: string
+  username?: string
   @ApiProperty({
     type: 'string',
     required: false
   })
   email?: string
   @ApiProperty({
-    type: UserUserNameEmailUniqueInputDto,
+    type: UserUsernameEmailUniqueInputDto,
     required: false
   })
-  userName_email?: UserUserNameEmailUniqueInputDto
+  username_email?: UserUsernameEmailUniqueInputDto
 }

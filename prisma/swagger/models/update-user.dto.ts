@@ -5,7 +5,7 @@ export class UpdateUserDto {
     type: 'string',
     required: false
   })
-  userName?: string
+  username?: string
   @ApiProperty({
     type: 'string',
     required: false

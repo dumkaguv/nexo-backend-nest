@@ -1,5 +1,7 @@
 import { Body, Controller, Post, Req, Res } from '@nestjs/common'
 
+import { ApiOperation } from '@nestjs/swagger'
+
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import { type AuthRequest, EmptyResponseDto } from '@/common/dtos'
 import { CreateUserDto } from '@/user/dto'
@@ -15,6 +17,10 @@ export class AuthController {
 
   @Post('register')
   @ApiOkResponseWrapped(LoginResponseDto)
+  @ApiOperation({
+    description: `Validation pattern for password:
+    \`/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':"\\\\|,.<>/?]).{8,}$/\``
+  })
   register(
     @Res({ passthrough: true }) res: Response,
     @Body() dto: CreateUserDto

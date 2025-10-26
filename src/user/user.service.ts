@@ -1,7 +1,7 @@
 import {
   BadRequestException,
   Injectable,
-  NotFoundException
+  UnauthorizedException
 } from '@nestjs/common'
 import { compareSync, hashSync } from 'bcrypt'
 import { v4 } from 'uuid'
@@ -21,16 +21,16 @@ export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
-    const { userName, fullName, email, password } = createUserDto
+    const { username, fullName, email, password } = createUserDto
 
     const candidate = await this.prisma.user.findFirst({
       where: {
-        OR: [{ email }, { userName }]
+        OR: [{ email }, { username }]
       }
     })
     if (candidate) {
       throw new BadRequestException(
-        `User with such email or username already exist: (${email}, ${userName})`
+        `User with such email or username already exist: (${email}, ${username})`
       )
     }
 
@@ -39,7 +39,7 @@ export class UserService {
 
     const userWithProfile = await this.prisma.user.create({
       data: {
-        userName,
+        username,
         email,
         password: hashPassword,
         activationLink,
@@ -76,7 +76,7 @@ export class UserService {
     })
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
+  update(id: number, updateUserDto: UpdateUserDto & { password?: string }) {
     return this.prisma.user.update({
       select: { ...selectFieldsWithoutPassword, profile: true },
       where: { id },
@@ -90,17 +90,43 @@ export class UserService {
     })
   }
 
-  async comparePasswords(email: string, password: string) {
+  async comparePasswords(password: string, email?: string, userId?: number) {
+    const whereCondition = {
+      OR: [] as Record<string, string | number>[]
+    }
+
+    if (email) {
+      whereCondition.OR.push({ email })
+    }
+    if (userId) {
+      whereCondition.OR.push({ id: userId })
+    }
+
+    if (whereCondition.OR.length === 0) {
+      throw new BadRequestException('Email or userId must be provided')
+    }
+
     const { password: passwordFromDb, ...userWithoutPassword } =
-      await this.prisma.user.findUniqueOrThrow({
+      await this.prisma.user.findFirstOrThrow({
         include: { profile: true },
-        where: { email }
+        where: whereCondition
       })
+
     const isValidPassword = compareSync(password, passwordFromDb)
     if (!isValidPassword) {
-      throw new NotFoundException()
+      throw new UnauthorizedException('Invalid credentials')
     }
 
     return userWithoutPassword
+  }
+
+  async changePassword(
+    userId: number,
+    oldPassword: string,
+    newPassword: string
+  ) {
+    await this.comparePasswords(oldPassword, undefined, userId)
+
+    return this.update(userId, { password: newPassword })
   }
 }

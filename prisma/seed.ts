@@ -11,19 +11,19 @@ const up = async () => {
       data: [
         {
           email: 'dima@gmail.com',
-          userName: 'dima',
+          username: 'dima',
           password: hashSync('111111', 10),
           isActivated: true
         },
         {
           email: 'ivan@gmail.com',
-          userName: 'ivan',
+          username: 'ivan',
           password: hashSync('111111', 10),
           isActivated: true
         },
         {
           email: 'petr@gmail.com',
-          userName: 'petr',
+          username: 'petr',
           password: hashSync('111111', 10),
           isActivated: true
         }

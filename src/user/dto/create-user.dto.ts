@@ -11,7 +11,7 @@ export class CreateUserDto {
   @IsString()
   @Length(2, 255)
   @ApiProperty({ type: 'string' })
-  userName: string
+  username: string
 
   @IsString()
   @Length(2, 255)

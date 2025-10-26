@@ -18,6 +18,7 @@ import { ApiPaginated } from '@/common/decorators/api-paginated.decorator'
 import { FindAllQueryDto } from '@/common/dtos'
 
 import {
+  ChangePasswordDto,
   UpdateUserDto,
   UserResponseDto,
   UserResponseWithRelationsDto
@@ -50,8 +51,17 @@ export class UserController {
 
   @Patch(':id')
   @ApiOkResponseWrapped(UserResponseDto)
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto)
+  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    return this.userService.update(+id, dto)
+  }
+
+  @Patch(':id/change-password')
+  @ApiOkResponseWrapped(UserResponseDto)
+  changePassword(
+    @Param('id') id: string,
+    @Body() { oldPassword, newPassword }: ChangePasswordDto
+  ) {
+    return this.userService.changePassword(+id, oldPassword, newPassword)
   }
 
   @Delete(':id')
