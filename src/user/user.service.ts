@@ -20,6 +20,10 @@ import { CreateUserDto, UpdateUserDto } from './dto'
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private hashPassword(password: string, rounds: number = 10) {
+    return hashSync(password, rounds)
+  }
+
   async create(createUserDto: CreateUserDto) {
     const { username, fullName, email, password } = createUserDto
 
@@ -34,7 +38,7 @@ export class UserService {
       )
     }
 
-    const hashPassword = hashSync(password, 10)
+    const hashPassword = this.hashPassword(password)
     const activationLink = v4()
 
     const userWithProfile = await this.prisma.user.create({
@@ -126,7 +130,8 @@ export class UserService {
     newPassword: string
   ) {
     await this.comparePasswords(oldPassword, undefined, userId)
+    const hashedPassword = this.hashPassword(newPassword)
 
-    return this.update(userId, { password: newPassword })
+    return this.update(userId, { password: hashedPassword })
   }
 }
