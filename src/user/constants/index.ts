@@ -1,9 +1,6 @@
 import type { Prisma } from '@prisma/client'
 
-export const selectFieldsWithoutPassword: Omit<
-  Prisma.UserSelectScalar,
-  'password'
-> = {
+export const selectUserFields: Prisma.UserSelectScalar = {
   id: true,
   email: true,
   username: true,
@@ -12,8 +9,8 @@ export const selectFieldsWithoutPassword: Omit<
   updatedAt: true
 } as const
 
-export const selectUserWithRelations: Omit<Prisma.UserSelect, 'password'> = {
-  ...selectFieldsWithoutPassword,
+export const selectUserWithRelations: Prisma.UserSelect = {
+  ...selectUserFields,
   profile: true,
   posts: true,
   likesOnPosts: true,

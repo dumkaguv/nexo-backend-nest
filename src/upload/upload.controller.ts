@@ -1,16 +1,17 @@
 import { Controller, Post, Req, UploadedFile } from '@nestjs/common'
 
 import { ApiBody, ApiConsumes } from '@nestjs/swagger'
+import { plainToInstance } from 'class-transformer'
 
 import { Authorization } from '@/auth/decorators'
 
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import type { AuthRequest } from '@/common/dtos'
 
-import { UserResponseDto } from '@/user/dto'
+import { ResponseUserDto } from '@/user/dto'
 
 import { FileUpload } from './decorators'
-import { UploadAvatarPayload } from './dto/upload-avatar-payload'
+import { CreateUploadAvatarDto } from './dto'
 import { UploadService } from './upload.service'
 
 @Controller('upload')
@@ -20,15 +21,16 @@ export class UploadController {
 
   @Post('avatar')
   @FileUpload('file')
-  @ApiOkResponseWrapped(UserResponseDto)
+  @ApiOkResponseWrapped(ResponseUserDto)
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: UploadAvatarPayload })
-  uploadAvatar(
+  @ApiBody({ type: CreateUploadAvatarDto })
+  async uploadAvatar(
     @Req() req: AuthRequest,
     @UploadedFile() file: Express.Multer.File
   ) {
-    const userId = req.user.id
-
-    return this.uploadService.uploadAvatar(file, userId, 'avatars')
+    return plainToInstance(
+      CreateUploadAvatarDto,
+      await this.uploadService.uploadAvatar(file, req.user.id, 'avatars')
+    )
   }
 }

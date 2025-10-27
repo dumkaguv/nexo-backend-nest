@@ -10,11 +10,8 @@ import { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
 import { PrismaService } from '@/prisma/prisma.service'
 
-import {
-  selectFieldsWithoutPassword,
-  selectUserWithRelations
-} from './constants'
-import { CreateUserDto, UpdateUserDto } from './dto'
+import { selectUserWithRelations } from './constants'
+import { CreateUserDto, ResponseUserDto, UpdateUserDto } from './dto'
 
 @Injectable()
 export class UserService {
@@ -57,7 +54,7 @@ export class UserService {
     return userWithProfile
   }
 
-  findAll(query: FindAllQueryDto) {
+  findAll(query: FindAllQueryDto<ResponseUserDto>) {
     return paginate({
       prisma: this.prisma,
       model: 'user',
@@ -68,7 +65,7 @@ export class UserService {
 
   findOne(id: number) {
     return this.prisma.user.findFirstOrThrow({
-      select: { ...selectFieldsWithoutPassword, profile: true },
+      include: { profile: true },
       where: { id }
     })
   }
@@ -89,9 +86,7 @@ export class UserService {
   }
 
   remove(id: number) {
-    return this.prisma.user.delete({
-      where: { id }
-    })
+    return this.prisma.user.delete({ where: { id } })
   }
 
   async comparePasswords(password: string, email?: string, userId?: number) {
@@ -110,18 +105,17 @@ export class UserService {
       throw new BadRequestException('Email or userId must be provided')
     }
 
-    const { password: passwordFromDb, ...userWithoutPassword } =
-      await this.prisma.user.findFirstOrThrow({
-        include: { profile: true },
-        where: whereCondition
-      })
+    const user = await this.prisma.user.findFirstOrThrow({
+      select: { ...selectUserWithRelations, password: true },
+      where: whereCondition
+    })
 
-    const isValidPassword = compareSync(password, passwordFromDb)
+    const isValidPassword = compareSync(password, user.password)
     if (!isValidPassword) {
       throw new UnauthorizedException('Invalid credentials')
     }
 
-    return userWithoutPassword
+    return user
   }
 
   async changePassword(

@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common'
 
 import { ApiTags } from '@nestjs/swagger'
+import { plainToInstance } from 'class-transformer'
 
 import { UpdatePostDto } from 'prisma/swagger/models/update-post.dto'
 
@@ -20,7 +21,7 @@ import { Authorization } from '@/auth/decorators'
 import { ApiOkResponseWrapped, ApiPaginated } from '@/common/decorators'
 import { type AuthRequest, FindAllQueryDto } from '@/common/dtos'
 
-import { CreatePayloadPostDto, PostResponseDto } from './dto'
+import { CreatePostDto, ResponsePostDto } from './dto'
 import { PostService } from './post.service'
 
 @Controller('posts')
@@ -30,29 +31,36 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Get()
-  @ApiPaginated(PostResponseDto)
-  findAll(@Query() query: FindAllQueryDto<PostResponseDto>) {
-    return this.postService.findAll(query)
+  @ApiPaginated(ResponsePostDto)
+  async findAll(@Query() query: FindAllQueryDto<ResponsePostDto>) {
+    return plainToInstance(
+      ResponsePostDto,
+      (await this.postService.findAll(query)).data
+    )
   }
 
   @Get(':id')
-  @ApiOkResponseWrapped(PostResponseDto)
-  findOne(@Param('id') id: string) {
-    return this.postService.findOne(+id)
+  @ApiOkResponseWrapped(ResponsePostDto)
+  async findOne(@Param('id') id: string) {
+    return plainToInstance(ResponsePostDto, await this.postService.findOne(+id))
   }
 
   @Post()
-  @ApiOkResponseWrapped(PostResponseDto)
-  create(@Req() req: AuthRequest, @Body() dto: CreatePayloadPostDto) {
-    const userId = req.user.id
-
-    return this.postService.create(userId, dto)
+  @ApiOkResponseWrapped(ResponsePostDto)
+  async create(@Req() req: AuthRequest, @Body() dto: CreatePostDto) {
+    return plainToInstance(
+      ResponsePostDto,
+      await this.postService.create(req.user.id, dto)
+    )
   }
 
   @Patch(':id')
-  @ApiOkResponseWrapped(PostResponseDto)
-  update(@Param('id') id: string, @Body() dto: UpdatePostDto) {
-    return this.postService.update(+id, dto)
+  @ApiOkResponseWrapped(ResponsePostDto)
+  async update(@Param('id') id: string, @Body() dto: UpdatePostDto) {
+    return plainToInstance(
+      ResponsePostDto,
+      await this.postService.update(+id, dto)
+    )
   }
 
   @Delete(':id')

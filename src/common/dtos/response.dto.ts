@@ -20,12 +20,12 @@ export class PaginatedResponseDto<TData> extends BaseResponseDto<TData> {
   @ApiProperty({ example: 10 })
   pageSize: number
 
-  @ApiProperty({ example: 5 })
+  @ApiProperty({ example: 10 })
   totalPages: number
 
-  @ApiProperty({ example: 7 })
+  @ApiProperty({ example: 2 })
   nextPage: number
 
-  @ApiProperty({ example: 6 })
+  @ApiProperty({ example: 1 })
   prevPage: number
 }

@@ -1,13 +1,20 @@
 import { Body, Controller, Post, Req, Res } from '@nestjs/common'
 
 import { ApiOperation } from '@nestjs/swagger'
+import { plainToInstance } from 'class-transformer'
 
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import { type AuthRequest, EmptyResponseDto } from '@/common/dtos'
 import { CreateUserDto } from '@/user/dto'
 
 import { AuthService } from './auth.service'
-import { LoginRequestDto, LoginResponseDto, RefreshResponseDto } from './dto'
+
+import {
+  CreateLoginDto,
+  ResponseLoginDto,
+  ResponseRefreshDto,
+  ResponseRegisterDto
+} from './dto'
 
 import type { Request, Response } from 'express'
 
@@ -16,39 +23,57 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  @ApiOkResponseWrapped(LoginResponseDto)
+  @ApiOkResponseWrapped(ResponseRegisterDto)
   @ApiOperation({
     description: `Validation pattern for password:
     \`/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':"\\\\|,.<>/?]).{8,}$/\``
   })
-  register(
+  async register(
     @Res({ passthrough: true }) res: Response,
     @Body() dto: CreateUserDto
   ) {
-    return this.authService.register(res, dto)
+    return plainToInstance(
+      ResponseRegisterDto,
+      await this.authService.register(res, dto)
+    )
   }
 
   @Post('login')
-  @ApiOkResponseWrapped(LoginResponseDto)
-  login(
+  @ApiOkResponseWrapped(ResponseLoginDto)
+  async login(
     @Res({ passthrough: true }) res: Response,
-    @Body() dto: LoginRequestDto
+    @Body() dto: CreateLoginDto
   ) {
-    return this.authService.login(res, dto)
+    return plainToInstance(
+      ResponseLoginDto,
+      await this.authService.login(res, dto)
+    )
   }
 
   @Post('logout')
   @ApiOkResponseWrapped(EmptyResponseDto)
-  logout(@Req() req: AuthRequest, @Res({ passthrough: true }) res: Response) {
+  async logout(
+    @Req() req: AuthRequest,
+    @Res({ passthrough: true }) res: Response
+  ) {
     const { refreshToken } = req.cookies
     res.clearCookie('refreshToken')
 
-    return this.authService.logout(refreshToken)
+    return plainToInstance(
+      EmptyResponseDto,
+      await this.authService.logout(refreshToken)
+    )
   }
 
   @Post('refresh')
-  @ApiOkResponseWrapped(RefreshResponseDto)
-  refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    return this.authService.refresh(req, res)
+  @ApiOkResponseWrapped(ResponseRefreshDto)
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    return plainToInstance(
+      ResponseRefreshDto,
+      await this.authService.refresh(req, res)
+    )
   }
 }

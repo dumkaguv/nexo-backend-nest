@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from '@/prisma/prisma.service'
 import { UserService } from '@/user/user.service'
 
-import { UpdatePayloadProfileDto } from './dto/update-payload-profile.dto'
+import { UpdateProfileDto } from './dto'
 
 @Injectable()
 export class ProfileService {
@@ -13,6 +13,10 @@ export class ProfileService {
   ) {}
 
   findOne(userId: number) {
+    return this.userService.findOne(userId)
+  }
+
+  findOneDetailed(userId: number) {
     return this.userService.findOneWithRelations(userId)
   }
 
@@ -22,7 +26,7 @@ export class ProfileService {
     })
   }
 
-  update(userId: number, dto: UpdatePayloadProfileDto) {
+  update(userId: number, dto: UpdateProfileDto) {
     return this.prisma.profile.update({
       data: dto,
       where: { userId }

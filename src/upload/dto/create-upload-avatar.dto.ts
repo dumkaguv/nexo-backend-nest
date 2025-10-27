@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { ApiProperty } from '@nestjs/swagger'
 
-export class UploadAvatarPayload {
+export class CreateUploadAvatarDto {
   @ApiProperty({
     type: 'string',
     format: 'binary'
   })
-  file: any
+  file: Express.Multer.File
 }

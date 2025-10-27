@@ -4,4 +4,4 @@ import { ApiExcludeController } from '@nestjs/swagger'
 
 @Controller('file')
 @ApiExcludeController()
-export class FileController {}
+export class PostFileController {}

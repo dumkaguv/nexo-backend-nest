@@ -12,17 +12,14 @@ import {
 
 import { ApiTags } from '@nestjs/swagger'
 
+import { plainToInstance } from 'class-transformer'
+
 import { Authorization } from '@/auth/decorators'
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import { ApiPaginated } from '@/common/decorators/api-paginated.decorator'
-import { FindAllQueryDto } from '@/common/dtos'
+import { EmptyResponseDto, FindAllQueryDto } from '@/common/dtos'
 
-import {
-  ChangePasswordDto,
-  UpdateUserDto,
-  UserResponseDto,
-  UserResponseWithRelationsDto
-} from './dto'
+import { CreateChangePasswordDto, ResponseUserDto, UpdateUserDto } from './dto'
 import { UserService } from './user.service'
 
 @Controller('users')
@@ -32,36 +29,39 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @ApiPaginated(UserResponseWithRelationsDto)
-  findAll(@Query() query: FindAllQueryDto<UserResponseWithRelationsDto>) {
-    return this.userService.findAll(query)
+  @ApiPaginated(ResponseUserDto)
+  async findAll(@Query() query: FindAllQueryDto<ResponseUserDto>) {
+    return plainToInstance(
+      ResponseUserDto,
+      (await this.userService.findAll(query)).data
+    )
   }
 
   @Get(':id')
-  @ApiOkResponseWrapped(UserResponseWithRelationsDto)
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id)
-  }
-
-  @Get('minified/:id')
-  @ApiOkResponseWrapped(UserResponseDto)
-  findOneMinified(@Param('id') id: string) {
-    return this.userService.findOne(+id)
+  @ApiOkResponseWrapped(ResponseUserDto)
+  async findOne(@Param('id') id: string) {
+    return plainToInstance(ResponseUserDto, await this.userService.findOne(+id))
   }
 
   @Patch(':id')
-  @ApiOkResponseWrapped(UserResponseWithRelationsDto)
-  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    return this.userService.update(+id, dto)
+  @ApiOkResponseWrapped(ResponseUserDto)
+  async update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    return plainToInstance(
+      ResponseUserDto,
+      await this.userService.update(+id, dto)
+    )
   }
 
   @Patch(':id/change-password')
-  @ApiOkResponseWrapped(UserResponseWithRelationsDto)
-  changePassword(
+  @ApiOkResponseWrapped(EmptyResponseDto)
+  async changePassword(
     @Param('id') id: string,
-    @Body() { oldPassword, newPassword }: ChangePasswordDto
+    @Body() { oldPassword, newPassword }: CreateChangePasswordDto
   ) {
-    return this.userService.changePassword(+id, oldPassword, newPassword)
+    return plainToInstance(
+      ResponseUserDto,
+      await this.userService.changePassword(+id, oldPassword, newPassword)
+    )
   }
 
   @Delete(':id')

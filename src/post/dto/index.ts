@@ -1,2 +1,2 @@
-export * from './post-response.dto'
-export * from './create-payload-post.dto'
+export * from './response-post.dto'
+export * from './create-post.dto'

@@ -11,7 +11,7 @@ import { CreateUserDto } from '@/user/dto'
 
 import { UserService } from '@/user/user.service'
 
-import { LoginRequestDto } from './dto'
+import { CreateLoginDto } from './dto'
 
 import type { Request, Response } from 'express'
 
@@ -34,21 +34,21 @@ export class AuthService {
   }
 
   async register(res: Response, dto: CreateUserDto) {
-    const userWithProfile = await this.userService.create(dto)
-    const { accessToken } = await this.auth(res, userWithProfile.id)
+    const { id } = await this.userService.create(dto)
+    const userAndAccessToken = await this.auth(res, id)
 
-    return { ...userWithProfile, accessToken }
+    return userAndAccessToken
   }
 
-  async login(res: Response, dto: LoginRequestDto) {
+  async login(res: Response, dto: CreateLoginDto) {
     const { email, password } = dto
     const user = await this.userService.comparePasswords(password, email)
 
-    return this.auth(res, user.id)
+    return await this.auth(res, user.id)
   }
 
-  logout(refreshToken: string) {
-    this.tokenService.remove(refreshToken)
+  async logout(refreshToken: string) {
+    await this.tokenService.remove(refreshToken)
   }
 
   async refresh(req: Request, res: Response) {
@@ -78,7 +78,7 @@ export class AuthService {
 
     let user: Omit<User, 'password'> | undefined = undefined
     if (returnUser) {
-      user = await this.userService.findOne(id)
+      user = await this.userService.findOneWithRelations(id)
     }
 
     this.setCookie(res, refreshToken, this.JWT_REFRESH_TTL)

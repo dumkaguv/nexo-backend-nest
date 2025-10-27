@@ -2,8 +2,7 @@
 
 import { applyDecorators } from '@nestjs/common'
 
-import { ApiQueryMany } from 'src/common/utils'
-
+import { ApiQueryMany } from './api-query-many'
 import { ApiOkResponseWrapped } from './api-response.decorator'
 import { UsePagination } from './use-pagination.decorator'
 

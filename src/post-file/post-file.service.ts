@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common'
 
-import { CreatePostFileDto } from 'prisma/swagger/models/create-postFile.dto'
-import { UpdatePostFileDto } from 'prisma/swagger/models/update-postFile.dto'
-
 import { PrismaService } from '@/prisma/prisma.service'
 
+import { CreatePostFileDto, UpdatePostFileDto } from './dto'
+
 @Injectable()
-export class FileService {
+export class PostFileService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(postId: number, dto: CreatePostFileDto) {

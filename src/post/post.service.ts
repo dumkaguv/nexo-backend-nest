@@ -6,20 +6,18 @@ import { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
 import { PrismaService } from '@/prisma/prisma.service'
 
-import { selectFieldsWithoutPassword } from '@/user/constants'
-
-import { CreatePayloadPostDto, PostResponseDto } from './dto'
+import { CreatePostDto, ResponsePostDto } from './dto'
 
 @Injectable()
 export class PostService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(query: FindAllQueryDto<PostResponseDto>) {
+  findAll(query: FindAllQueryDto<ResponsePostDto>) {
     return paginate({
       prisma: this.prisma,
       model: 'post',
       include: {
-        user: { select: { ...selectFieldsWithoutPassword, profile: true } },
+        user: true,
         files: true,
         likes: true,
         comments: true
@@ -35,7 +33,7 @@ export class PostService {
     })
   }
 
-  create(userId: number, dto: CreatePayloadPostDto) {
+  create(userId: number, dto: CreatePostDto) {
     return this.prisma.post.create({
       data: { userId, ...dto }
     })
@@ -49,8 +47,6 @@ export class PostService {
   }
 
   remove(id: number) {
-    return this.prisma.post.delete({
-      where: { id }
-    })
+    return this.prisma.post.delete({ where: { id } })
   }
 }
