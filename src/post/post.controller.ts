@@ -35,7 +35,6 @@ export class PostController {
   @Get()
   @ApiPaginated(ResponsePostDto)
   async findAll(@Query() query: FindAllQueryDto<ResponsePostDto>) {
-    console.log('data', await this.postService.findAll(query))
     return sendPaginatedResponse(
       ResponsePostDto,
       await this.postService.findAll(query)
