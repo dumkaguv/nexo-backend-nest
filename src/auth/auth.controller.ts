@@ -33,7 +33,7 @@ export class AuthController {
     @Body() dto: CreateUserDto
   ) {
     const response = await this.authService.register(res, dto)
-    console.log('response', response)
+
     return plainToInstance(ResponseRegisterDto, response)
   }
 
