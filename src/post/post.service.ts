@@ -17,10 +17,10 @@ export class PostService {
       prisma: this.prisma,
       model: 'post',
       include: {
-        user: true,
+        user: { include: { profile: true } },
         files: true,
-        likes: true,
-        comments: true
+        likes: { include: { user: { include: { profile: true } } } },
+        comments: { include: { user: { include: { profile: true } } } }
       },
       ...query,
       ordering: query.ordering ? query.ordering : '-createdAt'

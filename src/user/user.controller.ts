@@ -19,7 +19,7 @@ import { ApiOkResponseWrapped } from '@/common/decorators'
 import { ApiPaginated } from '@/common/decorators/api-paginated.decorator'
 import { EmptyResponseDto, FindAllQueryDto } from '@/common/dtos'
 
-import { sendPaginatedResponse } from '@/common/utils/sendPaginatedResponse'
+import { sendPaginatedResponse } from '@/common/utils'
 
 import { CreateChangePasswordDto, ResponseUserDto, UpdateUserDto } from './dto'
 import { UserService } from './user.service'

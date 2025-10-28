@@ -17,7 +17,7 @@ export class ProfileService {
   }
 
   async findOneDetailed(userId: number) {
-    return { user: await this.userService.findOneWithRelations(userId) }
+    return await this.userService.findOneWithRelations(userId)
   }
 
   create(userId: number, fullName: string) {

@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { Exclude, Expose } from 'class-transformer'
+import { Exclude, Expose, Type } from 'class-transformer'
+
+import { ResponseUserProfileDto } from '@/user/dto'
 
 @Exclude()
 export class ResponsePostCommentDto {
@@ -11,9 +13,10 @@ export class ResponsePostCommentDto {
   @Expose()
   readonly postId: number
 
-  @ApiProperty({ type: 'integer', readOnly: true })
+  @ApiProperty({ type: () => ResponseUserProfileDto })
+  @Type(() => ResponseUserProfileDto)
   @Expose()
-  readonly userId: number
+  user: ResponseUserProfileDto
 
   @ApiProperty({ type: 'string' })
   @Expose()

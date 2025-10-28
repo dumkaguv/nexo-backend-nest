@@ -21,6 +21,8 @@ import { Authorization } from '@/auth/decorators'
 import { ApiOkResponseWrapped, ApiPaginated } from '@/common/decorators'
 import { type AuthRequest, FindAllQueryDto } from '@/common/dtos'
 
+import { sendPaginatedResponse } from '@/common/utils'
+
 import { CreatePostDto, ResponsePostDto } from './dto'
 import { PostService } from './post.service'
 
@@ -33,9 +35,10 @@ export class PostController {
   @Get()
   @ApiPaginated(ResponsePostDto)
   async findAll(@Query() query: FindAllQueryDto<ResponsePostDto>) {
-    return plainToInstance(
+    console.log('data', await this.postService.findAll(query))
+    return sendPaginatedResponse(
       ResponsePostDto,
-      (await this.postService.findAll(query)).data
+      await this.postService.findAll(query)
     )
   }
 
