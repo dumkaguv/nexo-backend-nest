@@ -2,14 +2,14 @@ import { ApiProperty } from '@nestjs/swagger'
 
 import { Exclude, Expose, Type } from 'class-transformer'
 
-import { ResponseUserDto } from '@/user/dto'
+import { ResponseUserProfileDto } from '@/user/dto'
 
 @Exclude()
 export class ResponseLoginDto {
-  @ApiProperty({ type: () => ResponseUserDto })
-  @Type(() => ResponseUserDto)
+  @ApiProperty({ type: () => ResponseUserProfileDto })
+  @Type(() => ResponseUserProfileDto)
   @Expose()
-  user: ResponseUserDto
+  user: ResponseUserProfileDto
 
   @ApiProperty({ type: 'string' })
   @Expose()

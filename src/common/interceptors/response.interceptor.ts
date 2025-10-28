@@ -31,6 +31,7 @@ export class ResponseInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data) => {
         if (usePagination) {
+          console.log(data)
           const total = data.total || 0
           const pageSize = Number(request.query.pageSize || DEFAULT_PAGE_SIZE)
           const page = Number(request.query.page || DEFAULT_PAGE)
@@ -40,7 +41,7 @@ export class ResponseInterceptor implements NestInterceptor {
 
           return {
             message,
-            data,
+            data: data.data,
             total,
             page,
             totalPages,

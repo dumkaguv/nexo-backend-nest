@@ -5,6 +5,7 @@ export const selectUserFields: Prisma.UserSelectScalar = {
   email: true,
   username: true,
   activationLink: true,
+  isActivated: true,
   createdAt: true,
   updatedAt: true
 } as const
@@ -14,8 +15,24 @@ export const selectUserWithRelations: Prisma.UserSelect = {
   profile: true,
   posts: true,
   likesOnPosts: true,
-  followers: true,
-  following: true,
+  following: {
+    include: {
+      user: {
+        include: {
+          profile: true
+        }
+      }
+    }
+  },
+  followers: {
+    include: {
+      user: {
+        include: {
+          profile: true
+        }
+      }
+    }
+  },
   comments: true,
   sentMessages: true,
   receivedMessages: true

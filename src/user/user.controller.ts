@@ -19,6 +19,8 @@ import { ApiOkResponseWrapped } from '@/common/decorators'
 import { ApiPaginated } from '@/common/decorators/api-paginated.decorator'
 import { EmptyResponseDto, FindAllQueryDto } from '@/common/dtos'
 
+import { sendPaginatedResponse } from '@/common/utils/sendPaginatedResponse'
+
 import { CreateChangePasswordDto, ResponseUserDto, UpdateUserDto } from './dto'
 import { UserService } from './user.service'
 
@@ -31,16 +33,19 @@ export class UserController {
   @Get()
   @ApiPaginated(ResponseUserDto)
   async findAll(@Query() query: FindAllQueryDto<ResponseUserDto>) {
-    return plainToInstance(
+    return sendPaginatedResponse(
       ResponseUserDto,
-      (await this.userService.findAll(query)).data
+      await this.userService.findAll(query)
     )
   }
 
   @Get(':id')
   @ApiOkResponseWrapped(ResponseUserDto)
   async findOne(@Param('id') id: string) {
-    return plainToInstance(ResponseUserDto, await this.userService.findOne(+id))
+    return plainToInstance(
+      ResponseUserDto,
+      await this.userService.findOneWithRelations(+id)
+    )
   }
 
   @Patch(':id')

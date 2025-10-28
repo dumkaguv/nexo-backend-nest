@@ -32,9 +32,10 @@ export class ProfileController {
   @Get('me/detailed')
   @ApiOkResponseWrapped(ResponseProfileDetailedDto)
   async meDetailed(@Req() req: AuthRequest) {
+    console.log('data', await this.profileService.findOneDetailed(req.user.id))
     return plainToInstance(
-      ResponseProfileDto,
-      await this.profileService.findOne(req.user.id)
+      ResponseProfileDetailedDto,
+      await this.profileService.findOneDetailed(req.user.id)
     )
   }
 
