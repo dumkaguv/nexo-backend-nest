@@ -8,10 +8,8 @@ import { Authorization } from '@/auth/decorators'
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import type { AuthRequest } from '@/common/dtos'
 
-import { ResponseUserDto } from '@/user/dto'
-
 import { FileUpload } from './decorators'
-import { CreateUploadAvatarDto } from './dto'
+import { CreateUploadAvatarDto, ResponseUploadAvatarDto } from './dto'
 import { UploadService } from './upload.service'
 
 @Controller('upload')
@@ -21,7 +19,7 @@ export class UploadController {
 
   @Post('avatar')
   @FileUpload('file')
-  @ApiOkResponseWrapped(ResponseUserDto)
+  @ApiOkResponseWrapped(ResponseUploadAvatarDto)
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateUploadAvatarDto })
   async uploadAvatar(
@@ -29,7 +27,7 @@ export class UploadController {
     @UploadedFile() file: Express.Multer.File
   ) {
     return plainToInstance(
-      CreateUploadAvatarDto,
+      ResponseUploadAvatarDto,
       await this.uploadService.uploadAvatar(file, req.user.id, 'avatars')
     )
   }

@@ -9,6 +9,7 @@ import { ResponseInterceptor } from '@/common/interceptors'
 import { PostModule } from '@/post/post.module'
 import { PrismaModule } from '@/prisma/prisma.module'
 import { ProfileModule } from '@/profile/profile.module'
+import { SubscriptionModule } from '@/subscription/subscription.module'
 import { TokenModule } from '@/token/token.module'
 import { UploadModule } from '@/upload/upload.module'
 import { UserModule } from '@/user/user.module'
@@ -28,7 +29,8 @@ import { AppController } from './app.controller'
     ProfileModule,
     PostModule,
     UploadModule,
-    CloudinaryModule
+    CloudinaryModule,
+    SubscriptionModule
   ],
   controllers: [AppController],
   providers: [ResponseInterceptor, AllExceptionsFilter]

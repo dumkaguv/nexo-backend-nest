@@ -36,6 +36,10 @@ export class User {
   })
   isActivated: boolean
   @ApiProperty({
+    type: 'boolean'
+  })
+  isFollowing: boolean
+  @ApiProperty({
     type: () => Token,
     required: false,
     nullable: true

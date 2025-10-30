@@ -10,8 +10,8 @@ import { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
 import { PrismaService } from '@/prisma/prisma.service'
 
-import { selectUserWithRelations } from './constants'
-import { CreateUserDto, ResponseUserDto, UpdateUserDto } from './dto'
+import { includeUserWithRelations } from './constants'
+import { CreateUserDto, ResponseUserPaginateDto, UpdateUserDto } from './dto'
 
 @Injectable()
 export class UserService {
@@ -38,7 +38,7 @@ export class UserService {
     const hashPassword = this.hashPassword(password)
     const activationLink = v4()
 
-    const userWithProfile = await this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         username,
         email,
@@ -46,43 +46,68 @@ export class UserService {
         activationLink,
         profile: { create: { fullName } }
       },
-      select: selectUserWithRelations
+      include: includeUserWithRelations
     })
-
     // todo: email service
 
-    return userWithProfile
+    return { ...user, followingCount: 0, followersCount: 0 }
   }
 
-  findAll(query: FindAllQueryDto<ResponseUserDto>) {
+  findAll(query: FindAllQueryDto<ResponseUserPaginateDto>) {
     return paginate({
       prisma: this.prisma,
       model: 'user',
-      select: selectUserWithRelations,
+      include: includeUserWithRelations,
       ...query
     })
   }
 
-  findOne(id: number) {
-    return this.prisma.user.findFirstOrThrow({
-      include: { profile: true },
-      where: { id }
-    })
+  async findOne(id: number) {
+    const [user, followingCount, followersCount] = await Promise.all([
+      this.prisma.user.findFirstOrThrow({
+        include: { profile: true },
+        where: { id }
+      }),
+      this.prisma.subscription.count({
+        where: { userId: id }
+      }),
+      this.prisma.subscription.count({
+        where: { followingId: id }
+      })
+    ])
+
+    return { ...user, followingCount, followersCount }
   }
 
-  findOneWithRelations(id: number) {
-    return this.prisma.user.findFirstOrThrow({
-      select: selectUserWithRelations,
-      where: { id }
-    })
+  async findOneWithRelations(id: number) {
+    const [user, followingCount, followersCount] = await Promise.all([
+      this.prisma.user.findFirstOrThrow({
+        include: includeUserWithRelations,
+        where: { id }
+      }),
+      this.prisma.subscription.count({
+        where: { userId: id }
+      }),
+      this.prisma.subscription.count({
+        where: { followingId: id }
+      })
+    ])
+
+    return { ...user, followingCount, followersCount }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto & { password?: string }) {
-    return this.prisma.user.update({
-      select: selectUserWithRelations,
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto & { password?: string }
+  ) {
+    await this.prisma.user.update({
       where: { id },
       data: { ...updateUserDto }
     })
+
+    const user = await this.findOneWithRelations(id)
+
+    return user
   }
 
   remove(id: number) {
@@ -106,7 +131,7 @@ export class UserService {
     }
 
     const user = await this.prisma.user.findFirstOrThrow({
-      select: { ...selectUserWithRelations, password: true },
+      include: includeUserWithRelations,
       where: whereCondition
     })
 

@@ -2,7 +2,6 @@ import { Injectable, UnauthorizedException } from '@nestjs/common'
 
 import { ConfigService } from '@nestjs/config'
 
-import { User } from '@prisma/client'
 import ms, { type StringValue } from 'ms'
 
 import { isDev } from '@/common/utils'
@@ -76,7 +75,7 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.tokenService.generate(id)
     await this.tokenService.save(refreshToken, id)
 
-    let user: Omit<User, 'password'> | undefined = undefined
+    let user
     if (returnUser) {
       user = await this.userService.findOneWithRelations(id)
     }

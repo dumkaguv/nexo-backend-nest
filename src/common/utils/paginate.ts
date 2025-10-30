@@ -15,6 +15,7 @@ type PaginateParams = {
   search?: string
   select?: Record<string, boolean | object>
   include?: Record<string, boolean | object>
+  where?: Record<any, any>
 }
 
 export async function paginate({
@@ -25,7 +26,8 @@ export async function paginate({
   ordering,
   search,
   select,
-  include
+  include,
+  where: whereParam
 }: PaginateParams) {
   const skip = ((page ?? DEFAULT_PAGE) - 1) * (pageSize ?? DEFAULT_PAGE_SIZE)
   const take = pageSize ?? DEFAULT_PAGE_SIZE
@@ -44,7 +46,7 @@ export async function paginate({
     (model) => model.name === capitalizedModel
   )
 
-  let where: Record<string, any> | undefined
+  let where: Record<string, any> | undefined = whereParam
   if (search && prismaModel) {
     const stringFields = prismaModel.fields
       .filter(({ type }) => type === 'String')
@@ -53,7 +55,8 @@ export async function paginate({
     if (stringFields.length > 0) {
       where = {
         OR: stringFields.map(({ field }) => ({
-          [field]: { contains: search, mode: 'insensitive' }
+          [field]: { contains: search, mode: 'insensitive' },
+          ...(whereParam || {})
         }))
       }
     }

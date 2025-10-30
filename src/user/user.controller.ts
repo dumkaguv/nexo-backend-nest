@@ -21,7 +21,12 @@ import { EmptyResponseDto, FindAllQueryDto } from '@/common/dtos'
 
 import { sendPaginatedResponse } from '@/common/utils'
 
-import { CreateChangePasswordDto, ResponseUserDto, UpdateUserDto } from './dto'
+import {
+  CreateChangePasswordDto,
+  ResponseUserDto,
+  ResponseUserPaginateDto,
+  UpdateUserDto
+} from './dto'
 import { UserService } from './user.service'
 
 @Controller('users')
@@ -31,10 +36,10 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @ApiPaginated(ResponseUserDto)
-  async findAll(@Query() query: FindAllQueryDto<ResponseUserDto>) {
+  @ApiPaginated(ResponseUserPaginateDto)
+  async findAll(@Query() query: FindAllQueryDto<ResponseUserPaginateDto>) {
     return sendPaginatedResponse(
-      ResponseUserDto,
+      ResponseUserPaginateDto,
       await this.userService.findAll(query)
     )
   }

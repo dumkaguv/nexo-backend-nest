@@ -4,7 +4,7 @@ import { Exclude, Expose, Type } from 'class-transformer'
 import { ResponseProfileDto } from '@/profile/dto'
 
 @Exclude()
-export class ResponseUserDto {
+export class ResponseUserPaginateDto {
   @ApiProperty({ type: 'integer', readOnly: true })
   @Expose()
   readonly id: number
@@ -29,14 +29,6 @@ export class ResponseUserDto {
   @ApiProperty({ type: 'boolean', readOnly: true })
   @Expose()
   readonly isActivated: boolean
-
-  @ApiProperty({ type: 'integer', readOnly: true })
-  @Expose()
-  readonly followersCount: number
-
-  @ApiProperty({ type: 'integer', readOnly: true })
-  @Expose()
-  readonly followingCount: number
 
   @ApiProperty({ type: () => ResponseProfileDto })
   @Expose()

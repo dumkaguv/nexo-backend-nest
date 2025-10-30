@@ -28,6 +28,10 @@ export class UserDto {
   })
   isActivated: boolean
   @ApiProperty({
+    type: 'boolean'
+  })
+  isFollowing: boolean
+  @ApiProperty({
     type: 'string',
     format: 'date-time'
   })

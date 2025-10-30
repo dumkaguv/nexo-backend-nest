@@ -32,9 +32,10 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @Body() dto: CreateUserDto
   ) {
-    const response = await this.authService.register(res, dto)
-
-    return plainToInstance(ResponseRegisterDto, response)
+    return plainToInstance(
+      ResponseRegisterDto,
+      await this.authService.register(res, dto)
+    )
   }
 
   @Post('login')

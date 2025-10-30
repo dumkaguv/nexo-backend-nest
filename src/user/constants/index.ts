@@ -10,8 +10,7 @@ export const selectUserFields: Prisma.UserSelectScalar = {
   updatedAt: true
 } as const
 
-export const selectUserWithRelations: Prisma.UserSelect = {
-  ...selectUserFields,
+export const includeUserWithRelations: Prisma.UserInclude = {
   profile: true,
   posts: true,
   likesOnPosts: true,
