@@ -66,23 +66,32 @@ export class SubscriptionService {
       throw new BadRequestException('You cannot follow yourself')
     }
 
-    const follower = await this.prisma.subscription.findFirst({
-      where: { userId, followingId: idToFollow }
+    const exists = await this.prisma.subscription.findFirst({
+      where: { userId: idToFollow, followingId: userId }
     })
-    if (follower) {
+    if (exists) {
       throw new BadRequestException('This user already has this follower')
     }
 
     await this.prisma.subscription.create({
-      data: { userId, followingId: idToFollow }
+      data: { userId: idToFollow, followingId: userId }
     })
   }
 
   async unfollow(userId: number, idToUnfollow: number) {
+    const exists = await this.prisma.subscription.findFirst({
+      where: { userId: idToUnfollow, followingId: userId }
+    })
+    if (!exists) {
+      throw new BadRequestException('You do not following this user')
+    }
+
     await this.prisma.subscription.delete({
       where: {
-        userId_followingId: { userId: userId, followingId: idToUnfollow }
+        userId_followingId: { userId: idToUnfollow, followingId: userId }
       }
     })
+
+    return {}
   }
 }

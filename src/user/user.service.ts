@@ -11,7 +11,7 @@ import { paginate } from '@/common/utils'
 import { PrismaService } from '@/prisma/prisma.service'
 
 import { includeUserWithRelations } from './constants'
-import { CreateUserDto, ResponseUserPaginateDto, UpdateUserDto } from './dto'
+import { CreateUserDto, ResponseUserDto, UpdateUserDto } from './dto'
 
 @Injectable()
 export class UserService {
@@ -53,13 +53,32 @@ export class UserService {
     return { ...user, followingCount: 0, followersCount: 0 }
   }
 
-  findAll(query: FindAllQueryDto<ResponseUserPaginateDto>) {
-    return paginate({
+  async findSuggestedUserIds(userId: number) {
+    const following = await this.prisma.subscription.findMany({
+      where: { userId },
+      select: { followingId: true }
+    })
+
+    return new Set(following.map(({ followingId }) => followingId))
+  }
+
+  async findAll(query: FindAllQueryDto<ResponseUserDto>, userId: number) {
+    const followingIdsSet = await this.findSuggestedUserIds(userId)
+
+    const { data, total } = await paginate({
       prisma: this.prisma,
       model: 'user',
-      include: includeUserWithRelations,
+      include: { profile: true, following: true },
+      where: { id: { not: userId } },
       ...query
     })
+
+    const modifiedData = data.map((record) => ({
+      ...record,
+      isFollowing: followingIdsSet.has(record.id)
+    }))
+
+    return { data: modifiedData, total }
   }
 
   async findOne(id: number) {

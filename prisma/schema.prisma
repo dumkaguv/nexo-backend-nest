@@ -21,7 +21,6 @@ model User {
   password       String  @db.VarChar(100)
   activationLink String?
   isActivated    Boolean @default(false)
-  isFollowing    Boolean @default(false)
 
   token   Token?
   profile Profile?

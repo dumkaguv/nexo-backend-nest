@@ -7,7 +7,8 @@ import {
   HttpStatus,
   Param,
   Patch,
-  Query
+  Query,
+  Req
 } from '@nestjs/common'
 
 import { ApiTags } from '@nestjs/swagger'
@@ -17,16 +18,15 @@ import { plainToInstance } from 'class-transformer'
 import { Authorization } from '@/auth/decorators'
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import { ApiPaginated } from '@/common/decorators/api-paginated.decorator'
-import { EmptyResponseDto, FindAllQueryDto } from '@/common/dtos'
+import {
+  type AuthRequest,
+  EmptyResponseDto,
+  FindAllQueryDto
+} from '@/common/dtos'
 
 import { sendPaginatedResponse } from '@/common/utils'
 
-import {
-  CreateChangePasswordDto,
-  ResponseUserDto,
-  ResponseUserPaginateDto,
-  UpdateUserDto
-} from './dto'
+import { CreateChangePasswordDto, ResponseUserDto, UpdateUserDto } from './dto'
 import { UserService } from './user.service'
 
 @Controller('users')
@@ -36,11 +36,14 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @ApiPaginated(ResponseUserPaginateDto)
-  async findAll(@Query() query: FindAllQueryDto<ResponseUserPaginateDto>) {
+  @ApiPaginated(ResponseUserDto)
+  async findAll(
+    @Req() req: AuthRequest,
+    @Query() query: FindAllQueryDto<ResponseUserDto>
+  ) {
     return sendPaginatedResponse(
-      ResponseUserPaginateDto,
-      await this.userService.findAll(query)
+      ResponseUserDto,
+      await this.userService.findAll(query, req.user.id)
     )
   }
 

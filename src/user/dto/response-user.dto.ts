@@ -38,6 +38,10 @@ export class ResponseUserDto {
   @Expose()
   readonly followingCount: number
 
+  @ApiProperty({ type: 'boolean', readOnly: true })
+  @Expose()
+  readonly isFollowing: boolean
+
   @ApiProperty({ type: () => ResponseProfileDto })
   @Expose()
   @Type(() => ResponseProfileDto)
