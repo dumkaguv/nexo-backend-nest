@@ -15,11 +15,7 @@ import {
 } from '@/common/dtos'
 import { sendPaginatedResponse } from '@/common/utils'
 
-import {
-  ResponseSubscriptionCountDto,
-  ResponseSubscriptionDto,
-  ResponseSubscriptionFollowingDto
-} from './dto'
+import { ResponseSubscriptionCountDto, ResponseSubscriptionDto } from './dto'
 import { SubscriptionService } from './subscription.service'
 
 @Controller('subscription')
@@ -41,13 +37,13 @@ export class SubscriptionController {
   }
 
   @Get('following/:id')
-  @ApiPaginated(ResponseSubscriptionFollowingDto)
+  @ApiPaginated(ResponseSubscriptionDto)
   async findAllFollowing(
     @Param('id') id: string,
-    @Query() query: FindAllQueryDto<ResponseSubscriptionFollowingDto>
+    @Query() query: FindAllQueryDto<ResponseSubscriptionDto>
   ) {
     return sendPaginatedResponse(
-      ResponseSubscriptionFollowingDto,
+      ResponseSubscriptionDto,
       await this.subscriptionService.findAllSubscriptions(+id, query, false)
     )
   }
@@ -66,7 +62,7 @@ export class SubscriptionController {
   async follow(@Req() req: AuthRequest, @Param('id') id: string) {
     return plainToInstance(
       EmptyResponseDto,
-      await this.subscriptionService.follow(+id, req.user.id)
+      await this.subscriptionService.follow(req.user.id, +id)
     )
   }
 
@@ -75,7 +71,7 @@ export class SubscriptionController {
   async unfollow(@Req() req: AuthRequest, @Param('id') id: string) {
     return plainToInstance(
       EmptyResponseDto,
-      await this.subscriptionService.unfollow(+id, req.user.id)
+      await this.subscriptionService.unfollow(req.user.id, +id)
     )
   }
 }
