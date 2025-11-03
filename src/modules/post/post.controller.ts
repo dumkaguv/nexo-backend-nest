@@ -18,12 +18,22 @@ import { plainToInstance } from 'class-transformer'
 import { UpdatePostDto } from 'prisma/swagger/models/update-post.dto'
 
 import { ApiOkResponseWrapped, ApiPaginated } from '@/common/decorators'
-import { type AuthRequest, FindAllQueryDto } from '@/common/dtos'
+import {
+  type AuthRequest,
+  EmptyResponseDto,
+  FindAllQueryDto
+} from '@/common/dtos'
 
 import { sendPaginatedResponse } from '@/common/utils'
 import { Authorization } from '@/modules/auth/decorators'
 
-import { CreatePostDto, ResponsePostDto } from './dto'
+import {
+  CreatePostCommentDto,
+  CreatePostDto,
+  ResponsePostCommentDto,
+  ResponsePostDto,
+  ResponsePostLikeDto
+} from './dto'
 import { PostService } from './post.service'
 
 @Controller('posts')
@@ -34,10 +44,38 @@ export class PostController {
 
   @Get()
   @ApiPaginated(ResponsePostDto)
-  async findAll(@Query() query: FindAllQueryDto<ResponsePostDto>) {
+  async findAll(
+    @Req() req: AuthRequest,
+    @Query() query: FindAllQueryDto<ResponsePostDto>
+  ) {
     return sendPaginatedResponse(
       ResponsePostDto,
-      await this.postService.findAll(query)
+      await this.postService.findAll(req.user.id, query)
+    )
+  }
+
+  @Get(':id/comments')
+  @ApiPaginated(ResponsePostCommentDto)
+  async findAllComments(
+    @Param('id') id: string,
+    @Query() query: FindAllQueryDto<ResponsePostCommentDto>
+  ) {
+    return sendPaginatedResponse(
+      ResponsePostCommentDto,
+      await this.postService.findAllComments(+id, query)
+    )
+  }
+
+  @Get(':id/likes')
+  @ApiPaginated(ResponsePostLikeDto)
+  async findAllLikes(
+    @Req() req: AuthRequest,
+    @Param('id') id: string,
+    @Query() query: FindAllQueryDto<ResponsePostLikeDto>
+  ) {
+    return sendPaginatedResponse(
+      ResponsePostLikeDto,
+      await this.postService.findAllLikes(+id, req.user.id, query)
     )
   }
 
@@ -56,12 +94,56 @@ export class PostController {
     )
   }
 
+  @Post(':id/comments')
+  @ApiOkResponseWrapped(EmptyResponseDto)
+  async createComment(
+    @Req() req: AuthRequest,
+    @Param('id') id: string,
+    @Body() dto: CreatePostCommentDto
+  ) {
+    return plainToInstance(
+      EmptyResponseDto,
+      await this.postService.createComment(req.user.id, +id, dto)
+    )
+  }
+
   @Patch(':id')
   @ApiOkResponseWrapped(ResponsePostDto)
   async update(@Param('id') id: string, @Body() dto: UpdatePostDto) {
     return plainToInstance(
       ResponsePostDto,
       await this.postService.update(+id, dto)
+    )
+  }
+
+  @Post(':id/likes')
+  @ApiOkResponseWrapped(EmptyResponseDto)
+  async createLike(@Req() req: AuthRequest, @Param('id') id: string) {
+    return plainToInstance(
+      EmptyResponseDto,
+      await this.postService.createLike(req.user.id, +id)
+    )
+  }
+
+  @Delete(':id/likes')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeLike(@Req() req: AuthRequest, @Param('id') id: string) {
+    return plainToInstance(
+      EmptyResponseDto,
+      await this.postService.removeLike(req.user.id, +id)
+    )
+  }
+
+  @Delete(':id/comments/:commentId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeComment(
+    @Req() req: AuthRequest,
+    @Param('id') id: string,
+    @Param('commentId') commentId: string
+  ) {
+    return plainToInstance(
+      EmptyResponseDto,
+      await this.postService.removeComment(req.user.id, +id, +commentId)
     )
   }
 

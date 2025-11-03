@@ -16,6 +16,14 @@ type PaginateParams = {
   select?: Record<string, boolean | object>
   include?: Record<string, boolean | object>
   where?: Record<any, any>
+  computed?: Record<
+    string,
+    (
+      record: any,
+      helpers: { prisma: PrismaClient; context?: any }
+    ) => any | Promise<any>
+  >
+  context?: any
 }
 
 export async function paginate({
@@ -27,7 +35,9 @@ export async function paginate({
   search,
   select,
   include,
-  where: whereParam
+  where: whereParam,
+  computed,
+  context
 }: PaginateParams) {
   const skip = ((page ?? DEFAULT_PAGE) - 1) * (pageSize ?? DEFAULT_PAGE_SIZE)
   const take = pageSize ?? DEFAULT_PAGE_SIZE
@@ -74,5 +84,20 @@ export async function paginate({
     modelClient.count({ where })
   ])
 
-  return { data, total }
+  let resultData = data
+  if (computed) {
+    resultData = await Promise.all(
+      data.map(async (record) => {
+        const computedValues: Record<string, any> = {}
+
+        for (const [key, fn] of Object.entries(computed)) {
+          computedValues[key] = await fn(record, { prisma, context })
+        }
+
+        return { ...record, ...computedValues }
+      })
+    )
+  }
+
+  return { data: resultData, total }
 }

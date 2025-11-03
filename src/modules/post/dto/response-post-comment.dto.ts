@@ -9,10 +9,6 @@ export class ResponsePostCommentDto {
   @Expose()
   readonly id: number
 
-  @ApiProperty({ type: 'integer', readOnly: true })
-  @Expose()
-  readonly postId: number
-
   @ApiProperty({ type: () => ResponseUserProfileDto })
   @Type(() => ResponseUserProfileDto)
   @Expose()

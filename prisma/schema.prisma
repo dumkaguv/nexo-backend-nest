@@ -133,6 +133,7 @@ model PostComment {
   content String
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model Message {
@@ -153,9 +154,10 @@ model Message {
 }
 
 model MessageFile {
-  id        Int     @id @default(autoincrement())
-  url       String
-  type      String?
+  id   Int     @id @default(autoincrement())
+  url  String
+  type String?
+
   messageId Int
   message   Message @relation(fields: [messageId], references: [id])
 

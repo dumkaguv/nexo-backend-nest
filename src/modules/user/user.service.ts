@@ -53,7 +53,7 @@ export class UserService {
     return { ...user, followingCount: 0, followersCount: 0 }
   }
 
-  async findSuggestedUserIds(userId: number) {
+  async findFollowingUserIds(userId: number) {
     const following = await this.prisma.subscription.findMany({
       where: { userId },
       select: { followingId: true }
@@ -63,22 +63,18 @@ export class UserService {
   }
 
   async findAll(query: FindAllQueryDto<ResponseUserDto>, userId: number) {
-    const followingIdsSet = await this.findSuggestedUserIds(userId)
+    const followingIdsSet = await this.findFollowingUserIds(userId)
 
-    const { data, total } = await paginate({
+    return await paginate({
       prisma: this.prisma,
       model: 'user',
       include: { profile: true, following: true },
       where: { id: { not: userId } },
-      ...query
+      ...query,
+      computed: {
+        isFollowing: (record) => followingIdsSet.has(record.id)
+      }
     })
-
-    const modifiedData = data.map((record) => ({
-      ...record,
-      isFollowing: followingIdsSet.has(record.id)
-    }))
-
-    return { data: modifiedData, total }
   }
 
   async findOne(id: number) {

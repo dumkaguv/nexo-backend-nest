@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Exclude, Expose, Type } from 'class-transformer'
 
-import { ResponseUserProfileDto } from '@/modules/user/dto'
+import { ResponseUserProfileIsFollowingDto } from '@/modules/user/dto'
 
 @Exclude()
 export class ResponsePostLikeDto {
@@ -9,10 +9,10 @@ export class ResponsePostLikeDto {
   @Expose()
   readonly id: number
 
-  @ApiProperty({ type: () => ResponseUserProfileDto })
-  @Type(() => ResponseUserProfileDto)
+  @ApiProperty({ type: () => ResponseUserProfileIsFollowingDto })
+  @Type(() => ResponseUserProfileIsFollowingDto)
   @Expose()
-  user: ResponseUserProfileDto
+  user: ResponseUserProfileIsFollowingDto
 
   @ApiProperty({ type: 'string', format: 'date-time', readOnly: true })
   @Expose()

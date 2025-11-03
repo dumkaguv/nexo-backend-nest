@@ -1,10 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Exclude, Expose, Type } from 'class-transformer'
 
-import { ResponsePostCommentDto } from '@/modules/post-comment/dto'
 import { ResponsePostFileDto } from '@/modules/post-file/dto'
-import { ResponsePostLikeDto } from '@/modules/post-like/dto'
-import { ResponseUserDto } from '@/modules/user/dto'
+import { ResponseUserProfileDto } from '@/modules/user/dto'
 
 @Exclude()
 export class ResponsePostDto {
@@ -16,10 +14,14 @@ export class ResponsePostDto {
   @Expose()
   content: string
 
-  @ApiProperty({ type: () => ResponseUserDto })
-  @Type(() => ResponseUserDto)
+  @ApiProperty({ type: 'boolean' })
   @Expose()
-  user: ResponseUserDto
+  isLiked: boolean
+
+  @ApiProperty({ type: () => ResponseUserProfileDto })
+  @Type(() => ResponseUserProfileDto)
+  @Expose()
+  user: ResponseUserProfileDto
 
   @ApiProperty({
     type: () => ResponsePostFileDto,
@@ -31,25 +33,13 @@ export class ResponsePostDto {
   @Expose()
   files?: ResponsePostFileDto[] | null
 
-  @ApiProperty({
-    type: () => ResponsePostLikeDto,
-    required: false,
-    isArray: true,
-    nullable: true
-  })
-  @Type(() => ResponsePostLikeDto)
+  @ApiProperty({ type: 'integer' })
   @Expose()
-  likes?: ResponsePostLikeDto[] | null
+  likesCount: number
 
-  @ApiProperty({
-    type: () => ResponsePostCommentDto,
-    isArray: true,
-    required: false,
-    nullable: true
-  })
-  @Type(() => ResponsePostCommentDto)
+  @ApiProperty({ type: 'integer' })
   @Expose()
-  comments?: ResponsePostCommentDto[] | null
+  commentsCount: number
 
   @ApiProperty({ type: 'string', format: 'date-time', readOnly: true })
   @Expose()
