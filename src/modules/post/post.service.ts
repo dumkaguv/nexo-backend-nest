@@ -118,6 +118,19 @@ export class PostService {
     })
   }
 
+  async updateComment(
+    id: number,
+    commentId: number,
+    dto: CreatePostCommentDto
+  ) {
+    await this.prisma.postComment.update({
+      data: dto,
+      where: { id: commentId, postId: id }
+    })
+
+    return {}
+  }
+
   remove(id: number) {
     return this.prisma.post.delete({ where: { id } })
   }
@@ -129,11 +142,11 @@ export class PostService {
   }
 
   async removeComment(userId: number, postId: number, commentId: number) {
-    const existingPost = await this.prisma.postComment.findFirstOrThrow({
-      where: { id: commentId }
+    const existingComment = await this.prisma.postComment.findFirstOrThrow({
+      where: { id: commentId, postId }
     })
 
-    const isMyPost = existingPost.userId === postId
+    const isMyPost = existingComment.userId === userId
     if (!isMyPost) {
       throw new BadRequestException('You are not owner of this comment')
     }

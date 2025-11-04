@@ -116,6 +116,19 @@ export class PostController {
     )
   }
 
+  @Patch(':id/comments/:commentId')
+  @ApiOkResponseWrapped(EmptyResponseDto)
+  async updateComment(
+    @Param('id') id: string,
+    @Param('commentId') commentId: string,
+    @Body() dto: CreatePostCommentDto
+  ) {
+    return plainToInstance(
+      EmptyResponseDto,
+      await this.postService.updateComment(+id, +commentId, dto)
+    )
+  }
+
   @Post(':id/likes')
   @ApiOkResponseWrapped(EmptyResponseDto)
   async createLike(@Req() req: AuthRequest, @Param('id') id: string) {

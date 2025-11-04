@@ -36,7 +36,7 @@ model User {
   followers Subscription[] @relation("UserFollowers")
 
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  updatedAt   DateTime  @default(now()) @updatedAt
   activatedAt DateTime?
 
   @@unique([username, email])
@@ -54,7 +54,7 @@ model Profile {
   user   User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Token {
@@ -63,10 +63,10 @@ model Token {
   refreshToken String
 
   userId Int  @unique
-  user   User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Subscription {
@@ -75,8 +75,8 @@ model Subscription {
   userId      Int
   followingId Int
 
-  user      User @relation("UserFollowing", fields: [userId], references: [id])
-  following User @relation("UserFollowers", fields: [followingId], references: [id])
+  user      User @relation("UserFollowing", fields: [userId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -87,14 +87,14 @@ model Post {
   id      Int    @id @default(autoincrement())
   content String
   userId  Int
-  user    User   @relation(fields: [userId], references: [id])
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   files    PostFile[]
   likes    PostLike[]
   comments PostComment[]
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model PostFile {
@@ -102,7 +102,7 @@ model PostFile {
   url    String
   type   String?
   postId Int
-  post   Post    @relation(fields: [postId], references: [id])
+  post   Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   uploadedAt DateTime @default(now())
 }
@@ -113,8 +113,8 @@ model PostLike {
   userId Int
   postId Int
 
-  user User @relation(fields: [userId], references: [id])
-  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -127,13 +127,13 @@ model PostComment {
   postId Int
   userId Int
 
-  post Post @relation(fields: [postId], references: [id])
-  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   content String
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Message {

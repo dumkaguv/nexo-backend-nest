@@ -38,4 +38,9 @@ export class PostComment {
     format: 'date-time'
   })
   createdAt: Date
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time'
+  })
+  updatedAt: Date
 }
