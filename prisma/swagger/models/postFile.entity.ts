@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 
+import { File } from './file.entity'
 import { Post } from './post.entity'
 
 export class PostFile {
@@ -8,15 +9,6 @@ export class PostFile {
     format: 'int32'
   })
   id: number
-  @ApiProperty({
-    type: 'string'
-  })
-  url: string
-  @ApiProperty({
-    type: 'string',
-    nullable: true
-  })
-  type: string | null
   @ApiProperty({
     type: 'integer',
     format: 'int32'
@@ -28,8 +20,20 @@ export class PostFile {
   })
   post?: Post
   @ApiProperty({
+    type: 'integer',
+    format: 'int32',
+    nullable: true
+  })
+  fileId: number | null
+  @ApiProperty({
+    type: () => File,
+    required: false,
+    nullable: true
+  })
+  file?: File | null
+  @ApiProperty({
     type: 'string',
     format: 'date-time'
   })
-  uploadedAt: Date
+  createdAt: Date
 }

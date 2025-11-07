@@ -2,15 +2,13 @@ import { Module } from '@nestjs/common'
 
 import { CloudinaryModule } from '@/modules/cloudinary/cloudinary.module'
 
-import { ProfileModule } from '@/modules/profile/profile.module'
-
-import { UserModule } from '@/modules/user/user.module'
+import { FileModule } from '@/modules/file/file.module'
 
 import { UploadController } from './upload.controller'
 import { UploadService } from './upload.service'
 
 @Module({
-  imports: [CloudinaryModule, ProfileModule, UserModule],
+  imports: [CloudinaryModule, FileModule],
   controllers: [UploadController],
   providers: [UploadService]
 })

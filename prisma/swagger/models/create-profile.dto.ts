@@ -7,12 +7,6 @@ export class CreateProfileDto {
   fullName: string
   @ApiProperty({
     type: 'string',
-    required: false,
-    nullable: true
-  })
-  avatarUrl?: string | null
-  @ApiProperty({
-    type: 'string',
     format: 'date-time',
     required: false,
     nullable: true

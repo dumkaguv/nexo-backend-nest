@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Exclude, Expose, Type } from 'class-transformer'
 
-import { ResponsePostFileDto } from '@/modules/post-file/dto'
 import { ResponseUserProfileDto } from '@/modules/user/dto'
+
+import { ResponsePostFileDto } from './response-post-file.dto'
 
 @Exclude()
 export class ResponsePostDto {

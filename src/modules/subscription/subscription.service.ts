@@ -51,8 +51,10 @@ export class SubscriptionService {
       model: 'subscription',
       prisma: this.prisma,
       include: searchFollowers
-        ? { user: { include: { profile: true } } }
-        : { following: { include: { profile: true } } },
+        ? { user: { include: { profile: { include: { avatar: true } } } } }
+        : {
+            following: { include: { profile: { include: { avatar: true } } } }
+          },
       where: this.getWhereSubscriptionParam(userId, query, searchFollowers),
       ...query
     })

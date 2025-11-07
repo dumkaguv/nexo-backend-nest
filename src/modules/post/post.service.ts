@@ -27,8 +27,8 @@ export class PostService {
       prisma: this.prisma,
       model: 'post',
       include: {
-        user: { include: { profile: true } },
-        files: true
+        user: { include: { profile: { include: { avatar: true } } } },
+        files: { include: { file: true } }
       },
       ...query,
       ordering: query.ordering ? query.ordering : '-createdAt',
@@ -53,7 +53,9 @@ export class PostService {
     return await paginate({
       prisma: this.prisma,
       model: 'postComment',
-      include: { user: { include: { profile: true } } },
+      include: {
+        user: { include: { profile: { include: { avatar: true } } } }
+      },
       where: { postId, ...getUserSearchWhere(query) },
       ...query,
       ordering: query.ordering ? query.ordering : '-createdAt'
@@ -74,7 +76,10 @@ export class PostService {
       where: { postId, ...getUserSearchWhere(query) },
       ...query,
       computed: {
-        isFollowing: ({ user: { id } }) => followingUserIds.has(id)
+        user: ({ user }) => ({
+          ...user,
+          isFollowing: followingUserIds.has(user.id)
+        })
       }
     })
   }
@@ -85,10 +90,24 @@ export class PostService {
     })
   }
 
-  create(userId: number, dto: CreatePostDto) {
-    return this.prisma.post.create({
-      data: { userId, ...dto }
+  async create(userId: number, dto: CreatePostDto) {
+    const { files, ...rest } = dto
+
+    const post = await this.prisma.post.create({
+      data: { userId, ...rest }
     })
+
+    if (files?.length) {
+      await this.prisma.postFile.createMany({
+        data: files.map((fileId) => ({
+          postId: post.id,
+          fileId: fileId
+        })),
+        skipDuplicates: true
+      })
+    }
+
+    return post
   }
 
   async createLike(userId: number, postId: number) {

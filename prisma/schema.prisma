@@ -45,13 +45,15 @@ model User {
 model Profile {
   id        Int       @id @default(autoincrement())
   fullName  String    @db.VarChar(255)
-  avatarUrl String?
   birthDay  DateTime?
   phone     String?
   biography String?
 
   userId Int  @unique
   user   User @relation(fields: [userId], references: [id])
+
+  avatarFileId Int?
+  avatar       File? @relation(fields: [avatarFileId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -98,13 +100,15 @@ model Post {
 }
 
 model PostFile {
-  id     Int     @id @default(autoincrement())
-  url    String
-  type   String?
-  postId Int
-  post   Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  id Int @id @default(autoincrement())
 
-  uploadedAt DateTime @default(now())
+  postId Int
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  fileId Int?
+  file   File? @relation(fields: [fileId], references: [id])
+
+  createdAt DateTime @default(now())
 }
 
 model PostLike {
@@ -154,12 +158,26 @@ model Message {
 }
 
 model MessageFile {
-  id   Int     @id @default(autoincrement())
-  url  String
-  type String?
+  id Int @id @default(autoincrement())
 
-  messageId Int
-  message   Message @relation(fields: [messageId], references: [id])
+  messageId Int?
+  message   Message? @relation(fields: [messageId], references: [id])
+
+  fileId Int
+  file   File @relation(fields: [fileId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model File {
+  id       Int     @id @default(autoincrement())
+  publicId String
+  url      String
+  type     String?
+
+  MessageFile MessageFile[]
+  PostFile    PostFile[]
+  Profile     Profile[]
 
   uploadedAt DateTime @default(now())
 }

@@ -1,4 +1,14 @@
-import { Controller, Post, Req, UploadedFile } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Req,
+  UploadedFile
+} from '@nestjs/common'
 
 import { ApiBody, ApiConsumes } from '@nestjs/swagger'
 import { plainToInstance } from 'class-transformer'
@@ -8,7 +18,7 @@ import type { AuthRequest } from '@/common/dtos'
 import { Authorization } from '@/modules/auth/decorators'
 
 import { FileUpload } from './decorators'
-import { CreateUploadAvatarDto, ResponseUploadAvatarDto } from './dto'
+import { CreateUploadDto, ResponseUploadDto } from './dto'
 import { UploadService } from './upload.service'
 
 @Controller('upload')
@@ -16,18 +26,25 @@ import { UploadService } from './upload.service'
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
-  @Post('avatar')
+  @Post()
   @FileUpload('file')
-  @ApiOkResponseWrapped(ResponseUploadAvatarDto)
+  @ApiOkResponseWrapped(ResponseUploadDto)
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: CreateUploadAvatarDto })
-  async uploadAvatar(
+  @ApiBody({ type: CreateUploadDto })
+  async upload(
     @Req() req: AuthRequest,
-    @UploadedFile() file: Express.Multer.File
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: CreateUploadDto
   ) {
     return plainToInstance(
-      ResponseUploadAvatarDto,
-      await this.uploadService.uploadAvatar(file, req.user.id, 'avatars')
+      ResponseUploadDto,
+      await this.uploadService.upload(file, req.user.id, dto.folder)
     )
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async delete(@Param('id') id: string) {
+    return await this.uploadService.delete(+id)
   }
 }

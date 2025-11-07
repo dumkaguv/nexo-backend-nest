@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 
+import { File } from './file.entity'
 import { User } from './user.entity'
 
 export class Profile {
@@ -12,11 +13,6 @@ export class Profile {
     type: 'string'
   })
   fullName: string
-  @ApiProperty({
-    type: 'string',
-    nullable: true
-  })
-  avatarUrl: string | null
   @ApiProperty({
     type: 'string',
     format: 'date-time',
@@ -43,6 +39,18 @@ export class Profile {
     required: false
   })
   user?: User
+  @ApiProperty({
+    type: 'integer',
+    format: 'int32',
+    nullable: true
+  })
+  avatarFileId: number | null
+  @ApiProperty({
+    type: () => File,
+    required: false,
+    nullable: true
+  })
+  avatar?: File | null
   @ApiProperty({
     type: 'string',
     format: 'date-time'

@@ -1,2 +1,2 @@
-export * from './create-upload-avatar.dto'
-export * from './response-upload-avatar.dto'
+export * from './create-upload.dto'
+export * from './response-upload.dto'

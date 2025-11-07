@@ -68,7 +68,7 @@ export class UserService {
     return await paginate({
       prisma: this.prisma,
       model: 'user',
-      include: { profile: true, following: true },
+      include: { profile: { include: { avatar: true } }, following: true },
       where: { id: { not: userId } },
       ...query,
       computed: {
@@ -80,7 +80,7 @@ export class UserService {
   async findOne(id: number) {
     const [user, followingCount, followersCount] = await Promise.all([
       this.prisma.user.findFirstOrThrow({
-        include: { profile: true },
+        include: { profile: { include: { avatar: true } } },
         where: { id }
       }),
       this.prisma.subscription.count({

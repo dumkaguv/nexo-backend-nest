@@ -46,17 +46,14 @@ const up = async () => {
     const profilesData = [
       {
         fullName: 'Dmitry Golovichkin',
-        avatarUrl: null,
         userId: users.find((u) => u.email === 'dima@gmail.com')?.id
       },
       {
         fullName: 'Ivan Ivanov',
-        avatarUrl: null,
         userId: users.find((u) => u.email === 'ivan@gmail.com')?.id
       },
       {
         fullName: 'Petr Petrov',
-        avatarUrl: null,
         userId: users.find((u) => u.email === 'petr@gmail.com')?.id
       }
     ]
@@ -122,26 +119,6 @@ const up = async () => {
     )
 
     return posts
-  }
-
-  // Создание файлов для постов
-  const createPostFiles = async (posts: { id: number }[]) => {
-    for (const post of posts) {
-      await prisma.postFile.createMany({
-        data: [
-          {
-            url: `https://example.com/post-${post.id}-file1.jpg`,
-            type: 'image/jpeg',
-            postId: post.id
-          },
-          {
-            url: `https://example.com/post-${post.id}-file2.mp4`,
-            type: 'video/mp4',
-            postId: post.id
-          }
-        ]
-      })
-    }
   }
 
   // Лайки для постов
@@ -210,19 +187,6 @@ const up = async () => {
     return createdMessages
   }
 
-  // Файлы для сообщений
-  const createMessageFiles = async (messages: { id: number }[]) => {
-    for (const msg of messages) {
-      await prisma.messageFile.create({
-        data: {
-          url: `https://example.com/message-${msg.id}-file.txt`,
-          type: 'text/plain',
-          messageId: msg.id
-        }
-      })
-    }
-  }
-
   // Выполнение всех функций
   await createUsers()
   const users = await getUsers()
@@ -232,12 +196,10 @@ const up = async () => {
   await createSubscriptions(users)
 
   const posts = await createPosts(users)
-  await createPostFiles(posts)
   await createPostLikes(users, posts)
   await createPostComments(users, posts)
 
-  const messages = await createMessages(users)
-  await createMessageFiles(messages)
+  const _messages = await createMessages(users)
 }
 
 const down = async () => {

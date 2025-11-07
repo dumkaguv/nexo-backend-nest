@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsDateString, IsOptional, IsString, MinLength } from 'class-validator'
+import {
+  IsDateString,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MinLength
+} from 'class-validator'
 
 export class UpdateProfileDto {
   @ApiProperty({ required: false, nullable: true })
@@ -23,9 +29,9 @@ export class UpdateProfileDto {
 
   @ApiProperty({ required: false, nullable: true })
   @IsOptional()
-  @IsString()
-  @ApiProperty({ type: 'string' })
-  avatarUrl?: string | null
+  @IsNumber()
+  @ApiProperty({ type: 'integer' })
+  avatar?: number | null
 
   @ApiProperty({ required: false, nullable: true })
   @IsOptional()

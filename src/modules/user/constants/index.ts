@@ -11,14 +11,18 @@ export const selectUserFields: Prisma.UserSelectScalar = {
 } as const
 
 export const includeUserWithRelations: Prisma.UserInclude = {
-  profile: true,
+  profile: { include: { avatar: true } },
   posts: true,
   likesOnPosts: true,
   following: {
     include: {
       user: {
         include: {
-          profile: true
+          profile: {
+            include: {
+              avatar: true
+            }
+          }
         }
       }
     }
@@ -27,7 +31,11 @@ export const includeUserWithRelations: Prisma.UserInclude = {
     include: {
       user: {
         include: {
-          profile: true
+          profile: {
+            include: {
+              avatar: true
+            }
+          }
         }
       }
     }

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import { Exclude, Expose } from 'class-transformer'
 
 @Exclude()
-export class ResponsePostFileDto {
+export class ResponseFileDto {
   @ApiProperty({ type: 'integer', readOnly: true })
   @Expose()
   readonly id: number
@@ -13,9 +13,9 @@ export class ResponsePostFileDto {
 
   @ApiProperty({ type: 'string', required: false, nullable: true })
   @Expose()
-  type?: string | null
+  type?: string
 
   @ApiProperty({ type: 'string', format: 'date-time', readOnly: true })
   @Expose()
-  readonly uploadedAt?: Date | null
+  readonly uploadedAt: Date
 }

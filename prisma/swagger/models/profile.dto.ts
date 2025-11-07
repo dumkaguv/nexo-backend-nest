@@ -12,11 +12,6 @@ export class ProfileDto {
   fullName: string
   @ApiProperty({
     type: 'string',
-    nullable: true
-  })
-  avatarUrl: string | null
-  @ApiProperty({
-    type: 'string',
     format: 'date-time',
     nullable: true
   })

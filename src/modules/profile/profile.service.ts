@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
+import { connectOrDisconnect } from '@/common/utils'
+import { FileService } from '@/modules/file/file.service'
 import { UserService } from '@/modules/user/user.service'
 import { PrismaService } from '@/prisma/prisma.service'
 
@@ -9,7 +11,8 @@ import { UpdateProfileDto } from './dto'
 export class ProfileService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly fileService: FileService
   ) {}
 
   findOne(userId: number) {
@@ -26,9 +29,17 @@ export class ProfileService {
     })
   }
 
-  update(userId: number, dto: UpdateProfileDto) {
-    return this.prisma.profile.update({
-      data: dto,
+  async update(userId: number, dto: UpdateProfileDto) {
+    const { avatar, ...rest } = dto
+
+    let avatarFileId: number | undefined
+    if (avatar) {
+      const avatarFile = await this.fileService.findOne(avatar)
+      avatarFileId = avatarFile.id
+    }
+
+    return await this.prisma.profile.update({
+      data: { ...rest, avatar: connectOrDisconnect(avatarFileId) },
       where: { userId }
     })
   }

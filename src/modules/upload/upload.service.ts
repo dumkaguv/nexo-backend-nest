@@ -1,29 +1,29 @@
 import { Injectable } from '@nestjs/common'
 
 import { CloudinaryService } from '@/modules/cloudinary/cloudinary.service'
-import { ProfileService } from '@/modules/profile/profile.service'
-import { UserService } from '@/modules/user/user.service'
+import { FileService } from '@/modules/file/file.service'
 
 @Injectable()
 export class UploadService {
   constructor(
     private readonly cloudinaryService: CloudinaryService,
-    private readonly profileService: ProfileService,
-    private readonly userService: UserService
+    private readonly fileService: FileService
   ) {}
 
-  async uploadAvatar(
-    file: Express.Multer.File,
-    userId: number,
-    folder?: string
-  ) {
-    const { secure_url } = await this.cloudinaryService.uploadFromBuffer(
-      file,
-      userId,
-      folder
-    )
-    await this.profileService.update(userId, { avatarUrl: secure_url })
+  async upload(file: Express.Multer.File, userId: number, folder?: string) {
+    const {
+      public_id,
+      secure_url,
+      resource_type: type
+    } = await this.cloudinaryService.uploadFromBuffer(file, userId, folder)
 
-    return { user: await this.userService.findOneWithRelations(userId) }
+    const { id } = await this.fileService.create(public_id, secure_url, type)
+
+    return { id, secure_url, type }
+  }
+
+  async delete(id: number) {
+    const { publicId } = await this.fileService.findOne(id)
+    await this.fileService.delete(publicId, id)
   }
 }
