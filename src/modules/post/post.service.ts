@@ -1,9 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 
-import { UpdatePostDto } from 'prisma/swagger/models/update-post.dto'
-
 import { FindAllQueryDto } from '@/common/dtos'
 import { getUserSearchWhere, paginate } from '@/common/utils'
+import { FileService } from '@/modules/file/file.service'
 import { UserService } from '@/modules/user/user.service'
 import { PrismaService } from '@/prisma/prisma.service'
 
@@ -12,14 +11,16 @@ import {
   CreatePostDto,
   ResponsePostCommentDto,
   ResponsePostDto,
-  ResponsePostLikeDto
+  ResponsePostLikeDto,
+  UpdatePostDto
 } from './dto'
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly fileService: FileService
   ) {}
 
   async findAll(userId: number, query: FindAllQueryDto<ResponsePostDto>) {
@@ -130,9 +131,21 @@ export class PostService {
     return {}
   }
 
-  update(id: number, dto: UpdatePostDto) {
+  async update(id: number, dto: UpdatePostDto) {
+    const { files, ...rest } = dto
+
+    if (files?.length) {
+      await this.prisma.postFile.createMany({
+        data: files.map((fileId) => ({
+          postId: id,
+          fileId: fileId
+        })),
+        skipDuplicates: true
+      })
+    }
+
     return this.prisma.post.update({
-      data: dto,
+      data: rest,
       where: { id }
     })
   }

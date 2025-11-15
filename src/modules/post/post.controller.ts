@@ -15,8 +15,6 @@ import {
 import { ApiTags } from '@nestjs/swagger'
 import { plainToInstance } from 'class-transformer'
 
-import { UpdatePostDto } from 'prisma/swagger/models/update-post.dto'
-
 import { ApiOkResponseWrapped, ApiPaginated } from '@/common/decorators'
 import {
   type AuthRequest,
@@ -32,7 +30,8 @@ import {
   CreatePostDto,
   ResponsePostCommentDto,
   ResponsePostDto,
-  ResponsePostLikeDto
+  ResponsePostLikeDto,
+  UpdatePostDto
 } from './dto'
 import { PostService } from './post.service'
 

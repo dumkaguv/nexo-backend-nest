@@ -31,8 +31,8 @@
   },
   "lint-staged": {
     "{prisma,test,src}/**/*.{ts,js,json}": [
-      "npm run format",
-      "npm run lint"
+      "prettier --write",
+      "eslint --fix"
     ]
   },
   "prisma": {
