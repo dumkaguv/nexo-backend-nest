@@ -6,6 +6,7 @@ import { AllExceptionsFilter } from '@/common/filters'
 import { ResponseInterceptor } from '@/common/interceptors'
 import { AuthModule } from '@/modules/auth/auth.module'
 import { CloudinaryModule } from '@/modules/cloudinary/cloudinary.module'
+import { MessageModule } from '@/modules/message/message.module'
 import { PostModule } from '@/modules/post/post.module'
 import { ProfileModule } from '@/modules/profile/profile.module'
 import { SubscriptionModule } from '@/modules/subscription/subscription.module'
@@ -30,6 +31,7 @@ import { AppController } from './app.controller'
     PostModule,
     UploadModule,
     CloudinaryModule,
+    MessageModule,
     SubscriptionModule
   ],
   controllers: [AppController],

@@ -1,7 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 
 import { FindAllQueryDto } from '@/common/dtos'
-import { getUserSearchWhere, paginate } from '@/common/utils'
+import {
+  getUserSearchWhere,
+  paginate,
+  sanitizeHtmlContent
+} from '@/common/utils'
 import { FileService } from '@/modules/file/file.service'
 import { UserService } from '@/modules/user/user.service'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -92,10 +96,11 @@ export class PostService {
   }
 
   async create(userId: number, dto: CreatePostDto) {
-    const { files, ...rest } = dto
+    const { files, content, ...rest } = dto
+    const sanitizedContent = sanitizeHtmlContent(content)
 
     const post = await this.prisma.post.create({
-      data: { userId, ...rest }
+      data: { userId, content: sanitizedContent, ...rest }
     })
 
     if (files?.length) {
@@ -124,15 +129,17 @@ export class PostService {
     postId: number,
     dto: CreatePostCommentDto
   ) {
+    const sanitizedContent = sanitizeHtmlContent(dto.content)
+
     await this.prisma.postComment.create({
-      data: { userId, postId, ...dto }
+      data: { userId, postId, content: sanitizedContent }
     })
 
     return {}
   }
 
   async update(id: number, dto: UpdatePostDto) {
-    const { files, ...rest } = dto
+    const { files, content, ...rest } = dto
 
     if (files?.length) {
       await this.prisma.postFile.createMany({
@@ -144,8 +151,15 @@ export class PostService {
       })
     }
 
+    const data = {
+      ...rest,
+      ...(typeof content === 'string'
+        ? { content: sanitizeHtmlContent(content) }
+        : {})
+    }
+
     return this.prisma.post.update({
-      data: rest,
+      data,
       where: { id }
     })
   }
@@ -155,8 +169,10 @@ export class PostService {
     commentId: number,
     dto: CreatePostCommentDto
   ) {
+    const sanitizedContent = sanitizeHtmlContent(dto.content)
+
     await this.prisma.postComment.update({
-      data: dto,
+      data: { content: sanitizedContent },
       where: { id: commentId, postId: id }
     })
 
