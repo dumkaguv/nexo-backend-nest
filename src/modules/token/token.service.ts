@@ -66,9 +66,15 @@ export class TokenService {
     })
   }
 
-  async validateRefreshToken(refreshToken: string) {
+  async validateRefreshToken(refreshToken: string): Promise<JwtPayload> {
     return await this.jwtService.verifyAsync(refreshToken, {
       secret: this.JWT_REFRESH_SECRET
+    })
+  }
+
+  async validateAccessToken(accessToken: string): Promise<JwtPayload> {
+    return await this.jwtService.verifyAsync(accessToken, {
+      secret: this.JWT_ACCESS_SECRET
     })
   }
 

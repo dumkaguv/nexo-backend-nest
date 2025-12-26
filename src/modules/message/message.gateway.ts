@@ -1,0 +1,98 @@
+import {
+  ConnectedSocket,
+  MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+  WsException
+} from '@nestjs/websockets'
+import { Server, Socket } from 'socket.io'
+
+import { TokenService } from '@/modules/token/token.service'
+
+import { CreateMessageDto } from './dto'
+import { MessageService } from './message.service'
+
+@WebSocketGateway({ namespace: '/messages' })
+export class MessageGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
+  @WebSocketServer()
+  private readonly server: Server
+
+  constructor(
+    private readonly tokenService: TokenService,
+    private readonly messageService: MessageService
+  ) {}
+
+  async handleConnection(client: Socket) {
+    const token = this.extractToken(client)
+    if (!token) {
+      client.disconnect()
+      return
+    }
+
+    try {
+      const payload = await this.tokenService.validateAccessToken(token)
+
+      client.data.userId = payload.id
+      client.join(this.getUserRoom(payload.id))
+    } catch {
+      client.disconnect()
+    }
+  }
+
+  handleDisconnect(client: Socket) {
+    const userId = client.data.userId as number | undefined
+    if (userId) {
+      client.leave(this.getUserRoom(userId))
+    }
+  }
+
+  @SubscribeMessage('message:send')
+  async handleSend(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() dto: CreateMessageDto
+  ) {
+    const senderId = client.data.userId as number | undefined
+    if (!senderId) {
+      throw new WsException('Unauthorized')
+    }
+
+    const message = await this.messageService.createMessage(senderId, dto)
+
+    this.server
+      .to(this.getUserRoom(message.receiverId))
+      .emit('message:new', message)
+    this.server
+      .to(this.getUserRoom(message.senderId))
+      .emit('message:sent', message)
+
+    return message
+  }
+
+  private extractToken(client: Socket) {
+    const auth = client.handshake.auth as { token?: string } | undefined
+    if (auth?.token) {
+      return auth.token
+    }
+
+    const header = client.handshake.headers.authorization
+    if (!header) {
+      return null
+    }
+
+    const [type, token] = header.split(' ')
+    if (type?.toLowerCase() !== 'bearer') {
+      return null
+    }
+
+    return token
+  }
+
+  private getUserRoom(userId: number) {
+    return `user:${userId}`
+  }
+}
