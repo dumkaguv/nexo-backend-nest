@@ -5,6 +5,7 @@ import { NestFactory, Reflector } from '@nestjs/core'
 import cookieParser from 'cookie-parser'
 
 import { AppModule } from './app/app.module'
+import { ConfigurableSocketIoAdapter } from './common/adapters/socket-io.adapter'
 import { AllExceptionsFilter } from './common/filters'
 import { ResponseInterceptor } from './common/interceptors'
 import { setupSwagger } from './common/utils'
@@ -12,6 +13,8 @@ import { setupSwagger } from './common/utils'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   const config = app.get(ConfigService)
+
+  app.useWebSocketAdapter(new ConfigurableSocketIoAdapter(app, config))
 
   app.setGlobalPrefix('api')
 
