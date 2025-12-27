@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { Exclude, Expose } from 'class-transformer'
+import { Exclude, Expose, Type } from 'class-transformer'
+
+import { ResponseFileDto } from '@/modules/file/dto'
 
 @Exclude()
 export class ResponseMessageDto {
@@ -15,7 +17,17 @@ export class ResponseMessageDto {
   @Expose()
   receiverId: number
 
-  @ApiProperty({ type: 'integer', required: false, nullable: true })
+  @ApiProperty({ type: 'string', required: false, nullable: true })
   @Expose()
   content?: string | null
+
+  @ApiProperty({
+    type: () => ResponseFileDto,
+    required: false,
+    isArray: true,
+    nullable: true
+  })
+  @Type(() => ResponseFileDto)
+  @Expose()
+  files?: ResponseFileDto[] | null
 }

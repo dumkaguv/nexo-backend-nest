@@ -12,10 +12,11 @@ import { Server, Socket } from 'socket.io'
 
 import { TokenService } from '@/modules/token/token.service'
 
+import { MESSAGE_EVENTS, MESSAGE_NAMESPACE } from './constants'
 import { CreateMessageDto } from './dto'
 import { MessageService } from './message.service'
 
-@WebSocketGateway({ namespace: '/messages' })
+@WebSocketGateway({ namespace: MESSAGE_NAMESPACE })
 export class MessageGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
@@ -51,7 +52,7 @@ export class MessageGateway
     }
   }
 
-  @SubscribeMessage('message:send')
+  @SubscribeMessage(MESSAGE_EVENTS.SEND)
   async handleSend(
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: CreateMessageDto
@@ -61,7 +62,7 @@ export class MessageGateway
       throw new WsException('Unauthorized')
     }
 
-    const message = await this.messageService.createMessage(senderId, dto)
+    const message = await this.messageService.create(senderId, dto)
 
     this.server
       .to(this.getUserRoom(message.receiverId))

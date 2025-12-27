@@ -151,15 +151,10 @@ export class PostService {
       })
     }
 
-    const data = {
-      ...rest,
-      ...(typeof content === 'string'
-        ? { content: sanitizeHtmlContent(content) }
-        : {})
-    }
+    const sanitizedContent = sanitizeHtmlContent(content)
 
     return this.prisma.post.update({
-      data,
+      data: { content: sanitizedContent, ...rest },
       where: { id }
     })
   }
