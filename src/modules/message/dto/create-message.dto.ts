@@ -15,6 +15,11 @@ export class CreateMessageDto {
   @ApiProperty({ type: 'integer' })
   receiverId: number
 
+  @IsInt()
+  @Min(1)
+  @ApiProperty({ type: 'integer' })
+  conversationId: number
+
   @IsOptional()
   @IsString()
   @MinLength(1)

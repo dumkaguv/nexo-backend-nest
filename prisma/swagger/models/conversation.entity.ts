@@ -1,10 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger'
 
-import { Conversation } from './conversation.entity'
-import { MessageFile } from './messageFile.entity'
+import { Message } from './message.entity'
 import { User } from './user.entity'
 
-export class Message {
+export class Conversation {
   @ApiProperty({
     type: 'integer',
     format: 'int32'
@@ -21,11 +20,6 @@ export class Message {
   })
   receiverId: number
   @ApiProperty({
-    type: 'string',
-    nullable: true
-  })
-  content: string | null
-  @ApiProperty({
     type: () => User,
     required: false
   })
@@ -36,21 +30,11 @@ export class Message {
   })
   receiver?: User
   @ApiProperty({
-    type: 'integer',
-    format: 'int32'
-  })
-  conversationId: number
-  @ApiProperty({
-    type: () => Conversation,
-    required: false
-  })
-  conversation?: Conversation
-  @ApiProperty({
-    type: () => MessageFile,
+    type: () => Message,
     isArray: true,
     required: false
   })
-  files?: MessageFile[]
+  messages?: Message[]
   @ApiProperty({
     type: 'string',
     format: 'date-time'
@@ -58,8 +42,7 @@ export class Message {
   createdAt: Date
   @ApiProperty({
     type: 'string',
-    format: 'date-time',
-    nullable: true
+    format: 'date-time'
   })
-  readAt: Date | null
+  updatedAt: Date
 }

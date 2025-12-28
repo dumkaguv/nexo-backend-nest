@@ -27,6 +27,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
       })
     }
 
+    // Unique constraint failed
+    if (exception?.code === 'P2002') {
+      const fields = exception.meta?.target
+
+      return response.status(409).json({
+        statusCode: 409,
+        message: 'Unique constraint failed',
+        fields
+      })
+    }
+
     // ValidationPipe
     if (exception instanceof BadRequestException) {
       const res = exception.getResponse() as any

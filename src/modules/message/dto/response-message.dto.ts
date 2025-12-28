@@ -17,6 +17,10 @@ export class ResponseMessageDto {
   @Expose()
   receiverId: number
 
+  @ApiProperty({ type: 'integer' })
+  @Expose()
+  conversationId: number
+
   @ApiProperty({ type: 'string', required: false, nullable: true })
   @Expose()
   content?: string | null
@@ -30,4 +34,8 @@ export class ResponseMessageDto {
   @Type(() => ResponseFileDto)
   @Expose()
   files?: ResponseFileDto[] | null
+
+  @ApiProperty({ type: 'string', format: 'date-time', readOnly: true })
+  @Expose()
+  readonly createdAt: Date
 }

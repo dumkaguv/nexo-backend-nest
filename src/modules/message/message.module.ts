@@ -10,6 +10,7 @@ import { MessageService } from './message.service'
 @Module({
   imports: [TokenModule, UserModule],
   controllers: [MessageController],
-  providers: [MessageService, MessageGateway]
+  providers: [MessageService, MessageGateway],
+  exports: [MessageService]
 })
 export class MessageModule {}

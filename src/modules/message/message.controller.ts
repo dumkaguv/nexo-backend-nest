@@ -1,20 +1,10 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-  Req
-} from '@nestjs/common'
+import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common'
 
 import { ApiTags } from '@nestjs/swagger'
 import { plainToInstance } from 'class-transformer'
 
-import { ApiOkResponseWrapped, ApiPaginated } from '@/common/decorators'
-import { type AuthRequest, FindAllQueryDto } from '@/common/dtos'
-import { sendPaginatedResponse } from '@/common/utils'
+import { ApiOkResponseWrapped } from '@/common/decorators'
+import { type AuthRequest } from '@/common/dtos'
 import { Authorization } from '@/modules/auth/decorators'
 
 import { CreateMessageDto, ResponseMessageDto, UpdateMessageDto } from './dto'
@@ -25,18 +15,6 @@ import { MessageService } from './message.service'
 @ApiTags('Messages')
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
-
-  @Get()
-  @ApiPaginated(ResponseMessageDto)
-  async findAll(
-    @Req() req: AuthRequest,
-    @Query() query: FindAllQueryDto<ResponseMessageDto>
-  ) {
-    return sendPaginatedResponse(
-      ResponseMessageDto,
-      await this.messageService.findAll(req.user.id, query)
-    )
-  }
 
   @Get(':id')
   @ApiOkResponseWrapped(ResponseMessageDto)

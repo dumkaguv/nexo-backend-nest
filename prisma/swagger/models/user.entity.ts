@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 
+import { Conversation } from './conversation.entity'
 import { Message } from './message.entity'
 import { Post } from './post.entity'
 import { PostComment } from './postComment.entity'
@@ -65,6 +66,18 @@ export class User {
     required: false
   })
   receivedMessages?: Message[]
+  @ApiProperty({
+    type: () => Conversation,
+    isArray: true,
+    required: false
+  })
+  conversationsAsSender?: Conversation[]
+  @ApiProperty({
+    type: () => Conversation,
+    isArray: true,
+    required: false
+  })
+  conversationsAsReceiver?: Conversation[]
   @ApiProperty({
     type: () => PostLike,
     isArray: true,

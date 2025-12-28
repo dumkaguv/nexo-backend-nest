@@ -29,6 +29,9 @@ model User {
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
 
+  conversationsAsSender   Conversation[] @relation("ConversationSender")
+  conversationsAsReceiver Conversation[] @relation("ConversationReceiver")
+
   likesOnPosts PostLike[]
   comments     PostComment[]
 
@@ -146,10 +149,13 @@ model Message {
   senderId   Int
   receiverId Int
 
+  content String?
+
   sender   User @relation("SentMessages", fields: [senderId], references: [id])
   receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
 
-  content String?
+  conversationId Int
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   files MessageFile[]
 
@@ -167,6 +173,24 @@ model MessageFile {
   file   File @relation(fields: [fileId], references: [id])
 
   createdAt DateTime @default(now())
+}
+
+model Conversation {
+  id Int @id @default(autoincrement())
+
+  senderId   Int
+  receiverId Int
+
+  sender   User @relation("ConversationSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ConversationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId])
 }
 
 model File {

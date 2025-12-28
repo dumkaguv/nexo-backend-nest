@@ -28,6 +28,25 @@ export class MessageService {
     })
   }
 
+  async findAllMyMessages(
+    userId: number,
+    conversationId: number,
+    query: FindAllQueryDto
+  ) {
+    return await paginate({
+      prisma: this.prisma,
+      model: 'message',
+      where: {
+        conversationId,
+        conversation: {
+          OR: [{ senderId: userId }, { receiverId: userId }]
+        }
+      },
+      ...query,
+      ordering: query.ordering ? query.ordering : '-createdAt'
+    })
+  }
+
   async findOne(id: number) {
     return await this.prisma.message.findUnique({
       where: { id },
@@ -36,7 +55,7 @@ export class MessageService {
   }
 
   async create(senderId: number, dto: CreateMessageDto) {
-    const { receiverId, content, fileIds } = dto
+    const { receiverId, conversationId, content, fileIds } = dto
 
     if (!content && (!fileIds || fileIds.length === 0)) {
       throw new BadRequestException('Message content or files are required')
@@ -54,6 +73,7 @@ export class MessageService {
 
     const message = await this.prisma.message.create({
       data: {
+        conversationId,
         senderId,
         receiverId,
         content: sanitizedContent || null,
@@ -74,6 +94,7 @@ export class MessageService {
 
     return {
       id: message.id,
+      conversationId: message.conversationId,
       senderId: message.senderId,
       receiverId: message.receiverId,
       content: message.content,
