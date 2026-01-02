@@ -35,7 +35,8 @@
   "lint-staged": {
     "{prisma,test,src}/**/*.{ts,js,json}": [
       "prettier --write",
-      "eslint --fix"
+      "eslint --fix",
+      "tsc --noEmit"
     ]
   },
   "prisma": {
