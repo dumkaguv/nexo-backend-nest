@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing'
 
-import { EmptyResponseDto } from '@/common/dtos'
 
 import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'
@@ -95,7 +94,7 @@ describe('AuthController', () => {
 
     expect(res.clearCookie).toHaveBeenCalledWith('refreshToken')
     expect(authService.logout).toHaveBeenCalledWith('refresh')
-    expect(result).toBeInstanceOf(EmptyResponseDto)
+    expect(result).toBeUndefined()
   })
 
   it('refresh returns ResponseRefreshDto', async () => {
