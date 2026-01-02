@@ -8,7 +8,7 @@
   "scripts": {
     "start": "nest start",
     "dev": "nest start --watch",
-    "build": "nest build",
+    "build": "nest build && tsc-alias -p tsconfig.build.json",
     "debug": "nest start --debug --watch",
     "prod": "node dist/main",
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\" \"prisma/**/*.ts\"",
@@ -49,7 +49,9 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.7",
+    "@nestjs/platform-socket.io": "^11.1.7",
     "@nestjs/swagger": "^11.2.1",
+    "@nestjs/websockets": "^11.1.7",
     "@prisma/client": "^6.17.1",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
@@ -63,12 +65,10 @@
     "prisma": "^6.17.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "streamifier": "^0.1.1",
-    "uuid": "^13.0.0",
     "sanitize-html": "^2.12.1",
-    "@nestjs/websockets": "^11.1.7",
-    "@nestjs/platform-socket.io": "^11.1.7",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "streamifier": "^0.1.1",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@brakebein/prisma-generator-nestjs-dto": "^1.28.1",
@@ -88,6 +88,7 @@
     "@types/node": "^22.10.7",
     "@types/passport": "^1.0.17",
     "@types/passport-jwt": "^4.0.1",
+    "@types/sanitize-html": "^2.11.0",
     "@types/streamifier": "^0.1.2",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",
@@ -107,10 +108,10 @@
     "ts-jest": "^29.2.5",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.46.2",
-    "@types/sanitize-html": "^2.11.0"
+    "typescript-eslint": "^8.46.2"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -119,10 +120,16 @@
       "ts"
     ],
     "rootDir": "src",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1"
+    },
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "transformIgnorePatterns": [
+      "node_modules/(?!uuid/)"
+    ],
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
