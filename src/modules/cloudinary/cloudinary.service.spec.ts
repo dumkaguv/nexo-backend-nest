@@ -5,27 +5,28 @@ import { Test, TestingModule } from '@nestjs/testing'
 
 import { CloudinaryService } from './cloudinary.service'
 
-const cloudinaryMock = {
-  config: jest.fn(),
-  uploader: {
-    upload_stream: jest.fn(),
-    destroy: jest.fn()
-  }
-}
-
 jest.mock('cloudinary', () => ({
-  v2: cloudinaryMock
+  v2: {
+    config: jest.fn(),
+    uploader: {
+      upload_stream: jest.fn(),
+      destroy: jest.fn()
+    }
+  }
 }))
 
-const streamifierMock = {
+jest.mock('streamifier', () => ({
   createReadStream: jest.fn()
-}
-
-jest.mock('streamifier', () => streamifierMock)
+}))
 
 describe('CloudinaryService', () => {
   let service: CloudinaryService
   let configService: { getOrThrow: jest.Mock }
+  let cloudinaryMock: {
+    config: jest.Mock
+    uploader: { upload_stream: jest.Mock; destroy: jest.Mock }
+  }
+  let streamifierMock: { createReadStream: jest.Mock }
 
   beforeEach(async () => {
     const configValues: Record<string, string> = {
@@ -46,6 +47,8 @@ describe('CloudinaryService', () => {
     }).compile()
 
     service = module.get(CloudinaryService)
+    cloudinaryMock = jest.requireMock('cloudinary').v2
+    streamifierMock = jest.requireMock('streamifier')
   })
 
   afterEach(() => {
