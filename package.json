@@ -10,7 +10,7 @@
     "dev": "nest start --watch",
     "build": "nest build && tsc-alias -p tsconfig.build.json",
     "debug": "nest start --debug --watch",
-    "prod": "node dist/main",
+    "prod": "node dist/src/main.js",
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\" \"prisma/**/*.ts\"",
     "lint:check": "eslint \"{prisma,src,test}/**/*.ts\"",
     "typecheck": "tsc --noEmit",
