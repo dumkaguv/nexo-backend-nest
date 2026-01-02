@@ -1,13 +1,13 @@
 import { ForbiddenException, Injectable } from '@nestjs/common'
 
-import type { FindAllQueryDto } from '@/common/dtos'
+import { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
 
-import type { ResponseMessageDto } from '@/modules/message/dto'
-import type { MessageService } from '@/modules/message/message.service'
-import type { PrismaService } from '@/prisma/prisma.service'
+import { ResponseMessageDto } from '@/modules/message/dto'
+import { MessageService } from '@/modules/message/message.service'
+import { PrismaService } from '@/prisma/prisma.service'
 
-import type { CreateConversationDto, ResponseConversationDto } from './dto'
+import { CreateConversationDto, ResponseConversationDto } from './dto'
 
 @Injectable()
 export class ConversationService {

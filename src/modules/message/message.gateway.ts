@@ -7,17 +7,15 @@ import {
   WsException
 } from '@nestjs/websockets'
 
-import type { TokenService } from '@/modules/token/token.service'
+import { OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets'
+import { Server, Socket } from 'socket.io'
+
+import { TokenService } from '@/modules/token/token.service'
 
 import { MESSAGE_EVENTS, MESSAGE_NAMESPACE } from './constants'
 
-import type { CreateMessageDto } from './dto'
-import type { MessageService } from './message.service'
-import type {
-  OnGatewayConnection,
-  OnGatewayDisconnect
-} from '@nestjs/websockets'
-import type { Server, Socket } from 'socket.io'
+import { CreateMessageDto } from './dto'
+import { MessageService } from './message.service'
 
 @WebSocketGateway({ namespace: MESSAGE_NAMESPACE })
 export class MessageGateway

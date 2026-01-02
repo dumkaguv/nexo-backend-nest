@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common'
 
 import { ApiExcludeController } from '@nestjs/swagger'
 
-import type { FileService } from './file.service'
+import { FileService } from './file.service'
 
 @Controller('file')
 @ApiExcludeController()

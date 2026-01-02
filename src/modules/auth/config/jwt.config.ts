@@ -1,4 +1,4 @@
-import type { JwtModuleOptions } from '@nestjs/jwt'
+import { JwtModuleOptions } from '@nestjs/jwt'
 
 export function getJwtConfig(): JwtModuleOptions {
   return {

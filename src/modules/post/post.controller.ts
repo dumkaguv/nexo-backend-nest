@@ -16,7 +16,7 @@ import { ApiTags } from '@nestjs/swagger'
 import { plainToInstance } from 'class-transformer'
 
 import { ApiOkResponseWrapped, ApiPaginated } from '@/common/decorators'
-import type { FindAllQueryDto } from '@/common/dtos'
+import { FindAllQueryDto } from '@/common/dtos'
 import { type AuthRequest, EmptyResponseDto } from '@/common/dtos'
 
 import { sendPaginatedResponse } from '@/common/utils'
@@ -28,8 +28,8 @@ import {
   ResponsePostLikeDto
 } from './dto'
 
-import type { CreatePostCommentDto, CreatePostDto, UpdatePostDto } from './dto'
-import type { PostService } from './post.service'
+import { CreatePostCommentDto, CreatePostDto, UpdatePostDto } from './dto'
+import { PostService } from './post.service'
 
 @Controller('posts')
 @Authorization()

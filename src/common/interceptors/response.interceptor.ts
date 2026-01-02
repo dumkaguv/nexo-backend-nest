@@ -6,12 +6,11 @@ import {
   Injectable
 } from '@nestjs/common'
 
-import { type Observable, map } from 'rxjs'
+import { NestInterceptor } from '@nestjs/common'
+import { Reflector } from '@nestjs/core'
+import { map, Observable } from 'rxjs'
 
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from 'src/common/constants'
-
-import type { NestInterceptor } from '@nestjs/common'
-import type { Reflector } from '@nestjs/core'
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {

@@ -2,7 +2,7 @@
 
 import { plainToInstance } from 'class-transformer'
 
-import type { ClassConstructor } from 'class-transformer'
+import { ClassConstructor } from 'class-transformer'
 
 type Data = {
   data: any

@@ -15,7 +15,7 @@ import { ApiTags } from '@nestjs/swagger'
 import { plainToInstance } from 'class-transformer'
 
 import { ApiOkResponseWrapped, ApiPaginated } from '@/common/decorators'
-import type { FindAllQueryDto } from '@/common/dtos'
+import { FindAllQueryDto } from '@/common/dtos'
 import type { AuthRequest } from '@/common/dtos'
 
 import { sendPaginatedResponse } from '@/common/utils'
@@ -23,10 +23,10 @@ import { Authorization } from '@/modules/auth/decorators'
 
 import { ResponseMessageDto } from '@/modules/message/dto'
 
+import { ConversationService } from './conversation.service'
 import { ResponseConversationDto } from './dto'
 
-import type { ConversationService } from './conversation.service'
-import type { CreateConversationDto } from './dto'
+import { CreateConversationDto } from './dto'
 
 @Controller('conversations')
 @Authorization()

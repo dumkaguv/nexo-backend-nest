@@ -1,4 +1,4 @@
-import type { FindAllQueryDto } from '@/common/dtos'
+import { FindAllQueryDto } from '@/common/dtos'
 
 export function getUserSearchWhere(
   { search }: FindAllQueryDto,

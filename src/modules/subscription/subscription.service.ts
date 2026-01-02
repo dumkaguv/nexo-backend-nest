@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 
-import type { FindAllQueryDto } from '@/common/dtos'
+import { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
 
-import type { PrismaService } from '@/prisma/prisma.service'
+import { PrismaService } from '@/prisma/prisma.service'
 
-import type { ResponseSubscriptionDto } from './dto'
+import { ResponseSubscriptionDto } from './dto'
 
 @Injectable()
 export class SubscriptionService {

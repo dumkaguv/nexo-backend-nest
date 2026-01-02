@@ -4,16 +4,12 @@ import {
   Injectable
 } from '@nestjs/common'
 
-import type { FindAllQueryDto } from '@/common/dtos'
+import { FindAllQueryDto } from '@/common/dtos'
 import { paginate, sanitizeHtmlContent } from '@/common/utils'
-import type { UserService } from '@/modules/user/user.service'
-import type { PrismaService } from '@/prisma/prisma.service'
+import { UserService } from '@/modules/user/user.service'
+import { PrismaService } from '@/prisma/prisma.service'
 
-import type {
-  CreateMessageDto,
-  ResponseMessageDto,
-  UpdateMessageDto
-} from './dto'
+import { CreateMessageDto, ResponseMessageDto, UpdateMessageDto } from './dto'
 
 @Injectable()
 export class MessageService {

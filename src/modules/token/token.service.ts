@@ -1,11 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 
-import type { UserService } from '@/modules/user/user.service'
-import type { PrismaService } from '@/prisma/prisma.service'
+import { ConfigService } from '@nestjs/config'
+
+import { JwtService } from '@nestjs/jwt'
+
+import { UserService } from '@/modules/user/user.service'
+import { PrismaService } from '@/prisma/prisma.service'
 
 import type { JwtPayload } from './types'
-import type { ConfigService } from '@nestjs/config'
-import type { JwtService } from '@nestjs/jwt'
 
 @Injectable()
 export class TokenService {

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common'
 
 import { connectOrDisconnect } from '@/common/utils'
-import type { FileService } from '@/modules/file/file.service'
-import type { UserService } from '@/modules/user/user.service'
-import type { PrismaService } from '@/prisma/prisma.service'
+import { FileService } from '@/modules/file/file.service'
+import { UserService } from '@/modules/user/user.service'
+import { PrismaService } from '@/prisma/prisma.service'
 
-import type { UpdateProfileDto } from './dto'
+import { UpdateProfileDto } from './dto'
 
 @Injectable()
 export class ProfileService {

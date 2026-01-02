@@ -9,8 +9,8 @@ import { Authorization } from '@/modules/auth/decorators'
 
 import { ResponseProfileDetailedDto, ResponseProfileDto } from './dto'
 
-import type { UpdateProfileDto } from './dto'
-import type { ProfileService } from './profile.service'
+import { UpdateProfileDto } from './dto'
+import { ProfileService } from './profile.service'
 
 @Controller('profile')
 @Authorization()

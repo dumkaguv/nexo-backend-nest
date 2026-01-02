@@ -2,9 +2,9 @@
 
 import { Prisma } from '@prisma/client'
 
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@/common/constants'
+import { PrismaClient } from '@prisma/client'
 
-import type { PrismaClient } from '@prisma/client'
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@/common/constants'
 
 type PaginateParams = {
   prisma: PrismaClient

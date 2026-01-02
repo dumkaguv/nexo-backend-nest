@@ -9,8 +9,8 @@ import { Authorization } from '@/modules/auth/decorators'
 
 import { ResponseMessageDto } from './dto'
 
-import type { CreateMessageDto, UpdateMessageDto } from './dto'
-import type { MessageService } from './message.service'
+import { CreateMessageDto, UpdateMessageDto } from './dto'
+import { MessageService } from './message.service'
 
 @Controller('messages')
 @Authorization()

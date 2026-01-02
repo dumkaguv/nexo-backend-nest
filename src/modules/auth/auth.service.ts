@@ -1,14 +1,15 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import ms, { type StringValue } from 'ms'
 
 import { isDev } from '@/common/utils'
-import type { TokenService } from '@/modules/token/token.service'
+import { TokenService } from '@/modules/token/token.service'
 
-import type { CreateUserDto } from '@/modules/user/dto'
-import type { UserService } from '@/modules/user/user.service'
+import { CreateUserDto } from '@/modules/user/dto'
+import { UserService } from '@/modules/user/user.service'
 
-import type { CreateLoginDto } from './dto'
-import type { ConfigService } from '@nestjs/config'
+import { CreateLoginDto } from './dto'
+
 import type { Request, Response } from 'express'
 
 @Injectable()

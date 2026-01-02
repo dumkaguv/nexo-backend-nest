@@ -6,14 +6,14 @@ import { plainToInstance } from 'class-transformer'
 
 import { ApiOkResponseWrapped, ApiPaginated } from '@/common/decorators'
 
-import type { FindAllQueryDto } from '@/common/dtos'
+import { FindAllQueryDto } from '@/common/dtos'
 import { type AuthRequest, EmptyResponseDto } from '@/common/dtos'
 import { sendPaginatedResponse } from '@/common/utils'
 import { Authorization } from '@/modules/auth/decorators'
 
 import { ResponseSubscriptionCountDto, ResponseSubscriptionDto } from './dto'
 
-import type { SubscriptionService } from './subscription.service'
+import { SubscriptionService } from './subscription.service'
 
 @Controller('subscription')
 @Authorization()

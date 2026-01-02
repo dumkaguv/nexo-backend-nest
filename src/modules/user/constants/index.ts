@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 
 export const selectUserFields: Prisma.UserSelectScalar = {
   id: true,

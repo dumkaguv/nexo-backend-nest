@@ -6,13 +6,13 @@ import {
 import { compareSync, hashSync } from 'bcrypt'
 import { v4 } from 'uuid'
 
-import type { FindAllQueryDto } from '@/common/dtos'
+import { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
-import type { PrismaService } from '@/prisma/prisma.service'
+import { PrismaService } from '@/prisma/prisma.service'
 
 import { includeUserWithRelations } from './constants'
 
-import type { CreateUserDto, ResponseUserDto, UpdateUserDto } from './dto'
+import { CreateUserDto, ResponseUserDto, UpdateUserDto } from './dto'
 
 @Injectable()
 export class UserService {

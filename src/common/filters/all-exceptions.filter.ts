@@ -7,7 +7,8 @@ import {
   Logger
 } from '@nestjs/common'
 
-import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common'
+import { ArgumentsHost, ExceptionFilter } from '@nestjs/common'
+
 import type { Response } from 'express'
 
 @Catch()
