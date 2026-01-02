@@ -22,6 +22,14 @@ export default tseslint.config(
       'unused-imports': unusedImports
     },
     rules: {
+      'no-else-return': 'warn',
+      eqeqeq: 'error',
+      'no-debugger': 'error',
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+
+      '@typescript-eslint/array-type': 'error',
+      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
+
       '@typescript-eslint/no-empty-object-type': 'off',
 
       '@typescript-eslint/no-import-type-side-effects': 'error',
