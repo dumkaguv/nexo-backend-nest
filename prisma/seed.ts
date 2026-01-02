@@ -101,7 +101,7 @@ const up = async () => {
       try {
         await prisma.subscription.create({ data: sub })
       } catch (e) {
-        console.log(e)
+        console.error(e)
       }
     }
   }
@@ -219,9 +219,9 @@ const down = async () => {
 
 const main = async () => {
   try {
-    console.log('seed down...')
+    console.warn('seed down...')
     await down()
-    console.log('seed up...')
+    console.warn('seed up...')
     await up()
   } catch (error) {
     console.error(error)
