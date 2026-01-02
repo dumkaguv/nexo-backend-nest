@@ -6,8 +6,8 @@ import type { User } from '@prisma/client'
 
 const up = async () => {
   // Создание пользователей
-  const createUsers = async () => {
-    return await prisma.user.createMany({
+  const createUsers = async () =>
+    await prisma.user.createMany({
       data: [
         {
           email: 'dima@gmail.com',
@@ -30,16 +30,14 @@ const up = async () => {
       ],
       skipDuplicates: true
     })
-  }
 
   // Получение пользователей
-  const getUsers = async () => {
-    return await prisma.user.findMany({
+  const getUsers = async () =>
+    await prisma.user.findMany({
       where: {
         email: { in: ['dima@gmail.com', 'ivan@gmail.com', 'petr@gmail.com'] }
       }
     })
-  }
 
   // Создание профилей
   const createProfiles = async (users: User[]) => {
@@ -87,7 +85,10 @@ const up = async () => {
     const dima = users.find((u) => u.email === 'dima@gmail.com')
     const ivan = users.find((u) => u.email === 'ivan@gmail.com')
     const petr = users.find((u) => u.email === 'petr@gmail.com')
-    if (!dima || !ivan || !petr) return
+
+    if (!dima || !ivan || !petr) {
+      return
+    }
 
     const subs = [
       { userId: dima.id, followingId: ivan.id },
@@ -196,6 +197,7 @@ const up = async () => {
   await createSubscriptions(users)
 
   const posts = await createPosts(users)
+
   await createPostLikes(users, posts)
   await createPostComments(users, posts)
 

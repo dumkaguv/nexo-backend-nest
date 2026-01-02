@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
+
 import { type UploadApiResponse, v2 as cloudinary } from 'cloudinary'
 import streamifier from 'streamifier'
+
+import type { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class CloudinaryService {

@@ -5,16 +5,17 @@ import { plainToInstance } from 'class-transformer'
 
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import { type AuthRequest, EmptyResponseDto } from '@/common/dtos'
-import { CreateUserDto } from '@/modules/user/dto'
-
-import { AuthService } from './auth.service'
+import type { CreateUserDto } from '@/modules/user/dto'
 
 import {
-  CreateLoginDto,
   ResponseLoginDto,
   ResponseRefreshDto,
   ResponseRegisterDto
 } from './dto'
+
+import type { AuthService } from './auth.service'
+
+import type { CreateLoginDto } from './dto'
 
 import type { Request, Response } from 'express'
 
@@ -57,6 +58,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ) {
     const { refreshToken } = req.cookies
+
     res.clearCookie('refreshToken')
 
     return plainToInstance(

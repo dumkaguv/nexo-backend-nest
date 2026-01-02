@@ -19,7 +19,8 @@ import { Authorization } from '@/modules/auth/decorators'
 
 import { FileUpload } from './decorators'
 import { CreateUploadDto, ResponseUploadDto } from './dto'
-import { UploadService } from './upload.service'
+
+import type { UploadService } from './upload.service'
 
 @Controller('upload')
 @Authorization()

@@ -17,17 +17,16 @@ import { plainToInstance } from 'class-transformer'
 
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import { ApiPaginated } from '@/common/decorators/api-paginated.decorator'
-import {
-  type AuthRequest,
-  EmptyResponseDto,
-  FindAllQueryDto
-} from '@/common/dtos'
+import type { FindAllQueryDto } from '@/common/dtos'
+import { type AuthRequest, EmptyResponseDto } from '@/common/dtos'
 
 import { sendPaginatedResponse } from '@/common/utils'
 import { Authorization } from '@/modules/auth/decorators'
 
-import { CreateChangePasswordDto, ResponseUserDto, UpdateUserDto } from './dto'
-import { UserService } from './user.service'
+import { ResponseUserDto } from './dto'
+
+import type { CreateChangePasswordDto, UpdateUserDto } from './dto'
+import type { UserService } from './user.service'
 
 @Controller('users')
 @Authorization()

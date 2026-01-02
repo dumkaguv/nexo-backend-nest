@@ -9,7 +9,9 @@ export class ResponseConversationDto {
   @Expose()
   readonly id: number
 
-  @ApiProperty({ type: () => ResponseUserProfileDto })
+  @ApiProperty({
+    type: () => ResponseUserProfileDto
+  })
   @Type(() => ResponseUserProfileDto)
   @Expose()
   receiver: ResponseUserProfileDto

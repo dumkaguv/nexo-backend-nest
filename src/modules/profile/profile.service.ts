@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common'
 
 import { connectOrDisconnect } from '@/common/utils'
-import { FileService } from '@/modules/file/file.service'
-import { UserService } from '@/modules/user/user.service'
-import { PrismaService } from '@/prisma/prisma.service'
+import type { FileService } from '@/modules/file/file.service'
+import type { UserService } from '@/modules/user/user.service'
+import type { PrismaService } from '@/prisma/prisma.service'
 
-import { UpdateProfileDto } from './dto'
+import type { UpdateProfileDto } from './dto'
 
 @Injectable()
 export class ProfileService {
@@ -33,8 +33,10 @@ export class ProfileService {
     const { avatar, ...rest } = dto
 
     let avatarFileId: number | undefined
+
     if (avatar) {
       const avatarFile = await this.fileService.findOne(avatar)
+
       avatarFileId = avatarFile.id
     }
 

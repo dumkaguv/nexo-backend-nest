@@ -7,12 +7,10 @@ import { ApiOkResponseWrapped } from '@/common/decorators'
 import type { AuthRequest } from '@/common/dtos'
 import { Authorization } from '@/modules/auth/decorators'
 
-import {
-  ResponseProfileDetailedDto,
-  ResponseProfileDto,
-  UpdateProfileDto
-} from './dto'
-import { ProfileService } from './profile.service'
+import { ResponseProfileDetailedDto, ResponseProfileDto } from './dto'
+
+import type { UpdateProfileDto } from './dto'
+import type { ProfileService } from './profile.service'
 
 @Controller('profile')
 @Authorization()

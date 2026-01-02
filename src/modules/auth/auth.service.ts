@@ -1,17 +1,14 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
-
-import { ConfigService } from '@nestjs/config'
-
 import ms, { type StringValue } from 'ms'
 
 import { isDev } from '@/common/utils'
-import { TokenService } from '@/modules/token/token.service'
-import { CreateUserDto } from '@/modules/user/dto'
+import type { TokenService } from '@/modules/token/token.service'
 
-import { UserService } from '@/modules/user/user.service'
+import type { CreateUserDto } from '@/modules/user/dto'
+import type { UserService } from '@/modules/user/user.service'
 
-import { CreateLoginDto } from './dto'
-
+import type { CreateLoginDto } from './dto'
+import type { ConfigService } from '@nestjs/config'
 import type { Request, Response } from 'express'
 
 @Injectable()
@@ -54,6 +51,7 @@ export class AuthService {
     const refreshToken = req.cookies[this.REFRESH_TOKEN_COOKIE_NAME] as
       | string
       | undefined
+
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token is not valid')
     }
@@ -73,9 +71,11 @@ export class AuthService {
 
   private async auth(res: Response, id: number, returnUser: boolean = true) {
     const { accessToken, refreshToken } = await this.tokenService.generate(id)
+
     await this.tokenService.save(refreshToken, id)
 
     let user
+
     if (returnUser) {
       user = await this.userService.findOneWithRelations(id)
     }

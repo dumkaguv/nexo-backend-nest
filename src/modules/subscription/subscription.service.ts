@@ -1,10 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 
-import { FindAllQueryDto } from '@/common/dtos'
+import type { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
-import { PrismaService } from '@/prisma/prisma.service'
 
-import { ResponseSubscriptionDto } from './dto'
+import type { PrismaService } from '@/prisma/prisma.service'
+
+import type { ResponseSubscriptionDto } from './dto'
 
 @Injectable()
 export class SubscriptionService {
@@ -93,6 +94,7 @@ export class SubscriptionService {
     const exists = await this.prisma.subscription.findFirst({
       where: { userId, followingId: idToFollow }
     })
+
     if (exists) {
       throw new BadRequestException('This user already has this follower')
     }
@@ -108,6 +110,7 @@ export class SubscriptionService {
     const exists = await this.prisma.subscription.findFirst({
       where: { userId, followingId: idToUnfollow }
     })
+
     if (!exists) {
       throw new BadRequestException('You do not following this user')
     }

@@ -4,11 +4,13 @@ import { ApiTags } from '@nestjs/swagger'
 import { plainToInstance } from 'class-transformer'
 
 import { ApiOkResponseWrapped } from '@/common/decorators'
-import { type AuthRequest } from '@/common/dtos'
+import type { AuthRequest } from '@/common/dtos'
 import { Authorization } from '@/modules/auth/decorators'
 
-import { CreateMessageDto, ResponseMessageDto, UpdateMessageDto } from './dto'
-import { MessageService } from './message.service'
+import { ResponseMessageDto } from './dto'
+
+import type { CreateMessageDto, UpdateMessageDto } from './dto'
+import type { MessageService } from './message.service'
 
 @Controller('messages')
 @Authorization()

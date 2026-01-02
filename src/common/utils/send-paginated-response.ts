@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ClassConstructor, plainToInstance } from 'class-transformer'
+import { plainToInstance } from 'class-transformer'
+
+import type { ClassConstructor } from 'class-transformer'
 
 type Data = {
   data: any

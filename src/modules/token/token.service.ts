@@ -1,12 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
 
-import { JwtService } from '@nestjs/jwt'
-
-import { UserService } from '@/modules/user/user.service'
-import { PrismaService } from '@/prisma/prisma.service'
+import type { UserService } from '@/modules/user/user.service'
+import type { PrismaService } from '@/prisma/prisma.service'
 
 import type { JwtPayload } from './types'
+import type { ConfigService } from '@nestjs/config'
+import type { JwtService } from '@nestjs/jwt'
 
 @Injectable()
 export class TokenService {
@@ -95,6 +94,7 @@ export class TokenService {
       where: { userId: id }
     })
     const user = await this.userService.findOne(id)
+
     if (!existingToken || !user) {
       throw new NotFoundException()
     }

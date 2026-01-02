@@ -6,7 +6,9 @@ import { ResponseUserDto } from '@/modules/user/dto'
 
 @Exclude()
 export class ResponseLoginDto {
-  @ApiProperty({ type: () => ResponseUserDto })
+  @ApiProperty({
+    type: () => ResponseUserDto
+  })
   @Type(() => ResponseUserDto)
   @Expose()
   user: ResponseUserDto

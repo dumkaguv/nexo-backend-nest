@@ -2,7 +2,7 @@ import { applyDecorators, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { memoryStorage } from 'multer'
 
-import { imageAndVideoFileFilter } from '../config'
+import { imageAndVideoFileFilter } from '@/modules/upload/config'
 
 export function FileUpload(fieldName: string) {
   return applyDecorators(

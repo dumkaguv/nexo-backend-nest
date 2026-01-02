@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
-  ArgumentsHost,
   BadRequestException,
   Catch,
-  ExceptionFilter,
   HttpException,
   Logger
 } from '@nestjs/common'
-import { Response } from 'express'
+
+import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common'
+import type { Response } from 'express'
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -21,6 +21,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Prisma Not Found
     if (exception?.code === 'P2025') {
       this.logger.warn('Resource not found', exception)
+
       return response.status(404).json({
         message: 'Resource not found',
         status: 404
@@ -45,6 +46,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const errors = typeof res === 'object' ? res.errors : null
 
       this.logger.warn('Validation failed', exception)
+
       return response.status(400).json({ message, errors, status: 400 })
     }
 

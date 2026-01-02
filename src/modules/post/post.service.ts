@@ -1,16 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 
-import { FindAllQueryDto } from '@/common/dtos'
+import type { FindAllQueryDto } from '@/common/dtos'
 import {
   getUserSearchWhere,
   paginate,
   sanitizeHtmlContent
 } from '@/common/utils'
-import { FileService } from '@/modules/file/file.service'
-import { UserService } from '@/modules/user/user.service'
-import { PrismaService } from '@/prisma/prisma.service'
+import type { FileService } from '@/modules/file/file.service'
+import type { UserService } from '@/modules/user/user.service'
+import type { PrismaService } from '@/prisma/prisma.service'
 
-import {
+import type {
   CreatePostCommentDto,
   CreatePostDto,
   ResponsePostCommentDto,
@@ -190,6 +190,7 @@ export class PostService {
     })
 
     const isMyPost = existingComment.userId === userId
+
     if (!isMyPost) {
       throw new BadRequestException('You are not owner of this comment')
     }

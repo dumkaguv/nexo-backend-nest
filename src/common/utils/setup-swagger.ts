@@ -1,6 +1,7 @@
-import { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes'
+
+import type { INestApplication } from '@nestjs/common'
 
 export function setupSwagger(app: INestApplication) {
   const config = new DocumentBuilder()

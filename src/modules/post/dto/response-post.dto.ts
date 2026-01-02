@@ -19,7 +19,9 @@ export class ResponsePostDto {
   @Expose()
   isLiked: boolean
 
-  @ApiProperty({ type: () => ResponseUserProfileDto })
+  @ApiProperty({
+    type: () => ResponseUserProfileDto
+  })
   @Type(() => ResponseUserProfileDto)
   @Expose()
   user: ResponseUserProfileDto

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
-import { CloudinaryService } from '@/modules/cloudinary/cloudinary.service'
-import { PrismaService } from '@/prisma/prisma.service'
+import type { CloudinaryService } from '@/modules/cloudinary/cloudinary.service'
+import type { PrismaService } from '@/prisma/prisma.service'
 
 @Injectable()
 export class FileService {

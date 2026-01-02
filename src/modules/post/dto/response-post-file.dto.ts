@@ -5,7 +5,9 @@ import { ResponseFileDto } from '@/modules/file/dto'
 
 @Exclude()
 export class ResponsePostFileDto {
-  @ApiProperty({ type: () => ResponseFileDto })
+  @ApiProperty({
+    type: () => ResponseFileDto
+  })
   @Type(() => ResponseFileDto)
   @Expose()
   file: ResponseFileDto

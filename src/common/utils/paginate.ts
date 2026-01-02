@@ -43,9 +43,11 @@ export async function paginate({
   const take = pageSize ?? DEFAULT_PAGE_SIZE
 
   let orderBy: Record<string, 'asc' | 'desc'> | undefined
+
   if (ordering) {
     const direction = ordering.startsWith('-') ? 'desc' : 'asc'
     const field = ordering.replace(/^-/, '')
+
     orderBy = { [field]: direction }
   }
 
@@ -57,6 +59,7 @@ export async function paginate({
   )
 
   let where: Record<string, any> | undefined = whereParam
+
   if (search && prismaModel) {
     const stringFields = prismaModel.fields
       .filter(({ type }) => type === 'String')
@@ -85,6 +88,7 @@ export async function paginate({
   ])
 
   let resultData = data
+
   if (computed) {
     resultData = await Promise.all(
       data.map(async (record) => {

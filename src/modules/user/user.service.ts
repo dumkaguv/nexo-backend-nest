@@ -6,12 +6,13 @@ import {
 import { compareSync, hashSync } from 'bcrypt'
 import { v4 } from 'uuid'
 
-import { FindAllQueryDto } from '@/common/dtos'
+import type { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
-import { PrismaService } from '@/prisma/prisma.service'
+import type { PrismaService } from '@/prisma/prisma.service'
 
 import { includeUserWithRelations } from './constants'
-import { CreateUserDto, ResponseUserDto, UpdateUserDto } from './dto'
+
+import type { CreateUserDto, ResponseUserDto, UpdateUserDto } from './dto'
 
 @Injectable()
 export class UserService {
@@ -29,6 +30,7 @@ export class UserService {
         OR: [{ email }, { username }]
       }
     })
+
     if (candidate) {
       throw new BadRequestException(
         `User with such email or username already exist: (${email}, ${username})`
@@ -151,6 +153,7 @@ export class UserService {
     })
 
     const isValidPassword = compareSync(password, user.password)
+
     if (!isValidPassword) {
       throw new UnauthorizedException('Invalid credentials')
     }

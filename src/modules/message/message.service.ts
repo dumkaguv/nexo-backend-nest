@@ -4,12 +4,16 @@ import {
   Injectable
 } from '@nestjs/common'
 
-import { FindAllQueryDto } from '@/common/dtos'
+import type { FindAllQueryDto } from '@/common/dtos'
 import { paginate, sanitizeHtmlContent } from '@/common/utils'
-import { UserService } from '@/modules/user/user.service'
-import { PrismaService } from '@/prisma/prisma.service'
+import type { UserService } from '@/modules/user/user.service'
+import type { PrismaService } from '@/prisma/prisma.service'
 
-import { CreateMessageDto, ResponseMessageDto, UpdateMessageDto } from './dto'
+import type {
+  CreateMessageDto,
+  ResponseMessageDto,
+  UpdateMessageDto
+} from './dto'
 
 @Injectable()
 export class MessageService {
@@ -110,6 +114,7 @@ export class MessageService {
 
   async update(senderId: number, id: number, dto: UpdateMessageDto) {
     const message = await this.findOne(id)
+
     if (!message || message.senderId !== senderId) {
       throw new ForbiddenException('You are not allowed to update this message')
     }
@@ -117,6 +122,7 @@ export class MessageService {
     const { content, fileIds, ...rest } = dto
 
     const uniqueFileIds = await this.validateFileIds(fileIds)
+
     if (uniqueFileIds.length) {
       await this.createMessageFiles(id, uniqueFileIds)
     }
@@ -135,6 +141,7 @@ export class MessageService {
 
   private async validateFileIds(fileIds?: number[] | null) {
     const uniqueFileIds = fileIds ? [...new Set(fileIds)] : []
+
     if (uniqueFileIds.length === 0) {
       return []
     }
@@ -143,6 +150,7 @@ export class MessageService {
       select: { id: true },
       where: { id: { in: uniqueFileIds } }
     })
+
     if (existing.length !== uniqueFileIds.length) {
       throw new BadRequestException('Some files were not found')
     }

@@ -6,10 +6,9 @@ import { ApiQueryMany } from './api-query-many'
 import { ApiOkResponseWrapped } from './api-response.decorator'
 import { UsePagination } from './use-pagination.decorator'
 
-export const ApiPaginated = (model: any) => {
-  return applyDecorators(
+export const ApiPaginated = (model: any) =>
+  applyDecorators(
     UsePagination(),
     ApiQueryMany(),
     ApiOkResponseWrapped(model, true)
   )
-}

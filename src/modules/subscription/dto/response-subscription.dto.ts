@@ -9,7 +9,9 @@ export class ResponseSubscriptionDto {
   @Expose()
   readonly id: number
 
-  @ApiProperty({ type: () => ResponseUserProfileDto })
+  @ApiProperty({
+    type: () => ResponseUserProfileDto
+  })
   @Expose()
   user: ResponseUserProfileDto
 

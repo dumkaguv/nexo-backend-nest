@@ -1,7 +1,7 @@
-import { ConfigService } from '@nestjs/config'
 import { IoAdapter } from '@nestjs/platform-socket.io'
 
 import type { INestApplicationContext } from '@nestjs/common'
+import type { ConfigService } from '@nestjs/config'
 import type { ServerOptions } from 'socket.io'
 
 export class ConfigurableSocketIoAdapter extends IoAdapter {

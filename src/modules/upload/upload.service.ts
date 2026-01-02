@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
-import { CloudinaryService } from '@/modules/cloudinary/cloudinary.service'
-import { FileService } from '@/modules/file/file.service'
+import type { CloudinaryService } from '@/modules/cloudinary/cloudinary.service'
+import type { FileService } from '@/modules/file/file.service'
 
 @Injectable()
 export class UploadService {
@@ -24,6 +24,7 @@ export class UploadService {
 
   async delete(id: number) {
     const { publicId } = await this.fileService.findOne(id)
+
     await this.fileService.delete(publicId, id)
   }
 }
