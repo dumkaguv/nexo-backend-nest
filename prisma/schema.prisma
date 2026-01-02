@@ -8,11 +8,11 @@ datasource db {
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
-generator nestjsDto {
-  provider          = "prisma-generator-nestjs-dto"
-  output            = "./swagger/models"
-  generateFileTypes = "all"
-}
+// generator nestjsDto {
+//   provider          = "prisma-generator-nestjs-dto"
+//   output            = "./swagger/models"
+//   generateFileTypes = "all"
+// }
 
 model User {
   id             Int     @id @default(autoincrement())

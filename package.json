@@ -28,7 +28,7 @@
     "prisma:migrate-reset": "prisma migrate reset --schema=prisma/schema.prisma",
     "prisma:studio": "prisma studio --schema=prisma/schema.prisma",
     "prisma:seed": "prisma db seed --schema=prisma/schema.prisma",
-    "postinstall": "prisma generate --schema=prisma/schema.prisma && prettier --write \"prisma/**/*.ts\" && eslint \"prisma/**/*.ts\" --fix",
+    "postinstall": "prisma generate",
     "prepare": "husky",
     "lint-staged": "lint-staged"
   },
