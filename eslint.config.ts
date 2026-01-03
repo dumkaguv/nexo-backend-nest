@@ -23,32 +23,27 @@ export default tseslint.config(
     },
     rules: {
       'no-else-return': 'warn',
+      'no-extra-boolean-cast': 'error',
       eqeqeq: 'error',
       'no-debugger': 'error',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-undef': 'off',
+      'no-unused-vars': 'off',
+      'no-empty-function': 'off',
+      'no-useless-concat': 'error',
+      'no-useless-return': 'error',
+      'no-nested-ternary': 'error',
+      curly: ['error', 'all'],
+      'arrow-body-style': ['error', 'as-needed'],
 
+      '@typescript-eslint/no-empty-function': ['error', { allow: [] }],
       '@typescript-eslint/array-type': 'error',
       '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
-
       '@typescript-eslint/no-empty-object-type': 'off',
-
       '@typescript-eslint/no-import-type-side-effects': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'warn',
-
-      'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
-      'unused-imports/no-unused-imports': 'error',
-      'unused-imports/no-unused-vars': [
-        'error',
-        {
-          vars: 'all',
-          varsIgnorePattern: '^_',
-          args: 'after-used',
-          argsIgnorePattern: '^_',
-          ignoreRestSiblings: true
-        }
-      ],
 
       '@stylistic/ts/padding-line-between-statements': [
         'error',
@@ -66,10 +61,17 @@ export default tseslint.config(
         { blankLine: 'any', prev: 'import', next: 'import' }
       ],
 
-      curly: ['error', 'all'],
-      'arrow-body-style': ['error', 'as-needed'],
-      'no-empty-function': 'off',
-      '@typescript-eslint/no-empty-function': ['error', { allow: [] }],
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'error',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+          ignoreRestSiblings: true
+        }
+      ],
 
       'no-restricted-imports': [
         'error',
