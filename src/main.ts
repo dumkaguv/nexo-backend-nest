@@ -50,5 +50,9 @@ async function bootstrap() {
   app.getHttpAdapter().get('/', (_req, res) => res.redirect('/api'))
 
   await app.listen(config.get<string>('PORT') ?? 3000)
+
+  console.warn(
+    `Server started on url http://localhost:${config.get<string>('PORT') ?? 3000}`
+  )
 }
 bootstrap()

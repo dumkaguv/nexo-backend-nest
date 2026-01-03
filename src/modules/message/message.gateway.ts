@@ -12,7 +12,11 @@ import { Server, Socket } from 'socket.io'
 
 import { TokenService } from '@/modules/token/token.service'
 
-import { MESSAGE_EVENTS, MESSAGE_NAMESPACE } from './constants'
+import {
+  MESSAGE_EVENTS,
+  MESSAGE_NAMESPACE,
+  MESSAGE_SOCKET_EVENTS
+} from './constants'
 
 import { CreateMessageDto } from './dto'
 import { MessageService } from './message.service'
@@ -71,10 +75,10 @@ export class MessageGateway
 
     this.server
       .to(this.getUserRoom(message.receiverId))
-      .emit('message:new', message)
+      .emit(MESSAGE_SOCKET_EVENTS.NEW, message)
     this.server
       .to(this.getUserRoom(message.senderId))
-      .emit('message:sent', message)
+      .emit(MESSAGE_SOCKET_EVENTS.SENT, message)
 
     return message
   }
