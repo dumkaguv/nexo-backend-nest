@@ -21,18 +21,32 @@ export class ConversationService {
     userId: number,
     query: FindAllQueryDto<ResponseConversationDto>
   ) {
-    return paginate({
+    const result = await paginate({
       prisma: this.prisma,
       model: 'conversation',
       ...query,
       where: {
-        AND: [query.search ?? {}, { senderId: userId }]
+        AND: [
+          query.search ?? {},
+          { OR: [{ senderId: userId }, { receiverId: userId }] }
+        ]
       },
       include: {
+        sender: { include: { profile: { include: { avatar: true } } } },
         receiver: { include: { profile: { include: { avatar: true } } } }
       },
       ordering: query.ordering ? query.ordering : '-updatedAt'
     })
+
+    const data = result.data.map((conversation) => ({
+      ...conversation,
+      receiver:
+        conversation.senderId === userId
+          ? conversation.receiver
+          : conversation.sender
+    }))
+
+    return { ...result, data }
   }
 
   async findAllSuggestions(
@@ -52,11 +66,6 @@ export class ConversationService {
           {
             NOT: {
               OR: [
-                {
-                  conversationsAsSender: {
-                    some: { receiverId: userId }
-                  }
-                },
                 {
                   conversationsAsReceiver: {
                     some: { senderId: userId }
@@ -100,7 +109,13 @@ export class ConversationService {
       throw new ForbiddenException('Access denied')
     }
 
-    return conversation
+    return {
+      ...conversation,
+      receiver:
+        conversation.senderId === userId
+          ? conversation.receiver
+          : conversation.sender
+    }
   }
 
   async create(senderId: number, dto: CreateConversationDto) {

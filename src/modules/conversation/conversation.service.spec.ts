@@ -56,9 +56,10 @@ describe('ConversationService', () => {
         model: 'conversation',
         ordering: '-updatedAt',
         where: {
-          AND: [{}, { senderId: 1 }]
+          AND: [{}, { OR: [{ senderId: 1 }, { receiverId: 1 }] }]
         },
         include: {
+          sender: { include: { profile: { include: { avatar: true } } } },
           receiver: { include: { profile: { include: { avatar: true } } } }
         }
       })
@@ -85,9 +86,21 @@ describe('ConversationService', () => {
   })
 
   it('findOne returns conversation when allowed', async () => {
-    prisma.conversation.findFirst.mockResolvedValue({ id: 1 })
+    prisma.conversation.findFirst.mockResolvedValue({
+      id: 1,
+      senderId: 2,
+      receiverId: 1,
+      sender: { id: 2 },
+      receiver: { id: 1 }
+    })
 
-    await expect(service.findOne(1, 1)).resolves.toEqual({ id: 1 })
+    await expect(service.findOne(1, 1)).resolves.toEqual({
+      id: 1,
+      senderId: 2,
+      receiverId: 1,
+      sender: { id: 2 },
+      receiver: { id: 2 }
+    })
   })
 
   it('create creates conversation', async () => {
