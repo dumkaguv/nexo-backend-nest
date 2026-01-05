@@ -170,7 +170,7 @@ describe('MessageService', () => {
     prisma.message.findUnique.mockResolvedValue({ id: 1, senderId: 2 })
 
     await expect(
-      service.update(1, 1, { content: 'hi' })
+      service.update(1, 1, { id: 1, content: 'hi' })
     ).rejects.toBeInstanceOf(ForbiddenException)
   })
 
@@ -181,7 +181,7 @@ describe('MessageService', () => {
     prisma.message.update.mockResolvedValue({ id: 1, content: 'updated' })
 
     await expect(
-      service.update(1, 1, { content: 'updated', fileIds: [1] })
+      service.update(1, 1, { id: 1, content: 'updated', fileIds: [1] })
     ).resolves.toEqual({ id: 1, content: 'updated' })
     expect(prisma.messageFile.createMany).toHaveBeenCalledWith({
       data: [{ messageId: 1, fileId: 1 }],

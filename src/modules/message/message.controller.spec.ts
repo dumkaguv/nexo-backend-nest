@@ -76,10 +76,12 @@ describe('MessageController', () => {
     })
 
     const result = await controller.update({ user: { id: 1 } } as never, '3', {
+      id: 3,
       content: 'updated'
     })
 
     expect(messageService.update).toHaveBeenCalledWith(1, 3, {
+      id: 3,
       content: 'updated'
     })
     expect(result).toBeInstanceOf(ResponseMessageDto)
