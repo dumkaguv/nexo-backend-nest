@@ -129,10 +129,20 @@ export class MessageService {
     }
 
     return await this.prisma.message.update({
-      data,
+      data: { ...data, isEdited: true },
       where: { id },
       include: { files: { include: { file: true } } }
     })
+  }
+
+  async delete(senderId: number, id: number) {
+    const message = await this.findOne(id)
+
+    if (!message || message.senderId !== senderId) {
+      throw new ForbiddenException('You are not allowed to delete this message')
+    }
+
+    return this.prisma.message.delete({ where: { id } })
   }
 
   private async validateFileIds(fileIds?: number[] | null) {

@@ -23,6 +23,8 @@ import { Authorization } from '@/modules/auth/decorators'
 
 import { ResponseMessageDto } from '@/modules/message/dto'
 
+import { ResponseUserProfileDto } from '@/modules/user/dto'
+
 import { ConversationService } from './conversation.service'
 import { ResponseConversationDto } from './dto'
 
@@ -43,6 +45,18 @@ export class ConversationController {
     return sendPaginatedResponse(
       ResponseConversationDto,
       await this.conversationService.findAll(req.user.id, query)
+    )
+  }
+
+  @Get('suggestions')
+  @ApiPaginated(ResponseUserProfileDto)
+  async findAllSuggestions(
+    @Req() req: AuthRequest,
+    @Query() query: FindAllQueryDto<ResponseUserProfileDto>
+  ) {
+    return sendPaginatedResponse(
+      ResponseUserProfileDto,
+      await this.conversationService.findAllSuggestions(req.user.id, query)
     )
   }
 

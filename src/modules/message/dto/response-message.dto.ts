@@ -25,6 +25,10 @@ export class ResponseMessageDto {
   @Expose()
   content?: string | null
 
+  @ApiProperty({ type: 'boolean', readOnly: true })
+  @Expose()
+  readonly isEdited: boolean
+
   @ApiProperty({
     type: () => ResponseFileDto,
     required: false,
@@ -38,4 +42,8 @@ export class ResponseMessageDto {
   @ApiProperty({ type: 'string', format: 'date-time', readOnly: true })
   @Expose()
   readonly createdAt: Date
+
+  @ApiProperty({ type: 'string', format: 'date-time', readOnly: true })
+  @Expose()
+  readonly updatedAt: Date
 }

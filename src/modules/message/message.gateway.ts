@@ -18,7 +18,7 @@ import {
   MESSAGE_SOCKET_EVENTS
 } from './constants'
 
-import { CreateMessageDto } from './dto'
+import { CreateMessageDto, DeleteMessageDto, UpdateMessageDto } from './dto'
 import { MessageService } from './message.service'
 
 @WebSocketGateway({ namespace: MESSAGE_NAMESPACE })
@@ -76,11 +76,58 @@ export class MessageGateway
     this.server
       .to(this.getUserRoom(message.receiverId))
       .emit(MESSAGE_SOCKET_EVENTS.NEW, message)
+
     this.server
       .to(this.getUserRoom(message.senderId))
       .emit(MESSAGE_SOCKET_EVENTS.SENT, message)
 
     return message
+  }
+
+  @SubscribeMessage(MESSAGE_EVENTS.UPDATE)
+  async handleUpdate(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() dto: UpdateMessageDto
+  ) {
+    const senderId = client.data.userId as number | undefined
+
+    if (!senderId) {
+      throw new WsException('Unauthorized')
+    }
+
+    const message = await this.messageService.update(senderId, dto.id, dto)
+
+    this.server
+      .to(this.getUserRoom(message.receiverId))
+      .emit(MESSAGE_SOCKET_EVENTS.UPDATED, message)
+
+    this.server
+      .to(this.getUserRoom(message.senderId))
+      .emit(MESSAGE_SOCKET_EVENTS.UPDATED, message)
+
+    return message
+  }
+
+  @SubscribeMessage(MESSAGE_EVENTS.DELETE)
+  async handleDelete(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() dto: DeleteMessageDto
+  ) {
+    const senderId = client.data.userId as number | undefined
+
+    if (!senderId) {
+      throw new WsException('Unauthorized')
+    }
+
+    const message = await this.messageService.delete(senderId, dto.id)
+
+    this.server
+      .to(this.getUserRoom(message.receiverId))
+      .emit(MESSAGE_SOCKET_EVENTS.DELETED, { deletedMessageId: message.id })
+
+    this.server
+      .to(this.getUserRoom(message.senderId))
+      .emit(MESSAGE_SOCKET_EVENTS.DELETED, { deletedMessageId: message.id })
   }
 
   private extractToken(client: Socket) {

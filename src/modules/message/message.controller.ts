@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Req
+} from '@nestjs/common'
 
 import { ApiTags } from '@nestjs/swagger'
 import { plainToInstance } from 'class-transformer'
@@ -47,5 +58,11 @@ export class MessageController {
       ResponseMessageDto,
       await this.messageService.update(req.user.id, +id, dto)
     )
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.messageService.delete(req.user.id, +id)
   }
 }

@@ -5,6 +5,7 @@ import { paginate } from '@/common/utils'
 
 import { ResponseMessageDto } from '@/modules/message/dto'
 import { MessageService } from '@/modules/message/message.service'
+import { ResponseUserProfileDto } from '@/modules/user/dto'
 import { PrismaService } from '@/prisma/prisma.service'
 
 import { CreateConversationDto, ResponseConversationDto } from './dto'
@@ -25,15 +26,50 @@ export class ConversationService {
       model: 'conversation',
       ...query,
       where: {
-        AND: [
-          query.search ?? {},
-          { OR: [{ senderId: userId }, { receiverId: userId }] }
-        ]
+        AND: [query.search ?? {}, { senderId: userId }]
       },
       include: {
         receiver: { include: { profile: { include: { avatar: true } } } }
       },
       ordering: query.ordering ? query.ordering : '-updatedAt'
+    })
+  }
+
+  async findAllSuggestions(
+    userId: number,
+    query: FindAllQueryDto<ResponseUserProfileDto>
+  ) {
+    return paginate({
+      prisma: this.prisma,
+      model: 'user',
+      ...query,
+      where: {
+        AND: [
+          query.search ?? {},
+
+          { id: { not: userId } },
+
+          {
+            NOT: {
+              OR: [
+                {
+                  conversationsAsSender: {
+                    some: { receiverId: userId }
+                  }
+                },
+                {
+                  conversationsAsReceiver: {
+                    some: { senderId: userId }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      include: {
+        profile: { include: { avatar: true } }
+      }
     })
   }
 
@@ -52,8 +88,7 @@ export class ConversationService {
   async findOne(userId: number, id: number) {
     const conversation = await this.prisma.conversation.findFirst({
       where: {
-        id,
-        OR: [{ senderId: userId }, { receiverId: userId }]
+        AND: [{ id }, { OR: [{ senderId: userId }, { receiverId: userId }] }]
       },
       include: {
         sender: { include: { profile: { include: { avatar: true } } } },
@@ -69,7 +104,13 @@ export class ConversationService {
   }
 
   async create(senderId: number, dto: CreateConversationDto) {
-    return this.prisma.conversation.create({ data: { senderId, ...dto } })
+    return this.prisma.conversation.create({
+      data: { senderId, ...dto },
+      include: {
+        sender: { include: { profile: { include: { avatar: true } } } },
+        receiver: { include: { profile: { include: { avatar: true } } } }
+      }
+    })
   }
 
   async remove(userId: number, id: number) {

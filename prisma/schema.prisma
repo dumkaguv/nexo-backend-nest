@@ -149,7 +149,8 @@ model Message {
   senderId   Int
   receiverId Int
 
-  content String?
+  content  String?
+  isEdited Boolean @default(false)
 
   sender   User @relation("SentMessages", fields: [senderId], references: [id])
   receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
@@ -160,6 +161,7 @@ model Message {
   files MessageFile[]
 
   createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
   readAt    DateTime?
 }
 
@@ -170,7 +172,7 @@ model MessageFile {
   message   Message? @relation(fields: [messageId], references: [id])
 
   fileId Int
-  file   File @relation(fields: [fileId], references: [id])
+  file   File @relation(fields: [fileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 }
