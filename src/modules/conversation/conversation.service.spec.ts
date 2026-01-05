@@ -56,7 +56,10 @@ describe('ConversationService', () => {
         model: 'conversation',
         ordering: '-updatedAt',
         where: {
-          AND: [{}, { OR: [{ senderId: 1 }, { receiverId: 1 }] }]
+          AND: [{}, { senderId: 1 }]
+        },
+        include: {
+          receiver: { include: { profile: { include: { avatar: true } } } }
         }
       })
     )
@@ -94,7 +97,11 @@ describe('ConversationService', () => {
       id: 3
     })
     expect(prisma.conversation.create).toHaveBeenCalledWith({
-      data: { senderId: 1, receiverId: 2 }
+      data: { senderId: 1, receiverId: 2 },
+      include: {
+        sender: { include: { profile: { include: { avatar: true } } } },
+        receiver: { include: { profile: { include: { avatar: true } } } }
+      }
     })
   })
 
