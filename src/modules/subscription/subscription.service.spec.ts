@@ -121,4 +121,22 @@ describe('SubscriptionService', () => {
       where: { userId_followingId: { userId: 1, followingId: 2 } }
     })
   })
+
+  it('removeFollower throws when user is not follower', async () => {
+    prisma.subscription.findFirst.mockResolvedValue(null)
+
+    await expect(service.removeFollower(1, 2)).rejects.toBeInstanceOf(
+      BadRequestException
+    )
+  })
+
+  it('removeFollower deletes subscription', async () => {
+    prisma.subscription.findFirst.mockResolvedValue({ id: 1 })
+    prisma.subscription.delete.mockResolvedValue({ id: 1 })
+
+    await expect(service.removeFollower(1, 2)).resolves.toEqual({})
+    expect(prisma.subscription.delete).toHaveBeenCalledWith({
+      where: { userId_followingId: { userId: 2, followingId: 1 } }
+    })
+  })
 })

@@ -12,6 +12,7 @@ describe('ConversationController', () => {
     findAll: jest.Mock
     findAllConversationMessages: jest.Mock
     findOne: jest.Mock
+    findOneByUserId: jest.Mock
     create: jest.Mock
     remove: jest.Mock
   }
@@ -21,6 +22,7 @@ describe('ConversationController', () => {
       findAll: jest.fn(),
       findAllConversationMessages: jest.fn(),
       findOne: jest.fn(),
+      findOneByUserId: jest.fn(),
       create: jest.fn(),
       remove: jest.fn()
     }
@@ -78,6 +80,18 @@ describe('ConversationController', () => {
     const result = await controller.findOne({ user: { id: 1 } } as never, '4')
 
     expect(conversationService.findOne).toHaveBeenCalledWith(1, 4)
+    expect(result).toBeInstanceOf(ResponseConversationDto)
+  })
+
+  it('findOneByUserId returns ResponseConversationDto', async () => {
+    conversationService.findOneByUserId.mockResolvedValue({ id: 7 })
+
+    const result = await controller.findOneByUserId(
+      { user: { id: 1 } } as never,
+      '9'
+    )
+
+    expect(conversationService.findOneByUserId).toHaveBeenCalledWith(1, 9)
     expect(result).toBeInstanceOf(ResponseConversationDto)
   })
 

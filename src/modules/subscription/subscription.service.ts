@@ -123,4 +123,22 @@ export class SubscriptionService {
 
     return {}
   }
+
+  async removeFollower(userId: number, followerId: number) {
+    const exists = await this.prisma.subscription.findFirst({
+      where: { userId: followerId, followingId: userId }
+    })
+
+    if (!exists) {
+      throw new BadRequestException('This user is not your follower')
+    }
+
+    await this.prisma.subscription.delete({
+      where: {
+        userId_followingId: { userId: followerId, followingId: userId }
+      }
+    })
+
+    return {}
+  }
 }

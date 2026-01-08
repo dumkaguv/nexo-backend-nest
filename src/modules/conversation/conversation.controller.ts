@@ -60,6 +60,18 @@ export class ConversationController {
     )
   }
 
+  @Get('user/:userId')
+  @ApiOkResponseWrapped(ResponseConversationDto)
+  async findOneByUserId(
+    @Req() req: AuthRequest,
+    @Param('userId') userId: string
+  ) {
+    return plainToInstance(
+      ResponseConversationDto,
+      await this.conversationService.findOneByUserId(req.user.id, +userId)
+    )
+  }
+
   @Get(':id/messages')
   @ApiPaginated(ResponseMessageDto)
   async findAllConversationMessages(

@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common'
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common'
 
 import { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
@@ -109,6 +113,33 @@ export class ConversationService {
 
     if (!conversation) {
       throw new ForbiddenException('Access denied')
+    }
+
+    return {
+      ...conversation,
+      receiver:
+        conversation.senderId === userId
+          ? conversation.receiver
+          : conversation.sender
+    }
+  }
+
+  async findOneByUserId(userId: number, otherUserId: number) {
+    const conversation = await this.prisma.conversation.findFirst({
+      where: {
+        OR: [
+          { senderId: userId, receiverId: otherUserId },
+          { senderId: otherUserId, receiverId: userId }
+        ]
+      },
+      include: {
+        sender: { include: { profile: { include: { avatar: true } } } },
+        receiver: { include: { profile: { include: { avatar: true } } } }
+      }
+    })
+
+    if (!conversation) {
+      throw new NotFoundException('Conversation not found')
     }
 
     return {

@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common'
+import { ForbiddenException, NotFoundException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { paginate } from '@/common/utils'
@@ -104,6 +104,32 @@ describe('ConversationService', () => {
       receiverId: 1,
       sender: { id: 2 },
       receiver: { id: 2 }
+    })
+  })
+
+  it('findOneByUserId throws when conversation not found', async () => {
+    prisma.conversation.findFirst.mockResolvedValue(null)
+
+    await expect(service.findOneByUserId(1, 2)).rejects.toBeInstanceOf(
+      NotFoundException
+    )
+  })
+
+  it('findOneByUserId returns conversation for user pair', async () => {
+    prisma.conversation.findFirst.mockResolvedValue({
+      id: 2,
+      senderId: 1,
+      receiverId: 3,
+      sender: { id: 1 },
+      receiver: { id: 3 }
+    })
+
+    await expect(service.findOneByUserId(1, 3)).resolves.toEqual({
+      id: 2,
+      senderId: 1,
+      receiverId: 3,
+      sender: { id: 1 },
+      receiver: { id: 3 }
     })
   })
 

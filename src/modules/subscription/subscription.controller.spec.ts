@@ -13,6 +13,7 @@ describe('SubscriptionController', () => {
     findOneSubscriptionCount: jest.Mock
     follow: jest.Mock
     unfollow: jest.Mock
+    removeFollower: jest.Mock
   }
 
   beforeEach(async () => {
@@ -20,7 +21,8 @@ describe('SubscriptionController', () => {
       findAllSubscriptions: jest.fn(),
       findOneSubscriptionCount: jest.fn(),
       follow: jest.fn(),
-      unfollow: jest.fn()
+      unfollow: jest.fn(),
+      removeFollower: jest.fn()
     }
 
     const module: TestingModule = await Test.createTestingModule({
@@ -98,6 +100,18 @@ describe('SubscriptionController', () => {
     const result = await controller.unfollow({ user: { id: 1 } } as never, '2')
 
     expect(subscriptionService.unfollow).toHaveBeenCalledWith(1, 2)
+    expect(result).toBeInstanceOf(EmptyResponseDto)
+  })
+
+  it('removeFollower returns EmptyResponseDto', async () => {
+    subscriptionService.removeFollower.mockResolvedValue({})
+
+    const result = await controller.removeFollower(
+      { user: { id: 1 } } as never,
+      '2'
+    )
+
+    expect(subscriptionService.removeFollower).toHaveBeenCalledWith(1, 2)
     expect(result).toBeInstanceOf(EmptyResponseDto)
   })
 })

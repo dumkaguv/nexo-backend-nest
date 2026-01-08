@@ -71,4 +71,13 @@ export class SubscriptionController {
       await this.subscriptionService.unfollow(req.user.id, +id)
     )
   }
+
+  @Post('unfollow/follower/:id')
+  @ApiOkResponseWrapped(EmptyResponseDto)
+  async removeFollower(@Req() req: AuthRequest, @Param('id') id: string) {
+    return plainToInstance(
+      EmptyResponseDto,
+      await this.subscriptionService.removeFollower(req.user.id, +id)
+    )
+  }
 }
