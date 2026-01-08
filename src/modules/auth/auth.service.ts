@@ -45,7 +45,9 @@ export class AuthService {
   }
 
   async logout(refreshToken: string) {
-    await this.tokenService.remove(refreshToken)
+    const userId = await this.tokenService.remove(refreshToken)
+
+    await this.userService.updateLastActivity(userId)
   }
 
   async refresh(req: Request, res: Response) {

@@ -6,27 +6,88 @@ import { PrismaClient } from '@prisma/client'
 
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@/common/constants'
 
-type PaginateParams = {
-  prisma: PrismaClient
-  model: keyof PrismaClient
-  page?: number
-  pageSize?: number
-  ordering?: string
-  search?: string
-  select?: Record<string, boolean | object>
-  include?: Record<string, boolean | object>
-  where?: Record<any, any>
-  computed?: Record<
-    string,
-    (
-      record: any,
-      helpers: { prisma: PrismaClient; context?: any }
-    ) => any | Promise<any>
-  >
-  context?: any
+type PrismaModelDelegate = {
+  findMany: (args?: unknown) => unknown
+  count: (args?: unknown) => unknown
 }
 
-export async function paginate({
+type PrismaModelKey = {
+  [Key in keyof PrismaClient]: PrismaClient[Key] extends PrismaModelDelegate
+    ? Key
+    : never
+}[keyof PrismaClient]
+
+type ModelFindManyArgs<Key extends PrismaModelKey> = Prisma.Args<
+  PrismaClient[Key],
+  'findMany'
+>
+
+type ModelWhere<Key extends PrismaModelKey> = ModelFindManyArgs<Key>['where']
+
+type ModelOrderBy<Key extends PrismaModelKey> =
+  ModelFindManyArgs<Key>['orderBy']
+
+type OrderByInput<Key extends PrismaModelKey> =
+  NonNullable<ModelOrderBy<Key>> extends (infer Item)[]
+    ? Item
+    : NonNullable<ModelOrderBy<Key>>
+
+type OrderByKeys<Key extends PrismaModelKey> = Extract<
+  keyof OrderByInput<Key>,
+  string
+>
+
+type SelectionArgs<Select, Include> = ([Select] extends [undefined | null]
+  ? {}
+  : { select: Exclude<Select, undefined | null> }) &
+  ([Include] extends [undefined | null]
+    ? {}
+    : { include: Exclude<Include, undefined | null> })
+
+type ModelRecord<Key extends PrismaModelKey, Select, Include> = Prisma.Result<
+  PrismaClient[Key],
+  Prisma.SelectSubset<SelectionArgs<Select, Include>, ModelFindManyArgs<Key>>,
+  'findMany'
+>[number]
+
+type PaginateBaseParams<Key extends PrismaModelKey, Select, Include> = {
+  prisma: PrismaClient
+  model: Key
+  page?: number
+  pageSize?: number
+  ordering?: `${OrderByKeys<Key>}` | `-${OrderByKeys<Key>}` | string
+  search?: string
+  select?: Select
+  include?: Include
+  where?: ModelFindManyArgs<Key>['where']
+}
+
+type ComputedFn<Key extends PrismaModelKey, Select, Include, Context> = (
+  record: ModelRecord<Key, Select, Include>,
+  helpers: { prisma: PrismaClient; context: Context }
+) => any | Promise<any>
+
+type PaginateParams<
+  Key extends PrismaModelKey,
+  Select,
+  Include,
+  Context = undefined
+> = Context extends undefined
+  ? PaginateBaseParams<Key, Select, Include> & {
+      computed?: Record<string, ComputedFn<Key, Select, Include, undefined>>
+      context?: undefined
+    }
+  : PaginateBaseParams<Key, Select, Include> & {
+      computed?: Record<string, ComputedFn<Key, Select, Include, Context>>
+      context: Context
+    }
+
+export async function paginate<
+  Key extends PrismaModelKey,
+  Select extends ModelFindManyArgs<Key>['select'] = undefined,
+  Include extends ModelFindManyArgs<Key>['include'] = undefined,
+  Context = undefined
+>({
   prisma,
   model,
   page,
@@ -38,7 +99,7 @@ export async function paginate({
   where: whereParam,
   computed,
   context
-}: PaginateParams) {
+}: PaginateParams<Key, Select, Include, Context>) {
   const skip = ((page ?? DEFAULT_PAGE) - 1) * (pageSize ?? DEFAULT_PAGE_SIZE)
   const take = pageSize ?? DEFAULT_PAGE_SIZE
 
@@ -58,7 +119,7 @@ export async function paginate({
     (model) => model.name === capitalizedModel
   )
 
-  let where: Record<string, any> | undefined = whereParam
+  let where: ModelWhere<Key> | undefined = whereParam
 
   if (search && prismaModel) {
     const stringFields = prismaModel.fields
@@ -66,11 +127,16 @@ export async function paginate({
       .map(({ name }) => ({ field: name }))
 
     if (stringFields.length > 0) {
-      where = {
+      const searchWhere = {
         OR: stringFields.map(({ field }) => ({
-          [field]: { contains: search, mode: 'insensitive' },
-          ...(whereParam || {})
+          [field]: { contains: search, mode: 'insensitive' }
         }))
+      } as ModelWhere<Key>
+
+      if (whereParam) {
+        where = { AND: [whereParam, searchWhere] } as ModelWhere<Key>
+      } else {
+        where = searchWhere
       }
     }
   }
@@ -93,9 +159,13 @@ export async function paginate({
     resultData = await Promise.all(
       data.map(async (record) => {
         const computedValues: Record<string, any> = {}
+        const helpers = { prisma, context } as {
+          prisma: PrismaClient
+          context: Context
+        }
 
         for (const [key, fn] of Object.entries(computed)) {
-          computedValues[key] = await fn(record, { prisma, context })
+          computedValues[key] = await fn(record, helpers)
         }
 
         return { ...record, ...computedValues }

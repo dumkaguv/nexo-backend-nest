@@ -5,6 +5,7 @@ import { paginate } from '@/common/utils'
 import { MessageService } from '@/modules/message/message.service'
 import { PrismaService } from '@/prisma/prisma.service'
 
+import { ConversationGateway } from './conversation.gateway'
 import { ConversationService } from './conversation.service'
 
 jest.mock('@/common/utils', () => ({
@@ -21,6 +22,7 @@ describe('ConversationService', () => {
     }
   }
   let messageService: { findAllMyMessages: jest.Mock }
+  let conversationGateway: { emitNew: jest.Mock; emitDeleted: jest.Mock }
 
   beforeEach(async () => {
     prisma = {
@@ -31,12 +33,14 @@ describe('ConversationService', () => {
       }
     }
     messageService = { findAllMyMessages: jest.fn() }
+    conversationGateway = { emitNew: jest.fn(), emitDeleted: jest.fn() }
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ConversationService,
         { provide: PrismaService, useValue: prisma },
-        { provide: MessageService, useValue: messageService }
+        { provide: MessageService, useValue: messageService },
+        { provide: ConversationGateway, useValue: conversationGateway }
       ]
     }).compile()
 
@@ -56,7 +60,7 @@ describe('ConversationService', () => {
         model: 'conversation',
         ordering: '-updatedAt',
         where: {
-          AND: [{}, { OR: [{ senderId: 1 }, { receiverId: 1 }] }]
+          AND: [{ OR: [{ senderId: 1 }, { receiverId: 1 }] }]
         },
         include: {
           sender: { include: { profile: { include: { avatar: true } } } },

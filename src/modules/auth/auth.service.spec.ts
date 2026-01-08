@@ -22,6 +22,7 @@ describe('AuthService', () => {
     comparePasswords: jest.Mock
     findOne: jest.Mock
     findOneWithRelations: jest.Mock
+    updateLastActivity: jest.Mock
   }
   let tokenService: {
     generate: jest.Mock
@@ -44,7 +45,8 @@ describe('AuthService', () => {
       create: jest.fn(),
       comparePasswords: jest.fn(),
       findOne: jest.fn(),
-      findOneWithRelations: jest.fn()
+      findOneWithRelations: jest.fn(),
+      updateLastActivity: jest.fn()
     }
     tokenService = {
       generate: jest.fn(),
@@ -128,10 +130,12 @@ describe('AuthService', () => {
   })
 
   it('logout removes refresh token', async () => {
-    tokenService.remove.mockResolvedValue(undefined)
+    tokenService.remove.mockResolvedValue(1)
+    userService.updateLastActivity.mockResolvedValue(undefined)
 
     await expect(service.logout('refresh')).resolves.toBeUndefined()
     expect(tokenService.remove).toHaveBeenCalledWith('refresh')
+    expect(userService.updateLastActivity).toHaveBeenCalledWith(1)
   })
 
   it('refresh throws when cookie is missing', async () => {

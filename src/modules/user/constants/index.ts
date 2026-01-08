@@ -1,5 +1,17 @@
 import { Prisma } from '@prisma/client'
 
+export const USER_NAMESPACE = '/users' as const
+
+export const SERVER_TO_CLIENT = {
+  ONLINE: 'user:online',
+  OFFLINE: 'user:offline',
+  ONLINE_LIST: 'user:online:list'
+} as const
+
+export const CLIENT_TO_SERVER = {
+  ONLINE_LIST_REQUEST: 'user:online:list:request'
+} as const
+
 export const selectUserFields: Prisma.UserSelectScalar = {
   id: true,
   email: true,
@@ -7,6 +19,7 @@ export const selectUserFields: Prisma.UserSelectScalar = {
   activationLink: true,
   isActivated: true,
   createdAt: true,
+  lastActivity: true,
   updatedAt: true
 } as const
 

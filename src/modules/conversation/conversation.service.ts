@@ -8,13 +8,15 @@ import { MessageService } from '@/modules/message/message.service'
 import { ResponseUserProfileDto } from '@/modules/user/dto'
 import { PrismaService } from '@/prisma/prisma.service'
 
+import { ConversationGateway } from './conversation.gateway'
 import { CreateConversationDto, ResponseConversationDto } from './dto'
 
 @Injectable()
 export class ConversationService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly messageService: MessageService
+    private readonly messageService: MessageService,
+    private readonly conversationGateway: ConversationGateway
   ) {}
 
   async findAll(
@@ -26,10 +28,7 @@ export class ConversationService {
       model: 'conversation',
       ...query,
       where: {
-        AND: [
-          query.search ?? {},
-          { OR: [{ senderId: userId }, { receiverId: userId }] }
-        ]
+        AND: [{ OR: [{ senderId: userId }, { receiverId: userId }] }]
       },
       include: {
         sender: { include: { profile: { include: { avatar: true } } } },
@@ -59,8 +58,6 @@ export class ConversationService {
       ...query,
       where: {
         AND: [
-          query.search ?? {},
-
           { id: { not: userId } },
 
           {
@@ -69,6 +66,11 @@ export class ConversationService {
                 {
                   conversationsAsReceiver: {
                     some: { senderId: userId }
+                  }
+                },
+                {
+                  conversationsAsSender: {
+                    some: { receiverId: userId }
                   }
                 }
               ]
@@ -119,13 +121,17 @@ export class ConversationService {
   }
 
   async create(senderId: number, dto: CreateConversationDto) {
-    return this.prisma.conversation.create({
+    const conversation = await this.prisma.conversation.create({
       data: { senderId, ...dto },
       include: {
         sender: { include: { profile: { include: { avatar: true } } } },
         receiver: { include: { profile: { include: { avatar: true } } } }
       }
     })
+
+    this.conversationGateway.emitNew(conversation)
+
+    return conversation
   }
 
   async remove(userId: number, id: number) {
@@ -141,6 +147,12 @@ export class ConversationService {
       throw new ForbiddenException('Access denied')
     }
 
-    return this.prisma.conversation.delete({ where: { id } })
+    const conversation = await this.prisma.conversation.delete({
+      where: { id }
+    })
+
+    this.conversationGateway.emitDeleted(conversation)
+
+    return conversation
   }
 }

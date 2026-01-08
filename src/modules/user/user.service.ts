@@ -74,7 +74,7 @@ export class UserService {
       where: { id: { not: userId } },
       ...query,
       computed: {
-        isFollowing: (record) => followingIdsSet.has(record.id)
+        isFollowing: ({ id }) => followingIdsSet.has(id)
       }
     })
   }
@@ -170,5 +170,12 @@ export class UserService {
     const hashedPassword = this.hashPassword(newPassword)
 
     return this.update(userId, { password: hashedPassword })
+  }
+
+  async updateLastActivity(userId: number, date: Date = new Date()) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { lastActivity: date }
+    })
   }
 }

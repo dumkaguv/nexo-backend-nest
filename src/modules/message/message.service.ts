@@ -24,7 +24,10 @@ export class MessageService {
       model: 'message',
       where: { receiverId: userId },
       include: { files: { include: { file: true } } },
-      ...query
+      ...query,
+      computed: {
+        files: ({ files }) => files?.map(({ file }) => file) ?? []
+      }
     })
   }
 
@@ -42,8 +45,12 @@ export class MessageService {
           OR: [{ senderId: userId }, { receiverId: userId }]
         }
       },
+      include: { files: { include: { file: true } } },
       ...query,
-      ordering: query.ordering ? query.ordering : '-createdAt'
+      ordering: query.ordering ? query.ordering : '-createdAt',
+      computed: {
+        files: ({ files }) => files?.map(({ file }) => file) ?? []
+      }
     })
   }
 

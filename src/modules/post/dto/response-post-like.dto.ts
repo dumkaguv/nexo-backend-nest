@@ -9,9 +9,7 @@ export class ResponsePostLikeDto {
   @Expose()
   readonly id: number
 
-  @ApiProperty({
-    type: () => ResponseUserProfileIsFollowingDto
-  })
+  @ApiProperty({ type: () => ResponseUserProfileIsFollowingDto })
   @Type(() => ResponseUserProfileIsFollowingDto)
   @Expose()
   user: ResponseUserProfileIsFollowingDto

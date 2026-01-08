@@ -50,4 +50,8 @@ export class ResponseUserDto {
   @ApiProperty({ type: 'string', format: 'date-time', readOnly: true })
   @Expose()
   readonly createdAt: Date
+
+  @ApiProperty({ type: 'string', format: 'date-time', readOnly: true })
+  @Expose()
+  readonly lastActivity: Date
 }

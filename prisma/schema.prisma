@@ -38,9 +38,10 @@ model User {
   following Subscription[] @relation("UserFollowing")
   followers Subscription[] @relation("UserFollowers")
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now()) @updatedAt
-  activatedAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+  activatedAt  DateTime?
+  lastActivity DateTime  @default(now())
 
   @@unique([username, email])
 }

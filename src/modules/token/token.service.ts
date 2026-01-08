@@ -80,14 +80,16 @@ export class TokenService {
   }
 
   async remove(refreshToken: string) {
-    const { id } = await this.prisma.token.findFirstOrThrow({
-      select: { id: true },
+    const { id, userId } = await this.prisma.token.findFirstOrThrow({
+      select: { id: true, userId: true },
       where: { refreshToken }
     })
 
     await this.prisma.token.delete({
       where: { id }
     })
+
+    return userId
   }
 
   async refresh(refreshToken: string) {

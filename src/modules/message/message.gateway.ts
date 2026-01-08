@@ -13,9 +13,9 @@ import { Server, Socket } from 'socket.io'
 import { TokenService } from '@/modules/token/token.service'
 
 import {
-  MESSAGE_EVENTS,
+  CLIENT_TO_SERVER,
   MESSAGE_NAMESPACE,
-  MESSAGE_SOCKET_EVENTS
+  SERVER_TO_CLIENT
 } from './constants'
 
 import { CreateMessageDto, DeleteMessageDto, UpdateMessageDto } from './dto'
@@ -60,7 +60,7 @@ export class MessageGateway
     }
   }
 
-  @SubscribeMessage(MESSAGE_EVENTS.SEND)
+  @SubscribeMessage(CLIENT_TO_SERVER.SEND)
   async handleSend(
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: CreateMessageDto
@@ -75,16 +75,16 @@ export class MessageGateway
 
     this.server
       .to(this.getUserRoom(message.receiverId))
-      .emit(MESSAGE_SOCKET_EVENTS.NEW, message)
+      .emit(SERVER_TO_CLIENT.NEW, message)
 
     this.server
       .to(this.getUserRoom(message.senderId))
-      .emit(MESSAGE_SOCKET_EVENTS.SENT, message)
+      .emit(SERVER_TO_CLIENT.SENT, message)
 
     return message
   }
 
-  @SubscribeMessage(MESSAGE_EVENTS.UPDATE)
+  @SubscribeMessage(CLIENT_TO_SERVER.UPDATE)
   async handleUpdate(
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: UpdateMessageDto
@@ -99,16 +99,16 @@ export class MessageGateway
 
     this.server
       .to(this.getUserRoom(message.receiverId))
-      .emit(MESSAGE_SOCKET_EVENTS.UPDATED, message)
+      .emit(SERVER_TO_CLIENT.UPDATED, message)
 
     this.server
       .to(this.getUserRoom(message.senderId))
-      .emit(MESSAGE_SOCKET_EVENTS.UPDATED, message)
+      .emit(SERVER_TO_CLIENT.UPDATED, message)
 
     return message
   }
 
-  @SubscribeMessage(MESSAGE_EVENTS.DELETE)
+  @SubscribeMessage(CLIENT_TO_SERVER.DELETE)
   async handleDelete(
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: DeleteMessageDto
@@ -123,11 +123,11 @@ export class MessageGateway
 
     this.server
       .to(this.getUserRoom(message.receiverId))
-      .emit(MESSAGE_SOCKET_EVENTS.DELETED, { deletedMessageId: message.id })
+      .emit(SERVER_TO_CLIENT.DELETED, { deletedMessageId: message.id })
 
     this.server
       .to(this.getUserRoom(message.senderId))
-      .emit(MESSAGE_SOCKET_EVENTS.DELETED, { deletedMessageId: message.id })
+      .emit(SERVER_TO_CLIENT.DELETED, { deletedMessageId: message.id })
   }
 
   private extractToken(client: Socket) {

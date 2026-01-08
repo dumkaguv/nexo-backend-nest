@@ -1,12 +1,12 @@
 export const MESSAGE_NAMESPACE = '/messages' as const
 
-export const MESSAGE_EVENTS = {
+export const CLIENT_TO_SERVER = {
   SEND: 'message:send',
   DELETE: 'message:delete',
   UPDATE: 'message:update'
 } as const
 
-export const MESSAGE_SOCKET_EVENTS = {
+export const SERVER_TO_CLIENT = {
   NEW: 'message:new',
   SENT: 'message:sent',
 
