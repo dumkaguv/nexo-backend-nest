@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
+  ArgumentsHost,
   BadRequestException,
   Catch,
+  ExceptionFilter,
   HttpException,
   Logger
 } from '@nestjs/common'
-
-import { ArgumentsHost, ExceptionFilter } from '@nestjs/common'
 
 import type { Response } from 'express'
 
@@ -15,7 +17,7 @@ import type { Response } from 'express'
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name)
 
-  catch(exception: any, host: ArgumentsHost) {
+  public catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp()
     const response = ctx.getResponse<Response>()
 

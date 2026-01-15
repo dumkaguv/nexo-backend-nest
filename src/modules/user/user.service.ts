@@ -18,11 +18,7 @@ import { CreateUserDto, ResponseUserDto, UpdateUserDto } from './dto'
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private hashPassword(password: string, rounds: number = 10) {
-    return hashSync(password, rounds)
-  }
-
-  async create(createUserDto: CreateUserDto) {
+  public async create(createUserDto: CreateUserDto) {
     const { username, fullName, email, password } = createUserDto
 
     const candidate = await this.prisma.user.findFirst({
@@ -55,7 +51,7 @@ export class UserService {
     return { ...user, followingCount: 0, followersCount: 0 }
   }
 
-  async findFollowingUserIds(userId: number) {
+  public async findFollowingUserIds(userId: number) {
     const following = await this.prisma.subscription.findMany({
       where: { userId },
       select: { followingId: true }
@@ -64,10 +60,13 @@ export class UserService {
     return new Set(following.map(({ followingId }) => followingId))
   }
 
-  async findAll(query: FindAllQueryDto<ResponseUserDto>, userId: number) {
+  public async findAll(
+    query: FindAllQueryDto<ResponseUserDto>,
+    userId: number
+  ) {
     const followingIdsSet = await this.findFollowingUserIds(userId)
 
-    return await paginate({
+    return paginate({
       prisma: this.prisma,
       model: 'user',
       include: { profile: { include: { avatar: true } }, following: true },
@@ -79,7 +78,7 @@ export class UserService {
     })
   }
 
-  async findOne(id: number) {
+  public async findOne(id: number) {
     const [user, followingCount, followersCount] = await Promise.all([
       this.prisma.user.findFirstOrThrow({
         include: { profile: { include: { avatar: true } } },
@@ -96,7 +95,7 @@ export class UserService {
     return { ...user, followingCount, followersCount }
   }
 
-  async findOneWithRelations(id: number) {
+  public async findOneWithRelations(id: number) {
     const [user, followingCount, followersCount] = await Promise.all([
       this.prisma.user.findFirstOrThrow({
         include: includeUserWithRelations,
@@ -113,7 +112,7 @@ export class UserService {
     return { ...user, followingCount, followersCount }
   }
 
-  async update(
+  public async update(
     id: number,
     updateUserDto: UpdateUserDto & { password?: string }
   ) {
@@ -127,11 +126,15 @@ export class UserService {
     return user
   }
 
-  remove(id: number) {
+  public remove(id: number) {
     return this.prisma.user.delete({ where: { id } })
   }
 
-  async comparePasswords(password: string, email?: string, userId?: number) {
+  public async comparePasswords(
+    password: string,
+    email?: string,
+    userId?: number
+  ) {
     const whereCondition = {
       OR: [] as Record<string, string | number>[]
     }
@@ -139,6 +142,7 @@ export class UserService {
     if (email) {
       whereCondition.OR.push({ email })
     }
+
     if (userId) {
       whereCondition.OR.push({ id: userId })
     }
@@ -161,7 +165,7 @@ export class UserService {
     return user
   }
 
-  async changePassword(
+  public async changePassword(
     userId: number,
     oldPassword: string,
     newPassword: string
@@ -172,10 +176,14 @@ export class UserService {
     return this.update(userId, { password: hashedPassword })
   }
 
-  async updateLastActivity(userId: number, date: Date = new Date()) {
+  public async updateLastActivity(userId: number, date: Date = new Date()) {
     await this.prisma.user.update({
       where: { id: userId },
       data: { lastActivity: date }
     })
+  }
+
+  private hashPassword(password: string, rounds: number = 10) {
+    return hashSync(password, rounds)
   }
 }

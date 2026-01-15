@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Prisma } from '@prisma/client'
-
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@/common/constants'
 
@@ -23,7 +25,6 @@ type ModelFindManyArgs<Key extends PrismaModelKey> = Prisma.Args<
 >
 
 type ModelWhere<Key extends PrismaModelKey> = ModelFindManyArgs<Key>['where']
-
 type ModelOrderBy<Key extends PrismaModelKey> =
   ModelFindManyArgs<Key>['orderBy']
 
@@ -55,6 +56,7 @@ type PaginateBaseParams<Key extends PrismaModelKey, Select, Include> = {
   model: Key
   page?: number
   pageSize?: number
+
   ordering?: `${OrderByKeys<Key>}` | `-${OrderByKeys<Key>}` | string
   search?: string
   select?: Select
@@ -65,22 +67,81 @@ type PaginateBaseParams<Key extends PrismaModelKey, Select, Include> = {
 type ComputedFn<Key extends PrismaModelKey, Select, Include, Context> = (
   record: ModelRecord<Key, Select, Include>,
   helpers: { prisma: PrismaClient; context: Context }
-) => any | Promise<any>
+) => unknown | Promise<unknown>
+
+type ComputedMap<Key extends PrismaModelKey, Select, Include, Context> = Record<
+  string,
+  ComputedFn<Key, Select, Include, Context>
+>
+
+type ComputedValues<C extends Record<string, (...args: any[]) => any>> = {
+  [K in keyof C]: Awaited<ReturnType<C[K]>>
+}
 
 type PaginateParams<
   Key extends PrismaModelKey,
   Select,
   Include,
-  Context = undefined
+  Context
 > = Context extends undefined
   ? PaginateBaseParams<Key, Select, Include> & {
-      computed?: Record<string, ComputedFn<Key, Select, Include, undefined>>
+      computed?: ComputedMap<Key, Select, Include, undefined>
       context?: undefined
     }
   : PaginateBaseParams<Key, Select, Include> & {
-      computed?: Record<string, ComputedFn<Key, Select, Include, Context>>
+      computed?: ComputedMap<Key, Select, Include, Context>
       context: Context
     }
+
+type ModelClient<
+  Key extends PrismaModelKey,
+  Select extends ModelFindManyArgs<Key>['select'],
+  Include extends ModelFindManyArgs<Key>['include']
+> = {
+  findMany(
+    args: Prisma.SelectSubset<
+      ModelFindManyArgs<Key> & {
+        skip?: number
+        take?: number
+        orderBy?: Record<string, 'asc' | 'desc'>
+      },
+      ModelFindManyArgs<Key>
+    >
+  ): Prisma.PrismaPromise<ModelRecord<Key, Select, Include>[]>
+  count(args: { where?: ModelWhere<Key> }): Prisma.PrismaPromise<number>
+}
+
+export async function paginate<
+  Key extends PrismaModelKey,
+  Select extends ModelFindManyArgs<Key>['select'] = undefined,
+  Include extends ModelFindManyArgs<Key>['include'] = undefined,
+  Context = undefined
+>(
+  params: PaginateParams<Key, Select, Include, Context> & {
+    computed?: undefined
+  }
+): Promise<{
+  data: ModelRecord<Key, Select, Include>[]
+  total: number
+}>
+
+export async function paginate<
+  Key extends PrismaModelKey,
+  Select extends ModelFindManyArgs<Key>['select'] = undefined,
+  Include extends ModelFindManyArgs<Key>['include'] = undefined,
+  Context = undefined,
+  C extends ComputedMap<Key, Select, Include, Context> = ComputedMap<
+    Key,
+    Select,
+    Include,
+    Context
+  >
+>(
+  params: PaginateParams<Key, Select, Include, Context> & { computed: C }
+): Promise<{
+  data: (ModelRecord<Key, Select, Include> & ComputedValues<C>)[]
+  total: number
+}>
 
 export async function paginate<
   Key extends PrismaModelKey,
@@ -99,7 +160,10 @@ export async function paginate<
   where: whereParam,
   computed,
   context
-}: PaginateParams<Key, Select, Include, Context>) {
+}: PaginateParams<Key, Select, Include, Context>): Promise<{
+  data: any[]
+  total: number
+}> {
   const skip = ((page ?? DEFAULT_PAGE) - 1) * (pageSize ?? DEFAULT_PAGE_SIZE)
   const take = pageSize ?? DEFAULT_PAGE_SIZE
 
@@ -112,14 +176,20 @@ export async function paginate<
     orderBy = { [field]: direction }
   }
 
-  const modelClient = (prisma as any)[model]
+  const modelClient = prisma[model] as unknown as ModelClient<
+    Key,
+    Select,
+    Include
+  >
+
   const capitalizedModel =
     String(model)[0].toUpperCase() + String(model).slice(1).toLowerCase()
+
   const prismaModel = Prisma.dmmf.datamodel.models.find(
-    (model) => model.name === capitalizedModel
+    (m) => m.name === capitalizedModel
   )
 
-  let where: ModelWhere<Key> | undefined = whereParam
+  let where: ModelWhere<Key> | undefined = whereParam as any
 
   if (search && prismaModel) {
     const stringFields = prismaModel.fields
@@ -133,11 +203,9 @@ export async function paginate<
         }))
       } as ModelWhere<Key>
 
-      if (whereParam) {
-        where = { AND: [whereParam, searchWhere] } as ModelWhere<Key>
-      } else {
-        where = searchWhere
-      }
+      where = whereParam
+        ? ({ AND: [whereParam, searchWhere] } as ModelWhere<Key>)
+        : searchWhere
     }
   }
 
@@ -149,29 +217,29 @@ export async function paginate<
       where,
       select,
       include
-    }),
+    } as any),
     modelClient.count({ where })
   ])
 
-  let resultData = data
-
-  if (computed) {
-    resultData = await Promise.all(
-      data.map(async (record) => {
-        const computedValues: Record<string, any> = {}
-        const helpers = { prisma, context } as {
-          prisma: PrismaClient
-          context: Context
-        }
-
-        for (const [key, fn] of Object.entries(computed)) {
-          computedValues[key] = await fn(record, helpers)
-        }
-
-        return { ...record, ...computedValues }
-      })
-    )
+  if (!computed) {
+    return { data, total }
   }
+
+  const resultData = await Promise.all(
+    data.map(async (record) => {
+      const helpers = { prisma, context } as {
+        prisma: PrismaClient
+        context: Context
+      }
+      const computedValues: Record<string, unknown> = {}
+
+      for (const [key, fn] of Object.entries(computed)) {
+        computedValues[key] = await fn(record as any, helpers as any)
+      }
+
+      return { ...record, ...computedValues }
+    })
+  )
 
   return { data: resultData, total }
 }

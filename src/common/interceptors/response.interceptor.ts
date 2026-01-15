@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
   type CallHandler,
   type ExecutionContext,
-  Injectable
+  Injectable,
+  NestInterceptor
 } from '@nestjs/common'
 
-import { NestInterceptor } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { map, Observable } from 'rxjs'
 
@@ -14,9 +16,9 @@ import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from 'src/common/constants'
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
-  constructor(private reflector: Reflector) {}
+  constructor(private readonly reflector: Reflector) {}
 
-  intercept(
+  public intercept(
     context: ExecutionContext,
     next: CallHandler<any>
   ): Observable<any> {

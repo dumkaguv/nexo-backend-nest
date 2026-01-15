@@ -12,13 +12,11 @@ import {
 } from '@nestjs/common'
 
 import { ApiTags } from '@nestjs/swagger'
-import { plainToInstance } from 'class-transformer'
 
 import { ApiOkResponseWrapped, ApiPaginated } from '@/common/decorators'
-import { FindAllQueryDto } from '@/common/dtos'
-import type { AuthRequest } from '@/common/dtos'
+import { type AuthRequest, FindAllQueryDto } from '@/common/dtos'
 
-import { sendPaginatedResponse } from '@/common/utils'
+import { sendPaginatedResponse, sendResponse } from '@/common/utils'
 import { Authorization } from '@/modules/auth/decorators'
 
 import { ResponseMessageDto } from '@/modules/message/dto'
@@ -26,9 +24,7 @@ import { ResponseMessageDto } from '@/modules/message/dto'
 import { ResponseUserProfileDto } from '@/modules/user/dto'
 
 import { ConversationService } from './conversation.service'
-import { ResponseConversationDto } from './dto'
-
-import { CreateConversationDto } from './dto'
+import { CreateConversationDto, ResponseConversationDto } from './dto'
 
 @Controller('conversations')
 @Authorization()
@@ -38,50 +34,50 @@ export class ConversationController {
 
   @Get()
   @ApiPaginated(ResponseConversationDto)
-  async findAll(
+  public findAll(
     @Req() req: AuthRequest,
     @Query() query: FindAllQueryDto<ResponseConversationDto>
   ) {
     return sendPaginatedResponse(
       ResponseConversationDto,
-      await this.conversationService.findAll(req.user.id, query)
+      this.conversationService.findAll(req.user.id, query)
     )
   }
 
   @Get('suggestions')
   @ApiPaginated(ResponseUserProfileDto)
-  async findAllSuggestions(
+  public findAllSuggestions(
     @Req() req: AuthRequest,
     @Query() query: FindAllQueryDto<ResponseUserProfileDto>
   ) {
     return sendPaginatedResponse(
       ResponseUserProfileDto,
-      await this.conversationService.findAllSuggestions(req.user.id, query)
+      this.conversationService.findAllSuggestions(req.user.id, query)
     )
   }
 
   @Get('user/:userId')
   @ApiOkResponseWrapped(ResponseConversationDto)
-  async findOneByUserId(
+  public findOneByUserId(
     @Req() req: AuthRequest,
     @Param('userId') userId: string
   ) {
-    return plainToInstance(
+    return sendResponse(
       ResponseConversationDto,
-      await this.conversationService.findOneByUserId(req.user.id, +userId)
+      this.conversationService.findOneByUserId(req.user.id, +userId)
     )
   }
 
   @Get(':id/messages')
   @ApiPaginated(ResponseMessageDto)
-  async findAllConversationMessages(
+  public findAllConversationMessages(
     @Req() req: AuthRequest,
     @Param('id') id: string,
     @Query() query: FindAllQueryDto<ResponseMessageDto>
   ) {
     return sendPaginatedResponse(
       ResponseMessageDto,
-      await this.conversationService.findAllConversationMessages(
+      this.conversationService.findAllConversationMessages(
         req.user.id,
         +id,
         query
@@ -91,25 +87,25 @@ export class ConversationController {
 
   @Get(':id')
   @ApiOkResponseWrapped(ResponseConversationDto)
-  async findOne(@Req() req: AuthRequest, @Param('id') id: string) {
-    return plainToInstance(
+  public findOne(@Req() req: AuthRequest, @Param('id') id: string) {
+    return sendResponse(
       ResponseConversationDto,
-      await this.conversationService.findOne(req.user.id, +id)
+      this.conversationService.findOne(req.user.id, +id)
     )
   }
 
   @Post()
   @ApiOkResponseWrapped(ResponseConversationDto)
-  async create(@Req() req: AuthRequest, @Body() dto: CreateConversationDto) {
-    return plainToInstance(
+  public create(@Req() req: AuthRequest, @Body() dto: CreateConversationDto) {
+    return sendResponse(
       ResponseConversationDto,
-      await this.conversationService.create(req.user.id, dto)
+      this.conversationService.create(req.user.id, dto)
     )
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Req() req: AuthRequest, @Param('id') id: string) {
+  public remove(@Req() req: AuthRequest, @Param('id') id: string) {
     return this.conversationService.remove(req.user.id, +id)
   }
 }

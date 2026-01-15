@@ -1,6 +1,5 @@
 import { INestApplication } from '@nestjs/common'
-import { Test } from '@nestjs/testing'
-import { TestingModule } from '@nestjs/testing'
+import { Test, TestingModule } from '@nestjs/testing'
 import { App } from 'supertest/types'
 
 import { AppModule } from '@/app/app.module'

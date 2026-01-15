@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { type ApiQueryOptions, ApiQuery } from '@nestjs/swagger'

@@ -18,8 +18,8 @@ export class MessageService {
     private readonly userService: UserService
   ) {}
 
-  async findAll(userId: number, query: FindAllQueryDto<ResponseMessageDto>) {
-    return await paginate({
+  public findAll(userId: number, query: FindAllQueryDto<ResponseMessageDto>) {
+    return paginate({
       prisma: this.prisma,
       model: 'message',
       where: { receiverId: userId },
@@ -31,12 +31,12 @@ export class MessageService {
     })
   }
 
-  async findAllMyMessages(
+  public findAllMyMessages(
     userId: number,
     conversationId: number,
     query: FindAllQueryDto
   ) {
-    return await paginate({
+    return paginate({
       prisma: this.prisma,
       model: 'message',
       where: {
@@ -54,14 +54,14 @@ export class MessageService {
     })
   }
 
-  async findOne(id: number) {
-    return await this.prisma.message.findUnique({
+  public findOne(id: number) {
+    return this.prisma.message.findUnique({
       where: { id },
       include: { files: { include: { file: true } } }
     })
   }
 
-  async create(senderId: number, dto: CreateMessageDto) {
+  public async create(senderId: number, dto: CreateMessageDto) {
     const { receiverId, conversationId, content, fileIds } = dto
 
     if (!content && (!fileIds || fileIds.length === 0)) {
@@ -115,7 +115,7 @@ export class MessageService {
     }
   }
 
-  async update(senderId: number, id: number, dto: UpdateMessageDto) {
+  public async update(senderId: number, id: number, dto: UpdateMessageDto) {
     const message = await this.findOne(id)
 
     if (!message || message.senderId !== senderId) {
@@ -135,14 +135,14 @@ export class MessageService {
       content: sanitizeHtmlContent(content)
     }
 
-    return await this.prisma.message.update({
+    return this.prisma.message.update({
       data: { ...data, isEdited: true },
       where: { id },
       include: { files: { include: { file: true } } }
     })
   }
 
-  async delete(senderId: number, id: number) {
+  public async delete(senderId: number, id: number) {
     const message = await this.findOne(id)
 
     if (!message || message.senderId !== senderId) {
@@ -171,8 +171,8 @@ export class MessageService {
     return uniqueFileIds
   }
 
-  private async createMessageFiles(messageId: number, fileIds: number[]) {
-    return await this.prisma.messageFile.createMany({
+  private createMessageFiles(messageId: number, fileIds: number[]) {
+    return this.prisma.messageFile.createMany({
       data: fileIds.map((fileId) => ({
         messageId,
         fileId

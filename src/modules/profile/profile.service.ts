@@ -15,21 +15,21 @@ export class ProfileService {
     private readonly fileService: FileService
   ) {}
 
-  findOne(userId: number) {
+  public findOne(userId: number) {
     return this.userService.findOne(userId)
   }
 
-  async findOneDetailed(userId: number) {
+  public async findOneDetailed(userId: number) {
     return { user: await this.userService.findOneWithRelations(userId) }
   }
 
-  create(userId: number, fullName: string) {
+  public create(userId: number, fullName: string) {
     return this.prisma.profile.create({
       data: { userId, fullName }
     })
   }
 
-  async update(userId: number, dto: UpdateProfileDto) {
+  public async update(userId: number, dto: UpdateProfileDto) {
     const { avatar, ...rest } = dto
 
     let avatarFileId: number | undefined
@@ -40,7 +40,7 @@ export class ProfileService {
       avatarFileId = avatarFile.id
     }
 
-    return await this.prisma.profile.update({
+    return this.prisma.profile.update({
       data: { ...rest, avatar: connectOrDisconnect(avatarFileId) },
       where: { userId }
     })

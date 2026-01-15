@@ -30,27 +30,27 @@ export class AuthService {
     this.REFRESH_TOKEN_COOKIE_NAME = 'refreshToken'
   }
 
-  async register(res: Response, dto: CreateUserDto) {
+  public async register(res: Response, dto: CreateUserDto) {
     const { id } = await this.userService.create(dto)
     const userAndAccessToken = await this.auth(res, id)
 
     return userAndAccessToken
   }
 
-  async login(res: Response, dto: CreateLoginDto) {
+  public async login(res: Response, dto: CreateLoginDto) {
     const { email, password } = dto
     const user = await this.userService.comparePasswords(password, email)
 
-    return await this.auth(res, user.id)
+    return this.auth(res, user.id)
   }
 
-  async logout(refreshToken: string) {
+  public async logout(refreshToken: string) {
     const userId = await this.tokenService.remove(refreshToken)
 
     await this.userService.updateLastActivity(userId)
   }
 
-  async refresh(req: Request, res: Response) {
+  public async refresh(req: Request, res: Response) {
     const refreshToken = req.cookies[this.REFRESH_TOKEN_COOKIE_NAME] as
       | string
       | undefined
@@ -68,29 +68,27 @@ export class AuthService {
     }
   }
 
-  validate(id: number) {
+  public validate(id: number) {
     return this.userService.findOne(id)
   }
 
-  private async auth(res: Response, id: number, returnUser: boolean = true) {
+  private async auth(res: Response, id: number, returnUser = true) {
     const { accessToken, refreshToken } = await this.tokenService.generate(id)
 
     await this.tokenService.save(refreshToken, id)
 
-    let user
+    const user = returnUser
+      ? await this.userService.findOneWithRelations(id)
+      : null
 
-    if (returnUser) {
-      user = await this.userService.findOneWithRelations(id)
-    }
-
-    this.setCookie(res, refreshToken, this.JWT_REFRESH_TTL)
+    this.setCookie(res, refreshToken, this.JWT_REFRESH_TTL as StringValue)
 
     return { user, accessToken }
   }
 
-  private setCookie(res: Response, token: string, ttl: StringValue | string) {
-    const expires = new Date(Date.now() + ms(ttl as StringValue))
-    const maxAge = ms(ttl as StringValue) as number
+  private setCookie(res: Response, token: string, ttl: StringValue) {
+    const expires = new Date(Date.now() + ms(ttl))
+    const maxAge = ms(ttl)
     const url = new URL(this.FRONT_URL)
 
     res.cookie(this.REFRESH_TOKEN_COOKIE_NAME, token, {

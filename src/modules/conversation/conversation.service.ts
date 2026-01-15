@@ -23,7 +23,7 @@ export class ConversationService {
     private readonly conversationGateway: ConversationGateway
   ) {}
 
-  async findAll(
+  public async findAll(
     userId: number,
     query: FindAllQueryDto<ResponseConversationDto>
   ) {
@@ -52,7 +52,7 @@ export class ConversationService {
     return { ...result, data }
   }
 
-  async findAllSuggestions(
+  public findAllSuggestions(
     userId: number,
     query: FindAllQueryDto<ResponseUserProfileDto>
   ) {
@@ -88,19 +88,15 @@ export class ConversationService {
     })
   }
 
-  async findAllConversationMessages(
+  public findAllConversationMessages(
     userId: number,
     conversationId: number,
     query: FindAllQueryDto<ResponseMessageDto>
   ) {
-    return await this.messageService.findAllMyMessages(
-      userId,
-      conversationId,
-      query
-    )
+    return this.messageService.findAllMyMessages(userId, conversationId, query)
   }
 
-  async findOne(userId: number, id: number) {
+  public async findOne(userId: number, id: number) {
     const conversation = await this.prisma.conversation.findFirst({
       where: {
         AND: [{ id }, { OR: [{ senderId: userId }, { receiverId: userId }] }]
@@ -124,7 +120,7 @@ export class ConversationService {
     }
   }
 
-  async findOneByUserId(userId: number, otherUserId: number) {
+  public async findOneByUserId(userId: number, otherUserId: number) {
     const conversation = await this.prisma.conversation.findFirst({
       where: {
         OR: [
@@ -151,7 +147,7 @@ export class ConversationService {
     }
   }
 
-  async create(senderId: number, dto: CreateConversationDto) {
+  public async create(senderId: number, dto: CreateConversationDto) {
     const conversation = await this.prisma.conversation.create({
       data: { senderId, ...dto },
       include: {
@@ -165,7 +161,7 @@ export class ConversationService {
     return conversation
   }
 
-  async remove(userId: number, id: number) {
+  public async remove(userId: number, id: number) {
     const exists = await this.prisma.conversation.findFirst({
       where: {
         id,

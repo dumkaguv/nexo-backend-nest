@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   ConnectedSocket,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer
 } from '@nestjs/websockets'
-import { OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
 
 import { TokenService } from '@/modules/token/token.service'
@@ -16,7 +18,6 @@ import { CLIENT_TO_SERVER, SERVER_TO_CLIENT, USER_NAMESPACE } from './constants'
 export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   private readonly server: Server
-
   private readonly onlineUsers = new Map<number, string>()
 
   constructor(
@@ -24,7 +25,12 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly prisma: PrismaService
   ) {}
 
-  async handleConnection(client: Socket) {
+  @SubscribeMessage(CLIENT_TO_SERVER.ONLINE_LIST_REQUEST)
+  public handleOnlineListRequest(@ConnectedSocket() client: Socket) {
+    this.emitOnlineList(client)
+  }
+
+  public async handleConnection(client: Socket) {
     const token = this.extractToken(client)
 
     if (!token) {
@@ -37,7 +43,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const payload = await this.tokenService.validateAccessToken(token)
 
       client.data.userId = payload.id
-      client.join(this.getUserRoom(payload.id))
+      void client.join(this.getUserRoom(payload.id))
       this.emitOnline(client)
       this.emitOnlineList(client)
     } catch {
@@ -45,17 +51,17 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  handleDisconnect(client: Socket) {
+  public handleDisconnect(client: Socket) {
     const userId = client.data.userId as number | undefined
 
     if (userId) {
       this.emitOffline(client)
       this.emitOnlineList(client)
-      client.leave(this.getUserRoom(userId))
+      void client.leave(this.getUserRoom(userId))
     }
   }
 
-  emitOnline(@ConnectedSocket() client: Socket) {
+  public emitOnline(@ConnectedSocket() client: Socket) {
     const userId = client.data.userId as number | undefined
 
     if (!userId) {
@@ -73,7 +79,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit(SERVER_TO_CLIENT.ONLINE, userId)
   }
 
-  emitOffline(@ConnectedSocket() client: Socket) {
+  public emitOffline(@ConnectedSocket() client: Socket) {
     const userId = client.data.userId as number | undefined
 
     if (!userId) {
@@ -89,7 +95,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.onlineUsers.delete(userId)
 
     this.server.emit(SERVER_TO_CLIENT.OFFLINE, userId)
-    this.updateLastActivity(userId)
+    void this.updateLastActivity(userId)
   }
 
   private emitOnlineList(client: Socket) {
@@ -107,11 +113,6 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } catch {
       // Ignore update failures to avoid breaking disconnect flow
     }
-  }
-
-  @SubscribeMessage(CLIENT_TO_SERVER.ONLINE_LIST_REQUEST)
-  handleOnlineListRequest(@ConnectedSocket() client: Socket) {
-    this.emitOnlineList(client)
   }
 
   private extractToken(client: Socket) {

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+
 import { INestApplicationContext } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { IoAdapter } from '@nestjs/platform-socket.io'
@@ -11,7 +13,7 @@ export class ConfigurableSocketIoAdapter extends IoAdapter {
     super(app)
   }
 
-  createIOServer(port: number, options?: ServerOptions) {
+  public createIOServer(port: number, options?: ServerOptions) {
     const origin = this.configService.getOrThrow<string>('FRONT_URL')
     const cors = {
       ...(options?.cors ?? {}),

@@ -1,5 +1,12 @@
-import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets'
-import { OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets'
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
+import {
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  WebSocketGateway,
+  WebSocketServer
+} from '@nestjs/websockets'
+
 import { Server, Socket } from 'socket.io'
 
 import { TokenService } from '@/modules/token/token.service'
@@ -32,7 +39,7 @@ export class ConversationGateway
 
   constructor(private readonly tokenService: TokenService) {}
 
-  async handleConnection(client: Socket) {
+  public async handleConnection(client: Socket) {
     const token = this.extractToken(client)
 
     if (!token) {
@@ -45,21 +52,21 @@ export class ConversationGateway
       const payload = await this.tokenService.validateAccessToken(token)
 
       client.data.userId = payload.id
-      client.join(this.getUserRoom(payload.id))
+      void client.join(this.getUserRoom(payload.id))
     } catch {
       client.disconnect()
     }
   }
 
-  handleDisconnect(client: Socket) {
+  public handleDisconnect(client: Socket) {
     const userId = client.data.userId as number | undefined
 
     if (userId) {
-      client.leave(this.getUserRoom(userId))
+      void client.leave(this.getUserRoom(userId))
     }
   }
 
-  emitNew(conversation: ConversationWithUsers) {
+  public emitNew(conversation: ConversationWithUsers) {
     const senderPayload = this.mapConversationForUser(
       conversation,
       conversation.senderId
@@ -78,7 +85,7 @@ export class ConversationGateway
       .emit(SERVER_TO_CLIENT.NEW, receiverPayload)
   }
 
-  emitDeleted(conversation: {
+  public emitDeleted(conversation: {
     id: number
     senderId: number
     receiverId: number

@@ -1,20 +1,18 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { type ClassConstructor, plainToInstance } from 'class-transformer'
 
-import { plainToInstance } from 'class-transformer'
-
-import { ClassConstructor } from 'class-transformer'
-
-type Data = {
-  data: any
+type Paginated<T> = {
+  data: T[]
   total: number
 }
 
-export function sendPaginatedResponse(
-  cls: ClassConstructor<unknown>,
-  { data, total }: Data
-) {
+export async function sendPaginatedResponse<T, R>(
+  cls: ClassConstructor<R>,
+  resultPromise: Promise<Paginated<T>>
+): Promise<Paginated<R>> {
+  const result = await resultPromise
+
   return {
-    data: plainToInstance(cls, data),
-    total
+    data: plainToInstance(cls, result.data),
+    total: result.total
   }
 }

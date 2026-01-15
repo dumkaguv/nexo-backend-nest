@@ -16,7 +16,7 @@ export class CloudinaryService {
     })
   }
 
-  async uploadFromBuffer(
+  public uploadFromBuffer(
     file: Express.Multer.File,
     userId: number,
     folder: string = 'shared'
@@ -28,7 +28,7 @@ export class CloudinaryService {
         { folder: folderName },
         (error, result) => {
           if (error || !result) {
-            return reject(error || new Error('No result'))
+            return reject(this.toError(error, 'No result'))
           }
 
           resolve(result)
@@ -39,13 +39,14 @@ export class CloudinaryService {
     })
   }
 
-  async delete(publicId: string): Promise<void> {
+  public delete(publicId: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      cloudinary.uploader.destroy(publicId, (error, result) => {
+      void cloudinary.uploader.destroy(publicId, (error, result) => {
         if (error) {
-          return reject(error)
+          return reject(this.toError(error, 'Cloudinary delete failed'))
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (result?.result !== 'ok' && result?.result !== 'not found') {
           return reject(new Error(`Failed to delete file: ${publicId}`))
         }
@@ -53,5 +54,17 @@ export class CloudinaryService {
         resolve()
       })
     })
+  }
+
+  private toError(err: unknown, fallback: string): Error {
+    if (err instanceof Error) {
+      return err
+    }
+
+    if (typeof err === 'string') {
+      return new Error(err)
+    }
+
+    return new Error(fallback)
   }
 }

@@ -34,7 +34,7 @@ export class TokenService {
     )
   }
 
-  async generate(userId: number) {
+  public async generate(userId: number) {
     const payload: JwtPayload = { id: userId }
 
     const accessToken = await this.jwtService.signAsync(payload, {
@@ -50,7 +50,7 @@ export class TokenService {
     return { accessToken, refreshToken }
   }
 
-  async save(refreshToken: string, userId: number) {
+  public async save(refreshToken: string, userId: number) {
     const existing = await this.prisma.token.findUnique({
       where: { userId }
     })
@@ -67,19 +67,19 @@ export class TokenService {
     })
   }
 
-  async validateRefreshToken(refreshToken: string): Promise<JwtPayload> {
-    return await this.jwtService.verifyAsync(refreshToken, {
+  public validateRefreshToken(refreshToken: string): Promise<JwtPayload> {
+    return this.jwtService.verifyAsync(refreshToken, {
       secret: this.JWT_REFRESH_SECRET
     })
   }
 
-  async validateAccessToken(accessToken: string): Promise<JwtPayload> {
-    return await this.jwtService.verifyAsync(accessToken, {
+  public validateAccessToken(accessToken: string): Promise<JwtPayload> {
+    return this.jwtService.verifyAsync(accessToken, {
       secret: this.JWT_ACCESS_SECRET
     })
   }
 
-  async remove(refreshToken: string) {
+  public async remove(refreshToken: string) {
     const { id, userId } = await this.prisma.token.findFirstOrThrow({
       select: { id: true, userId: true },
       where: { refreshToken }
@@ -92,7 +92,7 @@ export class TokenService {
     return userId
   }
 
-  async refresh(refreshToken: string) {
+  public async refresh(refreshToken: string) {
     const { id } = await this.validateRefreshToken(refreshToken)
     const existingToken = await this.prisma.token.findUniqueOrThrow({
       where: { userId: id }

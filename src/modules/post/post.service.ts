@@ -25,8 +25,8 @@ export class PostService {
     private readonly userService: UserService
   ) {}
 
-  async findAll(userId: number, query: FindAllQueryDto<ResponsePostDto>) {
-    return await paginate({
+  public findAll(userId: number, query: FindAllQueryDto<ResponsePostDto>) {
+    return paginate({
       prisma: this.prisma,
       model: 'post',
       include: {
@@ -40,17 +40,17 @@ export class PostService {
           !!(await prisma.postLike.findFirst({
             where: { postId: id, userId: context.userId }
           })),
-        likesCount: async ({ id }, { prisma }) =>
-          await prisma.postLike.count({ where: { postId: id } }),
-        commentsCount: async ({ id }, { prisma }) =>
-          await prisma.postComment.count({ where: { postId: id } })
+        likesCount: ({ id }, { prisma }) =>
+          prisma.postLike.count({ where: { postId: id } }),
+        commentsCount: ({ id }, { prisma }) =>
+          prisma.postComment.count({ where: { postId: id } })
       },
       context: { userId }
     })
   }
 
-  async findAllMy(userId: number, query: FindAllQueryDto<ResponsePostDto>) {
-    return await paginate({
+  public findAllMy(userId: number, query: FindAllQueryDto<ResponsePostDto>) {
+    return paginate({
       prisma: this.prisma,
       model: 'post',
       where: { userId },
@@ -65,20 +65,20 @@ export class PostService {
           !!(await prisma.postLike.findFirst({
             where: { postId: id, userId: context.userId }
           })),
-        likesCount: async ({ id }, { prisma }) =>
-          await prisma.postLike.count({ where: { postId: id } }),
-        commentsCount: async ({ id }, { prisma }) =>
-          await prisma.postComment.count({ where: { postId: id } })
+        likesCount: ({ id }, { prisma }) =>
+          prisma.postLike.count({ where: { postId: id } }),
+        commentsCount: ({ id }, { prisma }) =>
+          prisma.postComment.count({ where: { postId: id } })
       },
       context: { userId }
     })
   }
 
-  async findAllComments(
+  public findAllComments(
     postId: number,
     query: FindAllQueryDto<ResponsePostCommentDto>
   ) {
-    return await paginate({
+    return paginate({
       prisma: this.prisma,
       model: 'postComment',
       include: {
@@ -90,14 +90,14 @@ export class PostService {
     })
   }
 
-  async findAllLikes(
+  public async findAllLikes(
     postId: number,
     userId: number,
     query: FindAllQueryDto<ResponsePostLikeDto>
   ) {
     const followingUserIds = await this.userService.findFollowingUserIds(userId)
 
-    return await paginate({
+    return paginate({
       prisma: this.prisma,
       model: 'postLike',
       include: { user: { include: { profile: true } } },
@@ -112,13 +112,13 @@ export class PostService {
     })
   }
 
-  findOne(id: number) {
+  public findOne(id: number) {
     return this.prisma.post.findFirstOrThrow({
       where: { id }
     })
   }
 
-  async create(userId: number, dto: CreatePostDto) {
+  public async create(userId: number, dto: CreatePostDto) {
     const { files, content, ...rest } = dto
     const sanitizedContent = sanitizeHtmlContent(content)
 
@@ -139,7 +139,7 @@ export class PostService {
     return post
   }
 
-  async createLike(userId: number, postId: number) {
+  public async createLike(userId: number, postId: number) {
     await this.prisma.postLike.create({
       data: { userId, postId }
     })
@@ -147,7 +147,7 @@ export class PostService {
     return {}
   }
 
-  async createComment(
+  public async createComment(
     userId: number,
     postId: number,
     dto: CreatePostCommentDto
@@ -161,7 +161,7 @@ export class PostService {
     return {}
   }
 
-  async update(id: number, dto: UpdatePostDto) {
+  public async update(id: number, dto: UpdatePostDto) {
     const { files, content, ...rest } = dto
 
     if (files?.length) {
@@ -182,7 +182,7 @@ export class PostService {
     })
   }
 
-  async updateComment(
+  public async updateComment(
     id: number,
     commentId: number,
     dto: CreatePostCommentDto
@@ -197,17 +197,21 @@ export class PostService {
     return {}
   }
 
-  remove(id: number) {
+  public remove(id: number) {
     return this.prisma.post.delete({ where: { id } })
   }
 
-  async removeLike(userId: number, postId: number) {
-    return await this.prisma.postLike.delete({
+  public removeLike(userId: number, postId: number) {
+    return this.prisma.postLike.delete({
       where: { userId_postId: { userId, postId } }
     })
   }
 
-  async removeComment(userId: number, postId: number, commentId: number) {
+  public async removeComment(
+    userId: number,
+    postId: number,
+    commentId: number
+  ) {
     const existingComment = await this.prisma.postComment.findFirstOrThrow({
       where: { id: commentId, postId }
     })
@@ -218,7 +222,7 @@ export class PostService {
       throw new BadRequestException('You are not owner of this comment')
     }
 
-    return await this.prisma.postComment.delete({
+    return this.prisma.postComment.delete({
       where: { id: commentId, userId, postId }
     })
   }

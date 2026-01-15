@@ -1,4 +1,5 @@
 import { SetMetadata } from '@nestjs/common'
 
-export const ResponseMessage = (message: string) =>
-  SetMetadata('responseMessage', message)
+export function ResponseMessage(message: string) {
+  return SetMetadata('responseMessage', message)
+}

@@ -10,7 +10,11 @@ export class UploadService {
     private readonly fileService: FileService
   ) {}
 
-  async upload(file: Express.Multer.File, userId: number, folder?: string) {
+  public async upload(
+    file: Express.Multer.File,
+    userId: number,
+    folder?: string
+  ) {
     const {
       public_id,
       secure_url,
@@ -22,7 +26,7 @@ export class UploadService {
     return { id, secure_url, type }
   }
 
-  async delete(id: number) {
+  public async delete(id: number) {
     const { publicId } = await this.fileService.findOne(id)
 
     await this.fileService.delete(publicId, id)

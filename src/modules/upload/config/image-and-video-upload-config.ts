@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export function imageAndVideoFileFilter(
   _req: any,
   file: Express.Multer.File,
-  cb: Function
+  cb: (error: Error | null, acceptFile: boolean) => void
 ) {
   if (
     !file.mimetype.startsWith('image/') &&

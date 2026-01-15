@@ -157,7 +157,7 @@ describe('AuthService', () => {
     tokenService.save.mockResolvedValue({ id: 3 })
 
     await expect(service.refresh(req, res)).resolves.toEqual({
-      user: undefined,
+      user: null,
       accessToken: 'access'
     })
     expect(tokenService.generate).toHaveBeenCalledWith(3)

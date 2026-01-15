@@ -50,5 +50,6 @@ const sanitizeOptions = {
   allowedSchemes: ['http', 'https', 'mailto', 'tel']
 }
 
-export const sanitizeHtmlContent = (value?: string) =>
-  value ? sanitizeHtml(value, sanitizeOptions).trim() : ''
+export function sanitizeHtmlContent(value?: string) {
+  return value ? sanitizeHtml(value, sanitizeOptions).trim() : ''
+}

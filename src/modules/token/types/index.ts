@@ -1,1 +1,1 @@
-export * from './jwt-payload'
+export type * from './jwt-payload'

@@ -4,6 +4,8 @@ import { NestFactory, Reflector } from '@nestjs/core'
 
 import cookieParser from 'cookie-parser'
 
+import { Request, Response } from 'express'
+
 import { AppModule } from './app/app.module'
 import { ConfigurableSocketIoAdapter } from './common/adapters/socket-io.adapter'
 import { AllExceptionsFilter } from './common/filters'
@@ -47,7 +49,9 @@ async function bootstrap() {
 
   setupSwagger(app)
 
-  app.getHttpAdapter().get('/', (_req, res) => res.redirect('/api'))
+  app
+    .getHttpAdapter()
+    .get('/', (_req: Request, res: Response) => res.redirect('/api'))
 
   await app.listen(config.get<string>('PORT') ?? 3000)
 
@@ -55,4 +59,5 @@ async function bootstrap() {
     `Server started on url http://localhost:${config.get<string>('PORT') ?? 3000}`
   )
 }
-bootstrap()
+
+void bootstrap()

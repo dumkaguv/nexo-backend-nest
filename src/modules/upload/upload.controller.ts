@@ -11,10 +11,10 @@ import {
 } from '@nestjs/common'
 
 import { ApiBody, ApiConsumes } from '@nestjs/swagger'
-import { plainToInstance } from 'class-transformer'
 
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import type { AuthRequest } from '@/common/dtos'
+import { sendResponse } from '@/common/utils'
 import { Authorization } from '@/modules/auth/decorators'
 
 import { FileUpload } from './decorators'
@@ -32,20 +32,20 @@ export class UploadController {
   @ApiOkResponseWrapped(ResponseUploadDto)
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateUploadDto })
-  async upload(
+  public upload(
     @Req() req: AuthRequest,
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: CreateUploadDto
   ) {
-    return plainToInstance(
+    return sendResponse(
       ResponseUploadDto,
-      await this.uploadService.upload(file, req.user.id, dto.folder)
+      this.uploadService.upload(file, req.user.id, dto.folder)
     )
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('id') id: string) {
-    return await this.uploadService.delete(+id)
+  public delete(@Param('id') id: string) {
+    return this.uploadService.delete(+id)
   }
 }

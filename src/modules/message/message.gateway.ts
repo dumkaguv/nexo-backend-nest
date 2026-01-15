@@ -1,13 +1,16 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
   WsException
 } from '@nestjs/websockets'
 
-import { OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
 
 import { TokenService } from '@/modules/token/token.service'
@@ -33,35 +36,8 @@ export class MessageGateway
     private readonly messageService: MessageService
   ) {}
 
-  async handleConnection(client: Socket) {
-    const token = this.extractToken(client)
-
-    if (!token) {
-      client.disconnect()
-
-      return
-    }
-
-    try {
-      const payload = await this.tokenService.validateAccessToken(token)
-
-      client.data.userId = payload.id
-      client.join(this.getUserRoom(payload.id))
-    } catch {
-      client.disconnect()
-    }
-  }
-
-  handleDisconnect(client: Socket) {
-    const userId = client.data.userId as number | undefined
-
-    if (userId) {
-      client.leave(this.getUserRoom(userId))
-    }
-  }
-
   @SubscribeMessage(CLIENT_TO_SERVER.SEND)
-  async handleSend(
+  public async handleSend(
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: CreateMessageDto
   ) {
@@ -85,7 +61,7 @@ export class MessageGateway
   }
 
   @SubscribeMessage(CLIENT_TO_SERVER.UPDATE)
-  async handleUpdate(
+  public async handleUpdate(
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: UpdateMessageDto
   ) {
@@ -109,7 +85,7 @@ export class MessageGateway
   }
 
   @SubscribeMessage(CLIENT_TO_SERVER.DELETE)
-  async handleDelete(
+  public async handleDelete(
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: DeleteMessageDto
   ) {
@@ -128,6 +104,33 @@ export class MessageGateway
     this.server
       .to(this.getUserRoom(message.senderId))
       .emit(SERVER_TO_CLIENT.DELETED, { deletedMessageId: message.id })
+  }
+
+  public async handleConnection(client: Socket) {
+    const token = this.extractToken(client)
+
+    if (!token) {
+      client.disconnect()
+
+      return
+    }
+
+    try {
+      const payload = await this.tokenService.validateAccessToken(token)
+
+      client.data.userId = payload.id
+      void client.join(this.getUserRoom(payload.id))
+    } catch {
+      client.disconnect()
+    }
+  }
+
+  public handleDisconnect(client: Socket) {
+    const userId = client.data.userId as number | undefined
+
+    if (userId) {
+      void client.leave(this.getUserRoom(userId))
+    }
   }
 
   private extractToken(client: Socket) {

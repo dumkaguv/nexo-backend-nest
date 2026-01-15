@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 
+// eslint-disable-next-line func-style
 const prismaClientSingleton = () => new PrismaClient()
 
 declare global {

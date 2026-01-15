@@ -11,6 +11,105 @@ import { ResponseSubscriptionDto } from './dto'
 export class SubscriptionService {
   constructor(private readonly prisma: PrismaService) {}
 
+  public async findAllSubscriptions(
+    userId: number,
+    query: FindAllQueryDto<ResponseSubscriptionDto>,
+    searchFollowers = true
+  ) {
+    const { data: dataDb, total } = await paginate({
+      model: 'subscription',
+      prisma: this.prisma,
+      include: searchFollowers
+        ? { user: { include: { profile: { include: { avatar: true } } } } }
+        : {
+            following: { include: { profile: { include: { avatar: true } } } }
+          },
+      where: this.getWhereSubscriptionParam(userId, query, searchFollowers),
+      ...query
+    })
+
+    const data = dataDb.map((record) => {
+      if (record.following) {
+        const { following, ...rest } = record
+
+        return { ...rest, user: following }
+      }
+
+      return record
+    })
+
+    return { data, total }
+  }
+
+  public async findOneSubscriptionCount(userId: number) {
+    const [followers, following] = await Promise.all([
+      this.prisma.subscription.count({
+        where: this.getWhereSubscriptionParam(userId, {})
+      }),
+      this.prisma.subscription.count({
+        where: this.getWhereSubscriptionParam(userId, {}, false)
+      })
+    ])
+
+    return { followers, following }
+  }
+
+  public async follow(userId: number, idToFollow: number) {
+    if (userId === idToFollow) {
+      throw new BadRequestException('You cannot follow yourself')
+    }
+
+    const exists = await this.prisma.subscription.findFirst({
+      where: { userId, followingId: idToFollow }
+    })
+
+    if (exists) {
+      throw new BadRequestException('This user already has this follower')
+    }
+
+    await this.prisma.subscription.create({
+      data: { userId, followingId: idToFollow }
+    })
+
+    return {}
+  }
+
+  public async unfollow(userId: number, idToUnfollow: number) {
+    const exists = await this.prisma.subscription.findFirst({
+      where: { userId, followingId: idToUnfollow }
+    })
+
+    if (!exists) {
+      throw new BadRequestException('You do not following this user')
+    }
+
+    await this.prisma.subscription.delete({
+      where: {
+        userId_followingId: { userId, followingId: idToUnfollow }
+      }
+    })
+
+    return {}
+  }
+
+  public async removeFollower(userId: number, followerId: number) {
+    const exists = await this.prisma.subscription.findFirst({
+      where: { userId: followerId, followingId: userId }
+    })
+
+    if (!exists) {
+      throw new BadRequestException('This user is not your follower')
+    }
+
+    await this.prisma.subscription.delete({
+      where: {
+        userId_followingId: { userId: followerId, followingId: userId }
+      }
+    })
+
+    return {}
+  }
+
   private getWhereSubscriptionParam(
     userId: number,
     query: FindAllQueryDto<ResponseSubscriptionDto>,
@@ -41,104 +140,5 @@ export class SubscriptionService {
     }
 
     return where
-  }
-
-  async findAllSubscriptions(
-    userId: number,
-    query: FindAllQueryDto<ResponseSubscriptionDto>,
-    searchFollowers = true
-  ) {
-    const { data: dataDb, total } = await paginate({
-      model: 'subscription',
-      prisma: this.prisma,
-      include: searchFollowers
-        ? { user: { include: { profile: { include: { avatar: true } } } } }
-        : {
-            following: { include: { profile: { include: { avatar: true } } } }
-          },
-      where: this.getWhereSubscriptionParam(userId, query, searchFollowers),
-      ...query
-    })
-
-    const data = dataDb.map((record) => {
-      if (record.following) {
-        const { following, ...rest } = record
-
-        return { user: following, ...rest }
-      }
-
-      return record
-    })
-
-    return { data, total }
-  }
-
-  async findOneSubscriptionCount(userId: number) {
-    const [followers, following] = await Promise.all([
-      this.prisma.subscription.count({
-        where: this.getWhereSubscriptionParam(userId, {})
-      }),
-      this.prisma.subscription.count({
-        where: this.getWhereSubscriptionParam(userId, {}, false)
-      })
-    ])
-
-    return { followers, following }
-  }
-
-  async follow(userId: number, idToFollow: number) {
-    if (userId === idToFollow) {
-      throw new BadRequestException('You cannot follow yourself')
-    }
-
-    const exists = await this.prisma.subscription.findFirst({
-      where: { userId, followingId: idToFollow }
-    })
-
-    if (exists) {
-      throw new BadRequestException('This user already has this follower')
-    }
-
-    await this.prisma.subscription.create({
-      data: { userId, followingId: idToFollow }
-    })
-
-    return {}
-  }
-
-  async unfollow(userId: number, idToUnfollow: number) {
-    const exists = await this.prisma.subscription.findFirst({
-      where: { userId, followingId: idToUnfollow }
-    })
-
-    if (!exists) {
-      throw new BadRequestException('You do not following this user')
-    }
-
-    await this.prisma.subscription.delete({
-      where: {
-        userId_followingId: { userId, followingId: idToUnfollow }
-      }
-    })
-
-    return {}
-  }
-
-  async removeFollower(userId: number, followerId: number) {
-    const exists = await this.prisma.subscription.findFirst({
-      where: { userId: followerId, followingId: userId }
-    })
-
-    if (!exists) {
-      throw new BadRequestException('This user is not your follower')
-    }
-
-    await this.prisma.subscription.delete({
-      where: {
-        userId_followingId: { userId: followerId, followingId: userId }
-      }
-    })
-
-    return {}
   }
 }

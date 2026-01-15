@@ -1,20 +1,19 @@
 import { Body, Controller, Post, Req, Res } from '@nestjs/common'
 
 import { ApiOperation } from '@nestjs/swagger'
-import { plainToInstance } from 'class-transformer'
 
 import { ApiOkResponseWrapped } from '@/common/decorators'
 import { type AuthRequest, EmptyResponseDto } from '@/common/dtos'
+import { sendResponse } from '@/common/utils'
 import { CreateUserDto } from '@/modules/user/dto'
 
 import { AuthService } from './auth.service'
 import {
+  CreateLoginDto,
   ResponseLoginDto,
   ResponseRefreshDto,
   ResponseRegisterDto
 } from './dto'
-
-import { CreateLoginDto } from './dto'
 
 import type { Request, Response } from 'express'
 
@@ -28,31 +27,28 @@ export class AuthController {
     description: `Validation pattern for password:
     \`/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':"\\\\|,.<>/?]).{8,}$/\``
   })
-  async register(
+  public register(
     @Res({ passthrough: true }) res: Response,
     @Body() dto: CreateUserDto
   ) {
-    return plainToInstance(
+    return sendResponse(
       ResponseRegisterDto,
-      await this.authService.register(res, dto)
+      this.authService.register(res, dto)
     )
   }
 
   @Post('login')
   @ApiOkResponseWrapped(ResponseLoginDto)
-  async login(
+  public login(
     @Res({ passthrough: true }) res: Response,
     @Body() dto: CreateLoginDto
   ) {
-    return plainToInstance(
-      ResponseLoginDto,
-      await this.authService.login(res, dto)
-    )
+    return sendResponse(ResponseLoginDto, this.authService.login(res, dto))
   }
 
   @Post('logout')
   @ApiOkResponseWrapped(EmptyResponseDto)
-  async logout(
+  public logout(
     @Req() req: AuthRequest,
     @Res({ passthrough: true }) res: Response
   ) {
@@ -60,21 +56,18 @@ export class AuthController {
 
     res.clearCookie('refreshToken')
 
-    return plainToInstance(
+    return sendResponse(
       EmptyResponseDto,
-      await this.authService.logout(refreshToken)
+      this.authService.logout(refreshToken as string)
     )
   }
 
   @Post('refresh')
   @ApiOkResponseWrapped(ResponseRefreshDto)
-  async refresh(
+  public refresh(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response
   ) {
-    return plainToInstance(
-      ResponseRefreshDto,
-      await this.authService.refresh(req, res)
-    )
+    return sendResponse(ResponseRefreshDto, this.authService.refresh(req, res))
   }
 }
