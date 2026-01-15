@@ -23,6 +23,8 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Prettier check
         run: npm run format:check
@@ -50,6 +52,8 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Run tests
         run: npm test
@@ -71,6 +75,8 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Build app
         run: npm run build
