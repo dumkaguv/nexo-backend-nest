@@ -49,6 +49,18 @@ export class PostController {
     )
   }
 
+  @Get('my')
+  @ApiPaginated(ResponsePostDto)
+  async findAllMy(
+    @Req() req: AuthRequest,
+    @Query() query: FindAllQueryDto<ResponsePostDto>
+  ) {
+    return sendPaginatedResponse(
+      ResponsePostDto,
+      await this.postService.findAllMy(req.user.id, query)
+    )
+  }
+
   @Get(':id/comments')
   @ApiPaginated(ResponsePostCommentDto)
   async findAllComments(

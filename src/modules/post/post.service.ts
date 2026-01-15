@@ -6,7 +6,6 @@ import {
   paginate,
   sanitizeHtmlContent
 } from '@/common/utils'
-import { FileService } from '@/modules/file/file.service'
 import { UserService } from '@/modules/user/user.service'
 import { PrismaService } from '@/prisma/prisma.service'
 
@@ -23,14 +22,38 @@ import {
 export class PostService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly userService: UserService,
-    private readonly fileService: FileService
+    private readonly userService: UserService
   ) {}
 
   async findAll(userId: number, query: FindAllQueryDto<ResponsePostDto>) {
     return await paginate({
       prisma: this.prisma,
       model: 'post',
+      include: {
+        user: { include: { profile: { include: { avatar: true } } } },
+        files: { include: { file: true } }
+      },
+      ...query,
+      ordering: query.ordering ? query.ordering : '-createdAt',
+      computed: {
+        isLiked: async ({ id }, { prisma, context }) =>
+          !!(await prisma.postLike.findFirst({
+            where: { postId: id, userId: context.userId }
+          })),
+        likesCount: async ({ id }, { prisma }) =>
+          await prisma.postLike.count({ where: { postId: id } }),
+        commentsCount: async ({ id }, { prisma }) =>
+          await prisma.postComment.count({ where: { postId: id } })
+      },
+      context: { userId }
+    })
+  }
+
+  async findAllMy(userId: number, query: FindAllQueryDto<ResponsePostDto>) {
+    return await paginate({
+      prisma: this.prisma,
+      model: 'post',
+      where: { userId },
       include: {
         user: { include: { profile: { include: { avatar: true } } } },
         files: { include: { file: true } }
