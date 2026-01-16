@@ -1,1 +1,1 @@
-export * from './response-file.dto'
+export * from './responses'

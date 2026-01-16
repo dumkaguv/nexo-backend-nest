@@ -1,2 +1,2 @@
-export * from './create-upload.dto'
-export * from './response-upload.dto'
+export * from './payloads'
+export * from './responses'
