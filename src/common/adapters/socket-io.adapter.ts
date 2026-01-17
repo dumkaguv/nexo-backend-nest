@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-
 import { INestApplicationContext } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { IoAdapter } from '@nestjs/platform-socket.io'
@@ -21,6 +19,7 @@ export class ConfigurableSocketIoAdapter extends IoAdapter {
       credentials: true
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return super.createIOServer(port, {
       ...options,
       cors

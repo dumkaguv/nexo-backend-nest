@@ -12,23 +12,7 @@ import { Server, Socket } from 'socket.io'
 import { TokenService } from '@/modules/token/token.service'
 
 import { CONVERSATION_NAMESPACE, SERVER_TO_CLIENT } from './constants'
-
-type ConversationWithUsers = {
-  id: number
-  senderId: number
-  receiverId: number
-  createdAt: Date
-  updatedAt: Date
-  sender: unknown
-  receiver: unknown
-}
-
-type ConversationResponsePayload = {
-  id: number
-  receiver: unknown
-  createdAt: Date
-  updatedAt: Date
-}
+import { ConversationResponsePayload, ConversationWithUsers } from './types'
 
 @WebSocketGateway({ namespace: CONVERSATION_NAMESPACE })
 export class ConversationGateway

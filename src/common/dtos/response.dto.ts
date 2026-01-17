@@ -2,12 +2,12 @@ import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 
 export class BaseResponseDto<TData> {
-  @ApiProperty({ example: 'Success' })
-  message: string
+  @ApiProperty({ example: 'Success', required: false, nullable: true })
+  message?: string
 
-  @ApiProperty({ isArray: false })
+  @ApiProperty({ isArray: false, required: false, nullable: true })
   @Type(() => Object)
-  data: TData
+  data?: TData
 }
 
 export class PaginatedResponseDto<TData> extends BaseResponseDto<TData> {

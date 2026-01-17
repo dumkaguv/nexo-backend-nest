@@ -2,10 +2,23 @@ import { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes'
 
+import type { WsDocs } from '@/common/swagger/ws-docs'
+import {
+  buildConversationWsDocs,
+  CONVERSATION_WS_MODELS
+} from '@/modules/conversation/conversation.ws-docs'
+import {
+  buildMessageWsDocs,
+  MESSAGE_WS_MODELS
+} from '@/modules/message/message.ws-docs'
+import { buildUserWsDocs } from '@/modules/user/user.ws-docs'
+
 export function setupSwagger(app: INestApplication) {
   const config = new DocumentBuilder()
     .setTitle('Nexo API')
-    .setDescription('Api documentation for social network Nexo')
+    .setDescription(
+      'Api documentation for social network Nexo. WebSocket events are documented under the WS tags.'
+    )
     .setVersion('1.0.0')
     .setContact(
       'dgl',
@@ -15,8 +28,12 @@ export function setupSwagger(app: INestApplication) {
     .addBearerAuth()
     .build()
 
-  const document = SwaggerModule.createDocument(app, config)
+  const document = SwaggerModule.createDocument(app, config, {
+    extraModels: [...MESSAGE_WS_MODELS, ...CONVERSATION_WS_MODELS]
+  })
   const theme = new SwaggerTheme()
+
+  addWebSocketDocs(document)
 
   SwaggerModule.setup('/api', app, document, {
     customSiteTitle: 'Nexo API',
@@ -33,4 +50,29 @@ export function setupSwagger(app: INestApplication) {
     explorer: true,
     customCss: theme.getBuffer(SwaggerThemeNameEnum.ONE_DARK)
   })
+}
+
+type OpenApiDocument = ReturnType<typeof SwaggerModule.createDocument>
+
+function addWebSocketDocs(document: OpenApiDocument) {
+  const authDescription =
+    'Auth: JWT via `auth.token` or `Authorization: Bearer <token>` in the handshake.'
+
+  const wsDocs: WsDocs[] = [
+    buildMessageWsDocs(authDescription),
+    buildConversationWsDocs(authDescription),
+    buildUserWsDocs(authDescription)
+  ]
+
+  document.tags = [
+    ...(document.tags ?? []),
+    ...wsDocs.flatMap((doc) => doc.tags)
+  ]
+  document.paths = wsDocs.reduce(
+    (paths, doc) => ({
+      ...paths,
+      ...doc.paths
+    }),
+    document.paths
+  )
 }
