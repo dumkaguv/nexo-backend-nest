@@ -1,11 +1,7 @@
 import { BadRequestException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
-import {
-  getUserSearchWhere,
-  paginate,
-  sanitizeHtmlContent
-} from '@/common/utils'
+import { paginate, sanitizeHtmlContent } from '@/common/utils'
 import { FileService } from '@/modules/file/file.service'
 import { UserService } from '@/modules/user/user.service'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -14,8 +10,7 @@ import { PostService } from './post.service'
 
 jest.mock('@/common/utils', () => ({
   paginate: jest.fn(),
-  sanitizeHtmlContent: jest.fn(),
-  getUserSearchWhere: jest.fn()
+  sanitizeHtmlContent: jest.fn()
 }))
 
 describe('PostService', () => {
@@ -116,14 +111,28 @@ describe('PostService', () => {
 
   it('findAllComments passes user search filter', async () => {
     ;(paginate as jest.Mock).mockResolvedValue({ data: [], total: 0 })
-    ;(getUserSearchWhere as jest.Mock).mockReturnValue({ userId: 7 })
 
     await service.findAllComments(2, { search: 'neo' })
-    expect(getUserSearchWhere).toHaveBeenCalledWith({ search: 'neo' })
     expect(paginate).toHaveBeenCalledWith(
       expect.objectContaining({
         model: 'postComment',
-        where: { postId: 2, userId: 7 }
+        where: expect.objectContaining({
+          postId: 2,
+          OR: [
+            {
+              user: {
+                username: { contains: 'neo', mode: 'insensitive' }
+              }
+            },
+            {
+              user: {
+                profile: {
+                  fullName: { contains: 'neo', mode: 'insensitive' }
+                }
+              }
+            }
+          ]
+        })
       })
     )
   })

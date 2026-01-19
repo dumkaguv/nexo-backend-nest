@@ -3,6 +3,7 @@ import stylisticTs from '@stylistic/eslint-plugin'
 import importPlugin from 'eslint-plugin-import'
 import regexpPlugin from 'eslint-plugin-regexp'
 import securityPlugin from 'eslint-plugin-security'
+import simpleImportSort from 'eslint-plugin-simple-import-sort'
 import eslintPluginUnicorn from 'eslint-plugin-unicorn'
 import unusedImports from 'eslint-plugin-unused-imports'
 import globals from 'globals'
@@ -16,6 +17,7 @@ export default tseslint.config(
       ...tseslint.configs.recommended,
       ...tseslint.configs.recommendedTypeChecked
     ],
+
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2024,
@@ -26,14 +28,17 @@ export default tseslint.config(
         tsconfigRootDir: __dirname
       }
     },
+
     plugins: {
       import: importPlugin,
       unicorn: eslintPluginUnicorn,
       regexp: regexpPlugin,
       '@stylistic/ts': stylisticTs,
       'unused-imports': unusedImports,
+      'simple-import-sort': simpleImportSort,
       security: securityPlugin
     },
+
     rules: {
       'no-else-return': 'warn',
       'no-extra-boolean-cast': 'error',
@@ -256,6 +261,15 @@ export default tseslint.config(
       '@typescript-eslint/explicit-member-accessibility': 'off',
 
       'func-style': 'off'
+    }
+  },
+
+  // OVERRIDE for barrel-files index.ts
+  {
+    files: ['**/index.ts'],
+    rules: {
+      'simple-import-sort/imports': 'error',
+      'simple-import-sort/exports': 'error'
     }
   }
 )
