@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes'
 
+import { API_GLOBAL_PREFIX } from '@/common/constants'
 import type { WsDocs } from '@/common/swagger/ws-docs'
 import {
   buildConversationWsDocs,
@@ -35,7 +36,7 @@ export function setupSwagger(app: INestApplication) {
 
   addWebSocketDocs(document)
 
-  SwaggerModule.setup('/api', app, document, {
+  SwaggerModule.setup(`/${API_GLOBAL_PREFIX}`, app, document, {
     customSiteTitle: 'Nexo API',
     jsonDocumentUrl: '/swagger.json',
     yamlDocumentUrl: '/swagger.yaml',

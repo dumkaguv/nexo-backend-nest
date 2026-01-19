@@ -1,11 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 
 import { FindAllQueryDto } from '@/common/dtos'
-import {
-  getUserSearchWhere,
-  paginate,
-  sanitizeHtmlContent
-} from '@/common/utils'
+import { paginate, sanitizeHtmlContent } from '@/common/utils'
 import { UserService } from '@/modules/user/user.service'
 import { PrismaService } from '@/prisma/prisma.service'
 
@@ -84,7 +80,7 @@ export class PostService {
       include: {
         user: { include: { profile: { include: { avatar: true } } } }
       },
-      where: { postId, ...getUserSearchWhere(query) },
+      where: { postId, ...this.getUserSearchWhere(query) },
       ...query,
       ordering: query.ordering ? query.ordering : '-createdAt'
     })
@@ -101,7 +97,7 @@ export class PostService {
       prisma: this.prisma,
       model: 'postLike',
       include: { user: { include: { profile: true } } },
-      where: { postId, ...getUserSearchWhere(query) },
+      where: { postId, ...this.getUserSearchWhere(query) },
       ...query,
       computed: {
         user: ({ user }) => ({
@@ -225,5 +221,29 @@ export class PostService {
     return this.prisma.postComment.delete({
       where: { id: commentId, userId, postId }
     })
+  }
+
+  private getUserSearchWhere({ search }: FindAllQueryDto, userId?: number) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: Record<string, any> = { userId }
+
+    if (search) {
+      where.OR = [
+        {
+          user: {
+            username: { contains: search, mode: 'insensitive' }
+          }
+        },
+        {
+          user: {
+            profile: {
+              fullName: { contains: search, mode: 'insensitive' }
+            }
+          }
+        }
+      ]
+    }
+
+    return where
   }
 }

@@ -9,6 +9,7 @@ import helmet from 'helmet'
 
 import { AppModule } from './app/app.module'
 import { ConfigurableSocketIoAdapter } from './common/adapters/socket-io.adapter'
+import { API_GLOBAL_PREFIX } from './common/constants'
 import { AllExceptionsFilter } from './common/filters'
 import { ResponseInterceptor } from './common/interceptors'
 import { setupSwagger } from './common/utils'
@@ -17,9 +18,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   const config = app.get(ConfigService)
 
+  app.setGlobalPrefix(API_GLOBAL_PREFIX)
+
+  app.useGlobalInterceptors(app.get(ResponseInterceptor))
+
+  app.useGlobalFilters(app.get(AllExceptionsFilter))
+
   app.useWebSocketAdapter(new ConfigurableSocketIoAdapter(app, config))
 
-  app.setGlobalPrefix('api')
+  setupSwagger(app)
 
   app.use(cookieParser())
 
@@ -58,15 +65,11 @@ async function bootstrap() {
     })
   )
 
-  app.useGlobalInterceptors(app.get(ResponseInterceptor))
-
-  app.useGlobalFilters(app.get(AllExceptionsFilter))
-
-  setupSwagger(app)
-
   app
     .getHttpAdapter()
-    .get('/', (_req: Request, res: Response) => res.redirect('/api'))
+    .get('/', (_req: Request, res: Response) =>
+      res.redirect(`/${API_GLOBAL_PREFIX}`)
+    )
 
   await app.listen(config.get<string>('PORT') ?? 3000)
 
