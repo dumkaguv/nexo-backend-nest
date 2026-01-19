@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common'
 
 import { ConfigModule } from '@nestjs/config'
 
+import { APP_GUARD } from '@nestjs/core'
+import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
+
 import { AllExceptionsFilter } from '@/common/filters'
 import { ResponseInterceptor } from '@/common/interceptors'
 import { AuthModule } from '@/modules/auth/auth.module'
@@ -25,6 +28,12 @@ import { AppController } from './app.controller'
       isGlobal: true,
       envFilePath: '.env'
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: seconds(60),
+        limit: 100
+      }
+    ]),
     AuthModule,
     TokenModule,
     UserModule,
@@ -37,6 +46,13 @@ import { AppController } from './app.controller'
     ConversationModule
   ],
   controllers: [AppController],
-  providers: [ResponseInterceptor, AllExceptionsFilter]
+  providers: [
+    ResponseInterceptor,
+    AllExceptionsFilter,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard
+    }
+  ]
 })
 export class AppModule {}

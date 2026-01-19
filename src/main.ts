@@ -2,9 +2,10 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory, Reflector } from '@nestjs/core'
 
+import compression from 'compression'
 import cookieParser from 'cookie-parser'
-
 import { Request, Response } from 'express'
+import helmet from 'helmet'
 
 import { AppModule } from './app/app.module'
 import { ConfigurableSocketIoAdapter } from './common/adapters/socket-io.adapter'
@@ -21,6 +22,20 @@ async function bootstrap() {
   app.setGlobalPrefix('api')
 
   app.use(cookieParser())
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false
+    })
+  )
+
+  app.use(
+    compression({
+      threshold: 1024,
+      level: 6
+    })
+  )
 
   app.enableCors({
     origin: config.getOrThrow<string>('FRONT_URL'),
