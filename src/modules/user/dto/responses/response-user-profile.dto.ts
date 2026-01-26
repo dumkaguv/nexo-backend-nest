@@ -42,5 +42,5 @@ export class ResponseUserProfileDto {
 
   @ApiProperty({ type: 'string', format: 'date-time', readOnly: true })
   @Expose()
-  readonly lastActivity: Date
+  readonly lastActivityAt: Date
 }

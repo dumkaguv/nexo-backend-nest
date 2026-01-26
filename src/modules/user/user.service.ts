@@ -179,7 +179,7 @@ export class UserService {
   public async updateLastActivity(userId: number, date: Date = new Date()) {
     await this.prisma.user.update({
       where: { id: userId },
-      data: { lastActivity: date }
+      data: { lastActivityAt: date }
     })
   }
 

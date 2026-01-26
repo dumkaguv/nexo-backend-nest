@@ -108,7 +108,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       await this.prisma.user.update({
         where: { id: userId },
-        data: { lastActivity: new Date() }
+        data: { lastActivityAt: new Date() }
       })
     } catch {
       // Ignore update failures to avoid breaking disconnect flow

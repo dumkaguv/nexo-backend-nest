@@ -19,7 +19,7 @@ export const selectUserFields: Prisma.UserSelectScalar = {
   activationLink: true,
   isActivated: true,
   createdAt: true,
-  lastActivity: true,
+  lastActivityAt: true,
   updatedAt: true
 } as const
 
