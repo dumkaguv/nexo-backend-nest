@@ -4,7 +4,6 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { paginate, sanitizeHtmlContent } from '@/common/utils'
 import { PrismaService } from '@/prisma/prisma.service'
 
-
 import { PostsService } from './posts.service'
 
 jest.mock('@/common/utils', () => ({
