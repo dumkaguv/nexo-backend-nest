@@ -162,6 +162,18 @@ export default tseslint.config(
         }
       ],
 
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['../../*', '../../**'],
+              message: 'Do not use ../../ in imports. Use @/alias instead.'
+            }
+          ]
+        }
+      ],
+
       'import/no-duplicates': ['error', { 'prefer-inline': true }],
       'import/no-named-as-default': 'warn',
       'import/no-named-as-default-member': 'warn',
