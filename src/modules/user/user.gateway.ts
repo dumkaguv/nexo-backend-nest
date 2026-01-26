@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   ConnectedSocket,
   OnGatewayConnection,
@@ -7,17 +6,20 @@ import {
   WebSocketGateway,
   WebSocketServer
 } from '@nestjs/websockets'
-import { Server, Socket } from 'socket.io'
+import { Socket } from 'socket.io'
 
 import { TokenService } from '@/modules/token/token.service'
 import { PrismaService } from '@/prisma/prisma.service'
 
 import { CLIENT_TO_SERVER, SERVER_TO_CLIENT, USER_NAMESPACE } from './constants'
 
+import type { UserServer, UserSocket } from './types'
+
 @WebSocketGateway({ namespace: USER_NAMESPACE })
 export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  private readonly server: Server
+  private readonly server: UserServer
+
   private readonly onlineUsers = new Map<number, string>()
 
   constructor(
@@ -26,11 +28,11 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {}
 
   @SubscribeMessage(CLIENT_TO_SERVER.ONLINE_LIST_REQUEST)
-  public handleOnlineListRequest(@ConnectedSocket() client: Socket) {
+  public handleOnlineListRequest(@ConnectedSocket() client: UserSocket) {
     this.emitOnlineList(client)
   }
 
-  public async handleConnection(client: Socket) {
+  public async handleConnection(client: UserSocket) {
     const token = this.extractToken(client)
 
     if (!token) {
@@ -51,8 +53,8 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  public handleDisconnect(client: Socket) {
-    const userId = client.data.userId as number | undefined
+  public handleDisconnect(client: UserSocket) {
+    const userId = client.data.userId
 
     if (userId) {
       this.emitOffline(client)
@@ -61,8 +63,8 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  public emitOnline(@ConnectedSocket() client: Socket) {
-    const userId = client.data.userId as number | undefined
+  public emitOnline(@ConnectedSocket() client: UserSocket) {
+    const userId = client.data.userId
 
     if (!userId) {
       return
@@ -79,8 +81,8 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit(SERVER_TO_CLIENT.ONLINE, userId)
   }
 
-  public emitOffline(@ConnectedSocket() client: Socket) {
-    const userId = client.data.userId as number | undefined
+  public emitOffline(@ConnectedSocket() client: UserSocket) {
+    const userId = client.data.userId
 
     if (!userId) {
       return

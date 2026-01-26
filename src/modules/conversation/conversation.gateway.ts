@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -7,23 +5,29 @@ import {
   WebSocketServer
 } from '@nestjs/websockets'
 
-import { Server, Socket } from 'socket.io'
+import { Socket } from 'socket.io'
 
 import { TokenService } from '@/modules/token/token.service'
 
 import { CONVERSATION_NAMESPACE, SERVER_TO_CLIENT } from './constants'
-import { ConversationResponsePayload, ConversationWithUsers } from './types'
+
+import type {
+  ConversationResponsePayload,
+  ConversationServer,
+  ConversationSocket,
+  ConversationWithUsers
+} from './types'
 
 @WebSocketGateway({ namespace: CONVERSATION_NAMESPACE })
 export class ConversationGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
-  private readonly server: Server
+  private readonly server: ConversationServer
 
   constructor(private readonly tokenService: TokenService) {}
 
-  public async handleConnection(client: Socket) {
+  public async handleConnection(client: ConversationSocket) {
     const token = this.extractToken(client)
 
     if (!token) {
@@ -42,8 +46,8 @@ export class ConversationGateway
     }
   }
 
-  public handleDisconnect(client: Socket) {
-    const userId = client.data.userId as number | undefined
+  public handleDisconnect(client: ConversationSocket) {
+    const userId = client.data.userId
 
     if (userId) {
       void client.leave(this.getUserRoom(userId))

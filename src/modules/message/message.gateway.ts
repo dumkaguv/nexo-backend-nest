@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
 import {
   ConnectedSocket,
   MessageBody,
@@ -11,7 +9,7 @@ import {
   WsException
 } from '@nestjs/websockets'
 
-import { Server, Socket } from 'socket.io'
+import { Socket } from 'socket.io'
 
 import { TokenService } from '@/modules/token/token.service'
 
@@ -24,12 +22,14 @@ import {
 import { CreateMessageDto, DeleteMessageDto, UpdateMessageDto } from './dto'
 import { MessageService } from './message.service'
 
+import type { MessageServer, MessageSocket } from './types'
+
 @WebSocketGateway({ namespace: MESSAGE_NAMESPACE })
 export class MessageGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
-  private readonly server: Server
+  private readonly server: MessageServer
 
   constructor(
     private readonly tokenService: TokenService,
@@ -38,10 +38,10 @@ export class MessageGateway
 
   @SubscribeMessage(CLIENT_TO_SERVER.SEND)
   public async handleSend(
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: MessageSocket,
     @MessageBody() dto: CreateMessageDto
   ) {
-    const senderId = client.data.userId as number | undefined
+    const senderId = client.data.userId
 
     if (!senderId) {
       throw new WsException('Unauthorized')
@@ -62,10 +62,10 @@ export class MessageGateway
 
   @SubscribeMessage(CLIENT_TO_SERVER.UPDATE)
   public async handleUpdate(
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: MessageSocket,
     @MessageBody() dto: UpdateMessageDto
   ) {
-    const senderId = client.data.userId as number | undefined
+    const senderId = client.data.userId
 
     if (!senderId) {
       throw new WsException('Unauthorized')
@@ -86,10 +86,10 @@ export class MessageGateway
 
   @SubscribeMessage(CLIENT_TO_SERVER.DELETE)
   public async handleDelete(
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: MessageSocket,
     @MessageBody() dto: DeleteMessageDto
   ) {
-    const senderId = client.data.userId as number | undefined
+    const senderId = client.data.userId
 
     if (!senderId) {
       throw new WsException('Unauthorized')
@@ -106,7 +106,7 @@ export class MessageGateway
       .emit(SERVER_TO_CLIENT.DELETED, { deletedMessageId: message.id })
   }
 
-  public async handleConnection(client: Socket) {
+  public async handleConnection(client: MessageSocket) {
     const token = this.extractToken(client)
 
     if (!token) {
@@ -125,8 +125,8 @@ export class MessageGateway
     }
   }
 
-  public handleDisconnect(client: Socket) {
-    const userId = client.data.userId as number | undefined
+  public handleDisconnect(client: MessageSocket) {
+    const userId = client.data.userId
 
     if (userId) {
       void client.leave(this.getUserRoom(userId))

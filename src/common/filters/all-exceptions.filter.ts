@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import {
   ArgumentsHost,
   BadRequestException,
@@ -11,56 +7,89 @@ import {
   Logger
 } from '@nestjs/common'
 
+import { isPrismaException } from '../utils'
+
 import type { Response } from 'express'
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name)
 
-  public catch(exception: any, host: ArgumentsHost) {
+  public catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp()
     const response = ctx.getResponse<Response>()
 
-    // Prisma Not Found
-    if (exception?.code === 'P2025') {
-      this.logger.warn('Resource not found', exception)
+    if (isPrismaException(exception)) {
+      if (exception.code === 'P2025') {
+        this.logger.warn('Resource not found', exception)
 
-      return response.status(404).json({
-        success: false,
-        message: 'Resource not found'
-      })
+        response.status(404).json({
+          success: false,
+          message: 'Resource not found'
+        })
+
+        return
+      }
+
+      if (exception.code === 'P2002') {
+        response.status(409).json({
+          success: false,
+          message: 'Unique constraint failed',
+          fields: exception.meta?.target
+        })
+
+        return
+      }
     }
 
-    // Unique constraint failed
-    if (exception?.code === 'P2002') {
-      const fields = exception.meta?.target
-
-      return response.status(409).json({
-        success: false,
-        message: 'Unique constraint failed',
-        fields
-      })
-    }
-
-    // ValidationPipe
+    /* ValidationPipe */
     if (exception instanceof BadRequestException) {
-      const res = exception.getResponse() as any
-      const message = typeof res === 'object' ? res.message : res
-      const errors = typeof res === 'object' ? res.errors : null
+      const res = exception.getResponse()
+
+      let message: string | string[]
+      let errors: unknown = null
+
+      if (typeof res === 'string') {
+        message = res
+      } else if (typeof res === 'object' && res !== null) {
+        const r = res as { message?: string | string[]; errors?: unknown }
+
+        message = r.message ?? 'Validation failed'
+        errors = r.errors ?? null
+      } else {
+        message = 'Validation failed'
+      }
 
       this.logger.warn('Validation failed', exception)
 
-      return response.status(400).json({ success: false, message, errors })
+      response.status(400).json({
+        success: false,
+        message,
+        errors
+      })
+
+      return
     }
 
-    const status =
-      exception instanceof HttpException ? exception.getStatus() : 500
-    const message =
-      exception instanceof HttpException
-        ? exception.message
-        : 'Internal server error'
+    if (exception instanceof HttpException) {
+      const status = exception.getStatus()
+      const message = exception.message
 
-    this.logger.error(message, exception)
-    response.status(status).json({ success: false, message })
+      this.logger.error(message, exception)
+
+      response.status(status).json({
+        success: false,
+        message
+      })
+
+      return
+    }
+
+    this.logger.error('Internal server error', exception)
+
+    response.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    })
   }
 }

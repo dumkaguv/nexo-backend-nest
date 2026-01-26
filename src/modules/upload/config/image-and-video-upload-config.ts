@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Request } from 'supertest'
 
 export function imageAndVideoFileFilter(
-  _req: any,
+  _req: Request,
   file: Express.Multer.File,
   cb: (error: Error | null, acceptFile: boolean) => void
 ) {
