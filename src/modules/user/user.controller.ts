@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -45,7 +46,7 @@ export class UserController {
 
   @Get(':id')
   @ApiOkResponseWrapped(ResponseUserDto)
-  public findOne(@Param('id') id: string) {
+  public findOne(@Req() req: AuthRequest, @Param('id') id: string) {
     return sendResponse(
       ResponseUserDto,
       this.userService.findOneWithRelations(+id)
@@ -54,16 +55,29 @@ export class UserController {
 
   @Patch(':id')
   @ApiOkResponseWrapped(ResponseUserDto)
-  public update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+  public update(
+    @Req() req: AuthRequest,
+    @Param('id') id: string,
+    @Body() dto: UpdateUserDto
+  ) {
+    if (req.user.id !== +id) {
+      throw new ForbiddenException('Access denied')
+    }
+
     return sendResponse(ResponseUserDto, this.userService.update(+id, dto))
   }
 
   @Patch(':id/change-password')
   @ApiOkResponseWrapped(EmptyResponseDto)
   public changePassword(
+    @Req() req: AuthRequest,
     @Param('id') id: string,
     @Body() { oldPassword, newPassword }: CreateChangePasswordDto
   ) {
+    if (req.user.id !== +id) {
+      throw new ForbiddenException('Access denied')
+    }
+
     return sendResponse(
       ResponseUserDto,
       this.userService.changePassword(+id, oldPassword, newPassword)
@@ -72,7 +86,11 @@ export class UserController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  public remove(@Param('id') id: string) {
+  public remove(@Req() req: AuthRequest, @Param('id') id: string) {
+    if (req.user.id !== +id) {
+      throw new ForbiddenException('Access denied')
+    }
+
     return this.userService.remove(+id)
   }
 }

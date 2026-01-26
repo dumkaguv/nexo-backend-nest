@@ -30,8 +30,11 @@ export class MessageController {
 
   @Get(':id')
   @ApiOkResponseWrapped(ResponseMessageDto)
-  public findOne(@Param('id') id: string) {
-    return sendResponse(ResponseMessageDto, this.messageService.findOne(+id))
+  public findOne(@Req() req: AuthRequest, @Param('id') id: string) {
+    return sendResponse(
+      ResponseMessageDto,
+      this.messageService.findOne(req.user.id, +id)
+    )
   }
 
   @Post()

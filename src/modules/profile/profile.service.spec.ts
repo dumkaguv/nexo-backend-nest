@@ -10,12 +10,12 @@ describe('ProfileService', () => {
   let service: ProfileService
   let prisma: { profile: { create: jest.Mock; update: jest.Mock } }
   let userService: { findOne: jest.Mock; findOneWithRelations: jest.Mock }
-  let fileService: { findOne: jest.Mock }
+  let fileService: { findOneForUser: jest.Mock }
 
   beforeEach(async () => {
     prisma = { profile: { create: jest.fn(), update: jest.fn() } }
     userService = { findOne: jest.fn(), findOneWithRelations: jest.fn() }
-    fileService = { findOne: jest.fn() }
+    fileService = { findOneForUser: jest.fn() }
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -64,7 +64,7 @@ describe('ProfileService', () => {
     await expect(service.update(4, { biography: 'bio' })).resolves.toEqual({
       id: 4
     })
-    expect(fileService.findOne).not.toHaveBeenCalled()
+    expect(fileService.findOneForUser).not.toHaveBeenCalled()
     expect(prisma.profile.update).toHaveBeenCalledWith({
       data: { biography: 'bio', avatar: { disconnect: true } },
       where: { userId: 4 }
@@ -72,11 +72,11 @@ describe('ProfileService', () => {
   })
 
   it('updates profile with avatar', async () => {
-    fileService.findOne.mockResolvedValue({ id: 10 })
+    fileService.findOneForUser.mockResolvedValue({ id: 10 })
     prisma.profile.update.mockResolvedValue({ id: 5 })
 
     await expect(service.update(5, { avatar: 10 })).resolves.toEqual({ id: 5 })
-    expect(fileService.findOne).toHaveBeenCalledWith(10)
+    expect(fileService.findOneForUser).toHaveBeenCalledWith(10, 5)
     expect(prisma.profile.update).toHaveBeenCalledWith({
       data: { avatar: { connect: { id: 10 } } },
       where: { userId: 5 }

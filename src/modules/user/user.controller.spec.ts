@@ -58,7 +58,7 @@ describe('UserController', () => {
       email: 'neo@example.com'
     })
 
-    const result = await controller.findOne('1')
+    const result = await controller.findOne({ user: { id: 1 } } as never, '1')
 
     expect(userService.findOneWithRelations).toHaveBeenCalledWith(1)
     expect(result).toBeInstanceOf(ResponseUserDto)
@@ -71,7 +71,9 @@ describe('UserController', () => {
       email: 'tri@example.com'
     })
 
-    const result = await controller.update('2', { username: 'trinity' })
+    const result = await controller.update({ user: { id: 2 } } as never, '2', {
+      username: 'trinity'
+    })
 
     expect(userService.update).toHaveBeenCalledWith(2, {
       username: 'trinity'
@@ -86,10 +88,14 @@ describe('UserController', () => {
       email: 'm@example.com'
     })
 
-    const result = await controller.changePassword('3', {
-      oldPassword: 'old',
-      newPassword: 'new'
-    })
+    const result = await controller.changePassword(
+      { user: { id: 3 } } as never,
+      '3',
+      {
+        oldPassword: 'old',
+        newPassword: 'new'
+      }
+    )
 
     expect(userService.changePassword).toHaveBeenCalledWith(3, 'old', 'new')
     expect(result).toBeInstanceOf(ResponseUserDto)
@@ -98,7 +104,9 @@ describe('UserController', () => {
   it('remove delegates to service', async () => {
     userService.remove.mockResolvedValue({ id: 4 })
 
-    await expect(controller.remove('4')).resolves.toEqual({ id: 4 })
+    await expect(
+      controller.remove({ user: { id: 4 } } as never, '4')
+    ).resolves.toEqual({ id: 4 })
     expect(userService.remove).toHaveBeenCalledWith(4)
   })
 })

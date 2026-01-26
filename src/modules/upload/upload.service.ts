@@ -21,13 +21,18 @@ export class UploadService {
       resource_type: type
     } = await this.cloudinaryService.uploadFromBuffer(file, userId, folder)
 
-    const { id } = await this.fileService.create(public_id, secure_url, type)
+    const { id } = await this.fileService.create(
+      public_id,
+      secure_url,
+      type,
+      userId
+    )
 
     return { id, secure_url, type }
   }
 
-  public async delete(id: number) {
-    const { publicId } = await this.fileService.findOne(id)
+  public async delete(userId: number, id: number) {
+    const { publicId } = await this.fileService.findOneForUser(id, userId)
 
     await this.fileService.delete(publicId, id)
   }

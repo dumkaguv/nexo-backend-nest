@@ -55,11 +55,20 @@ export class MessageService {
     })
   }
 
-  public findOne(id: number) {
-    return this.prisma.message.findUnique({
-      where: { id },
+  public async findOne(userId: number, id: number) {
+    const message = await this.prisma.message.findFirst({
+      where: {
+        id,
+        OR: [{ senderId: userId }, { receiverId: userId }]
+      },
       include: { files: { include: { file: true } } }
     })
+
+    if (!message) {
+      throw new ForbiddenException('Access denied')
+    }
+
+    return message
   }
 
   public async create(senderId: number, dto: CreateMessageDto) {
@@ -141,7 +150,7 @@ export class MessageService {
   }
 
   public async update(senderId: number, id: number, dto: UpdateMessageDto) {
-    const message = await this.findOne(id)
+    const message = await this.findOne(senderId, id)
 
     if (!message || message.senderId !== senderId) {
       throw new ForbiddenException('You are not allowed to update this message')
@@ -171,7 +180,7 @@ export class MessageService {
   }
 
   public async delete(senderId: number, id: number) {
-    const message = await this.findOne(id)
+    const message = await this.findOne(senderId, id)
 
     if (!message || message.senderId !== senderId) {
       throw new ForbiddenException('You are not allowed to delete this message')

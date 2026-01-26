@@ -40,6 +40,7 @@ model User {
   updatedAt      DateTime  @default(now()) @updatedAt
   activatedAt    DateTime?
   lastActivityAt DateTime  @default(now())
+  files          File[]
 
   @@unique([username, email])
 }
@@ -199,6 +200,9 @@ model File {
   publicId String
   url      String
   type     String?
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   MessageFile MessageFile[]
   PostFile    PostFile[]

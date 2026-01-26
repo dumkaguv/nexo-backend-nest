@@ -49,7 +49,9 @@ describe('UploadController', () => {
   it('delete calls service and returns void', async () => {
     uploadService.delete.mockResolvedValue(undefined)
 
-    await expect(controller.delete('5')).resolves.toBeUndefined()
-    expect(uploadService.delete).toHaveBeenCalledWith(5)
+    await expect(
+      controller.delete({ user: { id: 2 } } as never, '5')
+    ).resolves.toBeUndefined()
+    expect(uploadService.delete).toHaveBeenCalledWith(2, 5)
   })
 })

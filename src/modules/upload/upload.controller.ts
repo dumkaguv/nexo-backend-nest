@@ -45,7 +45,7 @@ export class UploadController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  public delete(@Param('id') id: string) {
-    return this.uploadService.delete(+id)
+  public delete(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.uploadService.delete(req.user.id, +id)
   }
 }

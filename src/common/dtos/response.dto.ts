@@ -30,7 +30,7 @@ export class PaginatedResponseDto<TData> extends BaseResponseDto<TData> {
     example: DEFAULT_PAGE_SIZE,
     default: DEFAULT_PAGE_SIZE,
     maximum: MAX_PAGE_SIZE,
-    minimum: DEFAULT_PAGE_SIZE
+    minimum: 1
   })
   pageSize: number
 

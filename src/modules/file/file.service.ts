@@ -10,9 +10,14 @@ export class FileService {
     private readonly cloudinaryService: CloudinaryService
   ) {}
 
-  public create(publicId: string, url: string, mimeType: string) {
+  public create(
+    publicId: string,
+    url: string,
+    mimeType: string,
+    userId: number
+  ) {
     return this.prisma.file.create({
-      data: { publicId, url, type: mimeType }
+      data: { publicId, url, type: mimeType, userId }
     })
   }
 
@@ -23,5 +28,9 @@ export class FileService {
 
   public findOne(id: number) {
     return this.prisma.file.findFirstOrThrow({ where: { id } })
+  }
+
+  public findOneForUser(id: number, userId: number) {
+    return this.prisma.file.findFirstOrThrow({ where: { id, userId } })
   }
 }

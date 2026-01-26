@@ -44,7 +44,11 @@ export class AuthService {
     return this.auth(res, user.id)
   }
 
-  public async logout(refreshToken: string) {
+  public async logout(refreshToken?: string) {
+    if (!refreshToken) {
+      return
+    }
+
     const userId = await this.tokenService.remove(refreshToken)
 
     await this.userService.updateLastActivity(userId)

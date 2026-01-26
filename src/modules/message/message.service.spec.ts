@@ -20,7 +20,7 @@ describe('MessageService', () => {
   let service: MessageService
   let prisma: {
     message: {
-      findUnique: jest.Mock
+      findFirst: jest.Mock
       create: jest.Mock
       update: jest.Mock
     }
@@ -40,7 +40,7 @@ describe('MessageService', () => {
   beforeEach(async () => {
     prisma = {
       message: {
-        findUnique: jest.fn(),
+        findFirst: jest.fn(),
         create: jest.fn(),
         update: jest.fn()
       },
@@ -218,7 +218,7 @@ describe('MessageService', () => {
   })
 
   it('update forbids editing a message from another sender', async () => {
-    prisma.message.findUnique.mockResolvedValue({ id: 1, senderId: 2 })
+    prisma.message.findFirst.mockResolvedValue({ id: 1, senderId: 2 })
 
     await expect(
       service.update(1, 1, { id: 1, content: 'hi' })
@@ -226,7 +226,7 @@ describe('MessageService', () => {
   })
 
   it('update creates message files and updates content', async () => {
-    prisma.message.findUnique.mockResolvedValue({ id: 1, senderId: 1 })
+    prisma.message.findFirst.mockResolvedValue({ id: 1, senderId: 1 })
     prisma.file.findMany.mockResolvedValue([{ id: 1 }])
     ;(sanitizeHtmlContent as jest.Mock).mockReturnValue('updated')
     prisma.message.update.mockResolvedValue({ id: 1, content: 'updated' })
@@ -241,7 +241,7 @@ describe('MessageService', () => {
   })
 
   it('update does not overwrite content when omitted', async () => {
-    prisma.message.findUnique.mockResolvedValue({ id: 1, senderId: 1 })
+    prisma.message.findFirst.mockResolvedValue({ id: 1, senderId: 1 })
     prisma.message.update.mockResolvedValue({ id: 1 })
 
     await service.update(1, 1, { id: 1 })
@@ -251,6 +251,14 @@ describe('MessageService', () => {
           isEdited: true
         })
       })
+    )
+  })
+
+  it('findOne throws when user is not participant', async () => {
+    prisma.message.findFirst.mockResolvedValue(null)
+
+    await expect(service.findOne(1, 1)).rejects.toBeInstanceOf(
+      ForbiddenException
     )
   })
 })

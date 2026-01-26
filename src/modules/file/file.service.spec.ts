@@ -45,13 +45,14 @@ describe('FileService', () => {
     prisma.file.create.mockResolvedValue({ id: 1 })
 
     await expect(
-      service.create('public', 'https://cdn/test.jpg', 'image/jpeg')
+      service.create('public', 'https://cdn/test.jpg', 'image/jpeg', 7)
     ).resolves.toEqual({ id: 1 })
     expect(prisma.file.create).toHaveBeenCalledWith({
       data: {
         publicId: 'public',
         url: 'https://cdn/test.jpg',
-        type: 'image/jpeg'
+        type: 'image/jpeg',
+        userId: 7
       }
     })
   })
@@ -71,6 +72,18 @@ describe('FileService', () => {
     await expect(service.findOne(3)).resolves.toEqual({ id: 3 })
     expect(prisma.file.findFirstOrThrow).toHaveBeenCalledWith({
       where: { id: 3 }
+    })
+  })
+
+  it('finds a file by id and user', async () => {
+    prisma.file.findFirstOrThrow.mockResolvedValue({ id: 4, userId: 9 })
+
+    await expect(service.findOneForUser(4, 9)).resolves.toEqual({
+      id: 4,
+      userId: 9
+    })
+    expect(prisma.file.findFirstOrThrow).toHaveBeenCalledWith({
+      where: { id: 4, userId: 9 }
     })
   })
 })

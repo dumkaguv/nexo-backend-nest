@@ -165,20 +165,51 @@ const up = async () => {
   }
 
   // Создание сообщений
-  const createMessages = async (users: User[]) => {
+  const createConversations = async (users: User[]) => {
+    const conversations: {
+      id: number
+      senderId: number
+      receiverId: number
+    }[] = []
+
+    for (let i = 0; i < users.length; i += 1) {
+      for (let j = i + 1; j < users.length; j += 1) {
+        const sender = users[i]
+        const receiver = users[j]
+
+        const conversation = await prisma.conversation.create({
+          data: {
+            senderId: sender.id,
+            receiverId: receiver.id
+          }
+        })
+
+        conversations.push(conversation)
+      }
+    }
+
+    return conversations
+  }
+
+  const createMessages = async (
+    conversations: { id: number; senderId: number; receiverId: number }[]
+  ) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const messages: any[] = []
 
-    for (const sender of users) {
-      for (const receiver of users) {
-        if (sender.id !== receiver.id) {
-          messages.push({
-            senderId: sender.id,
-            receiverId: receiver.id,
-            content: `Hi from user ${sender.id} to ${receiver.id}`
-          })
-        }
-      }
+    for (const conversation of conversations) {
+      messages.push({
+        conversationId: conversation.id,
+        senderId: conversation.senderId,
+        receiverId: conversation.receiverId,
+        content: `Hi from user ${conversation.senderId} to ${conversation.receiverId}`
+      })
+      messages.push({
+        conversationId: conversation.id,
+        senderId: conversation.receiverId,
+        receiverId: conversation.senderId,
+        content: `Hi from user ${conversation.receiverId} to ${conversation.senderId}`
+      })
     }
 
     const createdMessages = await Promise.all(
@@ -201,7 +232,8 @@ const up = async () => {
   await createPostLikes(users, posts)
   await createPostComments(users, posts)
 
-  const _messages = await createMessages(users)
+  const conversations = await createConversations(users)
+  const _messages = await createMessages(conversations)
 }
 
 const down = async () => {

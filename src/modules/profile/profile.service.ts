@@ -35,7 +35,7 @@ export class ProfileService {
     let avatarFileId: number | undefined
 
     if (avatar) {
-      const avatarFile = await this.fileService.findOne(avatar)
+      const avatarFile = await this.fileService.findOneForUser(avatar, userId)
 
       avatarFileId = avatarFile.id
     }

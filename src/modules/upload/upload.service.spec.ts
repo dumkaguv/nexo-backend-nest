@@ -8,13 +8,17 @@ import { UploadService } from './upload.service'
 describe('UploadService', () => {
   let service: UploadService
   let cloudinaryService: { uploadFromBuffer: jest.Mock }
-  let fileService: { create: jest.Mock; findOne: jest.Mock; delete: jest.Mock }
+  let fileService: {
+    create: jest.Mock
+    findOneForUser: jest.Mock
+    delete: jest.Mock
+  }
 
   beforeEach(async () => {
     cloudinaryService = { uploadFromBuffer: jest.fn() }
     fileService = {
       create: jest.fn(),
-      findOne: jest.fn(),
+      findOneForUser: jest.fn(),
       delete: jest.fn()
     }
 
@@ -56,16 +60,17 @@ describe('UploadService', () => {
     expect(fileService.create).toHaveBeenCalledWith(
       'public',
       'https://cdn/file.jpg',
-      'image'
+      'image',
+      7
     )
   })
 
   it('deletes file by id', async () => {
-    fileService.findOne.mockResolvedValue({ publicId: 'public' })
+    fileService.findOneForUser.mockResolvedValue({ publicId: 'public' })
     fileService.delete.mockResolvedValue(undefined)
 
-    await expect(service.delete(5)).resolves.toBeUndefined()
-    expect(fileService.findOne).toHaveBeenCalledWith(5)
+    await expect(service.delete(7, 5)).resolves.toBeUndefined()
+    expect(fileService.findOneForUser).toHaveBeenCalledWith(5, 7)
     expect(fileService.delete).toHaveBeenCalledWith('public', 5)
   })
 })

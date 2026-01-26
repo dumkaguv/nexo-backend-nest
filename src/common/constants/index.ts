@@ -27,7 +27,7 @@ export const DEFAULT_GET_QUERY: ApiQueryOptions[] = [
       type: 'integer',
       default: DEFAULT_PAGE_SIZE,
       maximum: MAX_PAGE_SIZE,
-      minimum: DEFAULT_PAGE_SIZE
+      minimum: 1
     }
   },
   {

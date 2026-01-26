@@ -39,9 +39,9 @@ describe('MessageController', () => {
       conversationId: 4
     })
 
-    const result = await controller.findOne('1')
+    const result = await controller.findOne({ user: { id: 2 } } as never, '1')
 
-    expect(messageService.findOne).toHaveBeenCalledWith(1)
+    expect(messageService.findOne).toHaveBeenCalledWith(2, 1)
     expect(result).toBeInstanceOf(ResponseMessageDto)
   })
 
