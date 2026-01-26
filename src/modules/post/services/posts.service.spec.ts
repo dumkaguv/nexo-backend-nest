@@ -1,20 +1,17 @@
-import { BadRequestException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { paginate, sanitizeHtmlContent } from '@/common/utils'
-import { FileService } from '@/modules/file/file.service'
-import { UserService } from '@/modules/user/user.service'
 import { PrismaService } from '@/prisma/prisma.service'
 
-import { PostService } from './post.service'
+import { PostsService } from './posts.service'
 
 jest.mock('@/common/utils', () => ({
   paginate: jest.fn(),
   sanitizeHtmlContent: jest.fn()
 }))
 
-describe('PostService', () => {
-  let service: PostService
+describe('PostsService', () => {
+  let service: PostsService
   let prisma: {
     post: {
       findFirstOrThrow: jest.Mock
@@ -26,20 +23,13 @@ describe('PostService', () => {
       createMany: jest.Mock
     }
     postLike: {
-      create: jest.Mock
       findFirst: jest.Mock
       count: jest.Mock
-      delete: jest.Mock
     }
     postComment: {
-      create: jest.Mock
       count: jest.Mock
-      update: jest.Mock
-      findFirstOrThrow: jest.Mock
-      delete: jest.Mock
     }
   }
-  let userService: { findFollowingUserIds: jest.Mock }
 
   beforeEach(async () => {
     prisma = {
@@ -53,31 +43,19 @@ describe('PostService', () => {
         createMany: jest.fn()
       },
       postLike: {
-        create: jest.fn(),
         findFirst: jest.fn(),
-        count: jest.fn(),
-        delete: jest.fn()
+        count: jest.fn()
       },
       postComment: {
-        create: jest.fn(),
-        count: jest.fn(),
-        update: jest.fn(),
-        findFirstOrThrow: jest.fn(),
-        delete: jest.fn()
+        count: jest.fn()
       }
     }
-    userService = { findFollowingUserIds: jest.fn() }
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        PostService,
-        { provide: PrismaService, useValue: prisma },
-        { provide: UserService, useValue: userService },
-        { provide: FileService, useValue: {} }
-      ]
+      providers: [PostsService, { provide: PrismaService, useValue: prisma }]
     }).compile()
 
-    service = module.get(PostService)
+    service = module.get(PostsService)
   })
 
   afterEach(() => {
@@ -109,48 +87,16 @@ describe('PostService', () => {
     ).resolves.toBe(3)
   })
 
-  it('findAllComments passes user search filter', async () => {
+  it('findAllMy includes userId filter', async () => {
     ;(paginate as jest.Mock).mockResolvedValue({ data: [], total: 0 })
 
-    await service.findAllComments(2, { search: 'neo' })
+    await service.findAllMy(7, { page: 1 })
+
     expect(paginate).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: 'postComment',
-        where: expect.objectContaining({
-          postId: 2,
-          OR: [
-            {
-              user: {
-                username: { contains: 'neo', mode: 'insensitive' }
-              }
-            },
-            {
-              user: {
-                profile: {
-                  fullName: { contains: 'neo', mode: 'insensitive' }
-                }
-              }
-            }
-          ]
-        })
+        model: 'post',
+        where: { userId: 7 }
       })
-    )
-  })
-
-  it('findAllLikes marks following users', async () => {
-    ;(paginate as jest.Mock).mockResolvedValue({ data: [], total: 0 })
-    userService.findFollowingUserIds.mockResolvedValue(new Set([2]))
-
-    await service.findAllLikes(3, 1, { page: 1 })
-
-    const paginateArgs = (paginate as jest.Mock).mock.calls[0][0]
-
-    expect(paginateArgs.model).toBe('postLike')
-    expect(paginateArgs.computed.user({ user: { id: 2 } }).isFollowing).toBe(
-      true
-    )
-    expect(paginateArgs.computed.user({ user: { id: 3 } }).isFollowing).toBe(
-      false
     )
   })
 
@@ -174,18 +120,6 @@ describe('PostService', () => {
     })
   })
 
-  it('createComment stores sanitized content', async () => {
-    ;(sanitizeHtmlContent as jest.Mock).mockReturnValue('comment')
-    prisma.postComment.create.mockResolvedValue({ id: 1 })
-
-    await expect(
-      service.createComment(1, 2, { content: 'comment' })
-    ).resolves.toEqual({})
-    expect(prisma.postComment.create).toHaveBeenCalledWith({
-      data: { userId: 1, postId: 2, content: 'comment' }
-    })
-  })
-
   it('update writes sanitized content and files', async () => {
     ;(sanitizeHtmlContent as jest.Mock).mockReturnValue('updated')
     prisma.post.update.mockResolvedValue({ id: 1 })
@@ -197,22 +131,5 @@ describe('PostService', () => {
       data: [{ postId: 1, fileId: 5 }],
       skipDuplicates: true
     })
-  })
-
-  it('removeLike deletes by composite key', async () => {
-    prisma.postLike.delete.mockResolvedValue({ id: 1 })
-
-    await expect(service.removeLike(1, 2)).resolves.toEqual({ id: 1 })
-    expect(prisma.postLike.delete).toHaveBeenCalledWith({
-      where: { userId_postId: { userId: 1, postId: 2 } }
-    })
-  })
-
-  it('removeComment throws when not owner', async () => {
-    prisma.postComment.findFirstOrThrow.mockResolvedValue({ userId: 2 })
-
-    await expect(service.removeComment(1, 2, 3)).rejects.toBeInstanceOf(
-      BadRequestException
-    )
   })
 })

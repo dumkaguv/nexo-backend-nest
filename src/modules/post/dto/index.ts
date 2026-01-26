@@ -1,2 +1,3 @@
-export * from './payloads'
-export * from './responses'
+export * from './comments'
+export * from './likes'
+export * from './posts'
