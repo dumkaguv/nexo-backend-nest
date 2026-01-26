@@ -13,7 +13,8 @@ import {
 import { ApiTags } from '@nestjs/swagger'
 
 import { ApiOkResponseWrapped, ApiPaginated } from '@/common/decorators'
-import { type AuthRequest, FindAllQueryDto } from '@/common/dtos'
+import { FindAllQueryDto } from '@/common/dtos'
+import type { AuthRequest } from '@/common/types'
 
 import { sendPaginatedResponse, sendResponse } from '@/common/utils'
 import { Authorization } from '@/modules/auth/decorators'

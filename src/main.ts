@@ -8,7 +8,7 @@ import { Request, Response } from 'express'
 import helmet from 'helmet'
 
 import { AppModule } from './app/app.module'
-import { ConfigurableSocketIoAdapter } from './common/adapters/socket-io.adapter'
+import { ConfigurableSocketIoAdapter } from './common/adapters'
 import { API_GLOBAL_PREFIX } from './common/constants'
 import { AllExceptionsFilter } from './common/filters'
 import { ResponseInterceptor } from './common/interceptors'

@@ -1,4 +1,4 @@
-import { type SchemaRef, type WsDocs, jsonContent } from '@/common/swagger'
+import { type SchemaRef, type WsDocs, jsonContent } from '@/common/utils'
 
 export function buildUserWsDocs(authDescription: string): WsDocs {
   const userIdSchema: SchemaRef = { type: 'integer' }

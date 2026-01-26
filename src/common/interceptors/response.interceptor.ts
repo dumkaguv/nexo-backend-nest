@@ -12,7 +12,11 @@ import {
 import { Reflector } from '@nestjs/core'
 import { map, Observable } from 'rxjs'
 
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from 'src/common/constants'
+import {
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE
+} from 'src/common/constants'
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
@@ -35,13 +39,17 @@ export class ResponseInterceptor implements NestInterceptor {
       map((data) => {
         if (usePagination) {
           const total = data.total || 0
-          const pageSize = Number(request.query.pageSize || DEFAULT_PAGE_SIZE)
+          const rawPageSize = Number(request.query.pageSize)
+          const pageSize = Number.isFinite(rawPageSize)
+            ? Math.min(Math.max(1, rawPageSize), MAX_PAGE_SIZE)
+            : DEFAULT_PAGE_SIZE
           const page = Number(request.query.page || DEFAULT_PAGE)
           const totalPages = Math.ceil(total / pageSize)
           const nextPage = page < totalPages ? page + 1 : null
           const prevPage = page > 1 ? page - 1 : null
 
           return {
+            success: true,
             message,
             data: data.data,
             total,
@@ -54,6 +62,7 @@ export class ResponseInterceptor implements NestInterceptor {
         }
 
         return {
+          success: true,
           message,
           data
         }

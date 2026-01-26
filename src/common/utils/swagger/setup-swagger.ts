@@ -3,7 +3,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes'
 
 import { API_GLOBAL_PREFIX } from '@/common/constants'
-import type { WsDocs } from '@/common/swagger/ws-docs'
+import type { WsDocs } from '@/common/utils'
 import {
   buildConversationWsDocs,
   CONVERSATION_WS_MODELS

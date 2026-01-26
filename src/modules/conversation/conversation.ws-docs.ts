@@ -1,6 +1,6 @@
 import { getSchemaPath } from '@nestjs/swagger'
 
-import { type SchemaRef, type WsDocs, jsonContent } from '@/common/swagger'
+import { type SchemaRef, type WsDocs, jsonContent } from '@/common/utils'
 
 import { ResponseConversationDto } from './dto'
 

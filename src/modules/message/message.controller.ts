@@ -14,7 +14,7 @@ import {
 import { ApiTags } from '@nestjs/swagger'
 
 import { ApiOkResponseWrapped } from '@/common/decorators'
-import type { AuthRequest } from '@/common/dtos'
+import type { AuthRequest } from '@/common/types'
 import { sendResponse } from '@/common/utils'
 import { Authorization } from '@/modules/auth/decorators'
 

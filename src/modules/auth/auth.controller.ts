@@ -3,7 +3,8 @@ import { Body, Controller, Post, Req, Res } from '@nestjs/common'
 import { ApiOperation } from '@nestjs/swagger'
 
 import { ApiOkResponseWrapped } from '@/common/decorators'
-import { type AuthRequest, EmptyResponseDto } from '@/common/dtos'
+import { EmptyResponseDto } from '@/common/dtos'
+import type { AuthRequest } from '@/common/types'
 import { sendResponse } from '@/common/utils'
 import { CreateUserDto } from '@/modules/user/dto'
 

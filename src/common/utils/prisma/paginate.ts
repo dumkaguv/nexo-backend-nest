@@ -6,7 +6,11 @@
 
 import { Prisma, PrismaClient } from '@prisma/client'
 
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@/common/constants'
+import {
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE
+} from '@/common/constants'
 
 type PrismaModelDelegate = {
   findMany: (args?: unknown) => unknown
@@ -164,8 +168,14 @@ export async function paginate<
   data: any[]
   total: number
 }> {
-  const skip = ((page ?? DEFAULT_PAGE) - 1) * (pageSize ?? DEFAULT_PAGE_SIZE)
-  const take = pageSize ?? DEFAULT_PAGE_SIZE
+  const safePageSize = Math.min(
+    Math.max(1, pageSize ?? DEFAULT_PAGE_SIZE),
+    MAX_PAGE_SIZE
+  )
+  const safePage = Math.max(1, page ?? DEFAULT_PAGE)
+
+  const skip = (safePage - 1) * safePageSize
+  const take = safePageSize
 
   let orderBy: Record<string, 'asc' | 'desc'> | undefined
 

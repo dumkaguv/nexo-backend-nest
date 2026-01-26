@@ -1,7 +1,11 @@
 import { Type } from 'class-transformer'
-import { IsInt, IsOptional, IsString, Min } from 'class-validator'
+import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator'
 
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '@/common/constants'
+import {
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE
+} from '@/common/constants'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class FindAllQueryDto<T = any> {
@@ -15,6 +19,7 @@ export class FindAllQueryDto<T = any> {
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(MAX_PAGE_SIZE)
   pageSize?: number = DEFAULT_PAGE_SIZE
 
   @IsOptional()

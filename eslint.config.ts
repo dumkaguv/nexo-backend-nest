@@ -92,6 +92,7 @@ export default tseslint.config(
       '@typescript-eslint/return-await': ['error', 'in-try-catch'],
       '@typescript-eslint/no-redundant-type-constituents': 'error',
       '@typescript-eslint/require-await': 'error',
+      '@typescript-eslint/no-unnecessary-template-expression': 'error',
 
       '@typescript-eslint/no-misused-promises': [
         'error',

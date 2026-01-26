@@ -26,8 +26,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       this.logger.warn('Resource not found', exception)
 
       return response.status(404).json({
-        message: 'Resource not found',
-        status: 404
+        success: false,
+        message: 'Resource not found'
       })
     }
 
@@ -36,7 +36,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const fields = exception.meta?.target
 
       return response.status(409).json({
-        statusCode: 409,
+        success: false,
         message: 'Unique constraint failed',
         fields
       })
@@ -50,7 +50,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
       this.logger.warn('Validation failed', exception)
 
-      return response.status(400).json({ message, errors, status: 400 })
+      return response.status(400).json({ success: false, message, errors })
     }
 
     const status =
@@ -61,6 +61,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
         : 'Internal server error'
 
     this.logger.error(message, exception)
-    response.status(status).json({ message, status })
+    response.status(status).json({ success: false, message })
   }
 }
