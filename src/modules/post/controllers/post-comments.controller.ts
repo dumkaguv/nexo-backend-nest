@@ -58,13 +58,14 @@ export class PostCommentsController {
   @Patch(':id/comments/:commentId')
   @ApiOkResponseWrapped(EmptyResponseDto)
   public updateComment(
+    @Req() req: AuthRequest,
     @Param('id') id: string,
     @Param('commentId') commentId: string,
     @Body() dto: CreatePostCommentDto
   ) {
     return sendResponse(
       EmptyResponseDto,
-      this.postCommentsService.updateComment(+id, +commentId, dto)
+      this.postCommentsService.updateComment(req.user.id, +id, +commentId, dto)
     )
   }
 

@@ -59,13 +59,12 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token is not valid')
     }
 
-    const {
-      user: { id }
-    } = await this.tokenService.refresh(refreshToken)
+    const { accessToken, refreshToken: newRefreshToken } =
+      await this.tokenService.refresh(refreshToken)
 
-    if (id) {
-      return this.auth(res, id, false)
-    }
+    this.setCookie(res, newRefreshToken, this.JWT_REFRESH_TTL as StringValue)
+
+    return { accessToken }
   }
 
   public validate(id: number) {

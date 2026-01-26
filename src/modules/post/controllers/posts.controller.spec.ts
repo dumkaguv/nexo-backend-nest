@@ -92,16 +92,22 @@ describe('PostsController', () => {
   it('update returns ResponsePostDto', async () => {
     postsService.update.mockResolvedValue({ id: 6 })
 
-    const result = await controller.update('6', { content: 'updated' })
+    const result = await controller.update({ user: { id: 3 } } as never, '6', {
+      content: 'updated'
+    })
 
-    expect(postsService.update).toHaveBeenCalledWith(6, { content: 'updated' })
+    expect(postsService.update).toHaveBeenCalledWith(3, 6, {
+      content: 'updated'
+    })
     expect(result).toBeInstanceOf(ResponsePostDto)
   })
 
   it('remove deletes post', async () => {
     postsService.remove.mockResolvedValue({ id: 8 })
 
-    await expect(controller.remove('8')).resolves.toEqual({ id: 8 })
-    expect(postsService.remove).toHaveBeenCalledWith(8)
+    await expect(
+      controller.remove({ user: { id: 2 } } as never, '8')
+    ).resolves.toEqual({ id: 8 })
+    expect(postsService.remove).toHaveBeenCalledWith(2, 8)
   })
 })

@@ -82,6 +82,21 @@ type ComputedValues<C extends Record<string, (...args: any[]) => any>> = {
   [K in keyof C]: Awaited<ReturnType<C[K]>>
 }
 
+type ComputedBatchFn<Key extends PrismaModelKey, Select, Include, Context> = (
+  records: ModelRecord<Key, Select, Include>[],
+  helpers: { prisma: PrismaClient; context: Context }
+) => Record<string, unknown>[] | Promise<Record<string, unknown>[]>
+
+type ComputedBatchValues<CB> = CB extends (...args: any[]) => Promise<infer R>
+  ? R extends (infer Item)[]
+    ? Item
+    : never
+  : CB extends (...args: any[]) => infer R
+    ? R extends (infer Item)[]
+      ? Item
+      : never
+    : never
+
 type PaginateParams<
   Key extends PrismaModelKey,
   Select,
@@ -90,10 +105,12 @@ type PaginateParams<
 > = Context extends undefined
   ? PaginateBaseParams<Key, Select, Include> & {
       computed?: ComputedMap<Key, Select, Include, undefined>
+      computedBatch?: ComputedBatchFn<Key, Select, Include, undefined>
       context?: undefined
     }
   : PaginateBaseParams<Key, Select, Include> & {
       computed?: ComputedMap<Key, Select, Include, Context>
+      computedBatch?: ComputedBatchFn<Key, Select, Include, Context>
       context: Context
     }
 
@@ -123,6 +140,7 @@ export async function paginate<
 >(
   params: PaginateParams<Key, Select, Include, Context> & {
     computed?: undefined
+    computedBatch?: undefined
   }
 ): Promise<{
   data: ModelRecord<Key, Select, Include>[]
@@ -151,6 +169,56 @@ export async function paginate<
   Key extends PrismaModelKey,
   Select extends ModelFindManyArgs<Key>['select'] = undefined,
   Include extends ModelFindManyArgs<Key>['include'] = undefined,
+  Context = undefined,
+  CB extends ComputedBatchFn<Key, Select, Include, Context> = ComputedBatchFn<
+    Key,
+    Select,
+    Include,
+    Context
+  >
+>(
+  params: PaginateParams<Key, Select, Include, Context> & {
+    computed?: undefined
+    computedBatch: CB
+  }
+): Promise<{
+  data: (ModelRecord<Key, Select, Include> & ComputedBatchValues<CB>)[]
+  total: number
+}>
+
+export async function paginate<
+  Key extends PrismaModelKey,
+  Select extends ModelFindManyArgs<Key>['select'] = undefined,
+  Include extends ModelFindManyArgs<Key>['include'] = undefined,
+  Context = undefined,
+  C extends ComputedMap<Key, Select, Include, Context> = ComputedMap<
+    Key,
+    Select,
+    Include,
+    Context
+  >,
+  CB extends ComputedBatchFn<Key, Select, Include, Context> = ComputedBatchFn<
+    Key,
+    Select,
+    Include,
+    Context
+  >
+>(
+  params: PaginateParams<Key, Select, Include, Context> & {
+    computed: C
+    computedBatch: CB
+  }
+): Promise<{
+  data: (ModelRecord<Key, Select, Include> &
+    ComputedValues<C> &
+    ComputedBatchValues<CB>)[]
+  total: number
+}>
+
+export async function paginate<
+  Key extends PrismaModelKey,
+  Select extends ModelFindManyArgs<Key>['select'] = undefined,
+  Include extends ModelFindManyArgs<Key>['include'] = undefined,
   Context = undefined
 >({
   prisma,
@@ -163,6 +231,7 @@ export async function paginate<
   include,
   where: whereParam,
   computed,
+  computedBatch,
   context
 }: PaginateParams<Key, Select, Include, Context>): Promise<{
   data: any[]
@@ -209,7 +278,7 @@ export async function paginate<
     if (stringFields.length > 0) {
       const searchWhere = {
         OR: stringFields.map(({ field }) => ({
-          [field]: { contains: search, mode: 'insensitive' }
+          [field]: { contains: search, mode: Prisma.QueryMode.insensitive }
         }))
       } as ModelWhere<Key>
 
@@ -231,16 +300,42 @@ export async function paginate<
     modelClient.count({ where })
   ])
 
-  if (!computed) {
+  if (!computed && !computedBatch) {
     return { data, total }
   }
 
-  const resultData = await Promise.all(
-    data.map(async (record) => {
-      const helpers = { prisma, context } as {
-        prisma: PrismaClient
-        context: Context
-      }
+  const helpers = { prisma, context } as {
+    prisma: PrismaClient
+    context: Context
+  }
+
+  let resultData = data as Record<string, unknown>[]
+
+  if (computedBatch) {
+    const batchValues = await computedBatch(data as any, helpers as any)
+
+    if (!Array.isArray(batchValues)) {
+      throw new Error('computedBatch must return an array')
+    }
+
+    if (batchValues.length !== data.length) {
+      throw new Error(
+        'computedBatch result length must match the number of records'
+      )
+    }
+
+    resultData = data.map((record, index) => ({
+      ...(record as Record<string, unknown>),
+      ...(batchValues[index] ?? {})
+    }))
+  }
+
+  if (!computed) {
+    return { data: resultData, total }
+  }
+
+  const resultDataWithComputed = await Promise.all(
+    resultData.map(async (record) => {
       const computedValues: Record<string, unknown> = {}
 
       for (const [key, fn] of Object.entries(computed)) {
@@ -251,5 +346,5 @@ export async function paginate<
     })
   )
 
-  return { data: resultData, total }
+  return { data: resultDataWithComputed, total }
 }

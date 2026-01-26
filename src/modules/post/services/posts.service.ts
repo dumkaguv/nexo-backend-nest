@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { ForbiddenException, Injectable } from '@nestjs/common'
 
 import { FindAllQueryDto } from '@/common/dtos'
 import { paginate, sanitizeHtmlContent } from '@/common/utils'
@@ -16,19 +16,33 @@ export class PostsService {
       model: 'post',
       include: {
         user: { include: { profile: { include: { avatar: true } } } },
-        files: { include: { file: true } }
+        files: { include: { file: true } },
+        _count: { select: { likes: true, comments: true } }
       },
       ...query,
       ordering: query.ordering ? query.ordering : '-createdAt',
-      computed: {
-        isLiked: async ({ id }, { prisma, context }) =>
-          !!(await prisma.postLike.findFirst({
-            where: { postId: id, userId: context.userId }
-          })),
-        likesCount: ({ id }, { prisma }) =>
-          prisma.postLike.count({ where: { postId: id } }),
-        commentsCount: ({ id }, { prisma }) =>
-          prisma.postComment.count({ where: { postId: id } })
+      computedBatch: async (records, { prisma, context }) => {
+        const ids = records.map((record) => record.id)
+
+        if (ids.length === 0) {
+          return records.map(() => ({
+            isLiked: false,
+            likesCount: 0,
+            commentsCount: 0
+          }))
+        }
+
+        const liked = await prisma.postLike.findMany({
+          where: { postId: { in: ids }, userId: context.userId },
+          select: { postId: true }
+        })
+        const likedSet = new Set(liked.map((row) => row.postId))
+
+        return records.map((record) => ({
+          isLiked: likedSet.has(record.id),
+          likesCount: record._count?.likes ?? 0,
+          commentsCount: record._count?.comments ?? 0
+        }))
       },
       context: { userId }
     })
@@ -41,19 +55,33 @@ export class PostsService {
       where: { userId },
       include: {
         user: { include: { profile: { include: { avatar: true } } } },
-        files: { include: { file: true } }
+        files: { include: { file: true } },
+        _count: { select: { likes: true, comments: true } }
       },
       ...query,
       ordering: query.ordering ? query.ordering : '-createdAt',
-      computed: {
-        isLiked: async ({ id }, { prisma, context }) =>
-          !!(await prisma.postLike.findFirst({
-            where: { postId: id, userId: context.userId }
-          })),
-        likesCount: ({ id }, { prisma }) =>
-          prisma.postLike.count({ where: { postId: id } }),
-        commentsCount: ({ id }, { prisma }) =>
-          prisma.postComment.count({ where: { postId: id } })
+      computedBatch: async (records, { prisma, context }) => {
+        const ids = records.map((record) => record.id)
+
+        if (ids.length === 0) {
+          return records.map(() => ({
+            isLiked: false,
+            likesCount: 0,
+            commentsCount: 0
+          }))
+        }
+
+        const liked = await prisma.postLike.findMany({
+          where: { postId: { in: ids }, userId: context.userId },
+          select: { postId: true }
+        })
+        const likedSet = new Set(liked.map((row) => row.postId))
+
+        return records.map((record) => ({
+          isLiked: likedSet.has(record.id),
+          likesCount: record._count?.likes ?? 0,
+          commentsCount: record._count?.comments ?? 0
+        }))
       },
       context: { userId }
     })
@@ -86,7 +114,16 @@ export class PostsService {
     return post
   }
 
-  public async update(id: number, dto: UpdatePostDto) {
+  public async update(userId: number, id: number, dto: UpdatePostDto) {
+    const existing = await this.prisma.post.findFirst({
+      where: { id, userId },
+      select: { id: true }
+    })
+
+    if (!existing) {
+      throw new ForbiddenException('You are not allowed to update this post')
+    }
+
     const { files, content, ...rest } = dto
 
     if (files?.length) {
@@ -107,7 +144,16 @@ export class PostsService {
     })
   }
 
-  public remove(id: number) {
+  public async remove(userId: number, id: number) {
+    const existing = await this.prisma.post.findFirst({
+      where: { id, userId },
+      select: { id: true }
+    })
+
+    if (!existing) {
+      throw new ForbiddenException('You are not allowed to delete this post')
+    }
+
     return this.prisma.post.delete({ where: { id } })
   }
 }

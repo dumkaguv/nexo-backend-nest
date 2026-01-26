@@ -1,4 +1,8 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException
+} from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { paginate } from '@/common/utils'
@@ -134,6 +138,7 @@ describe('ConversationService', () => {
   })
 
   it('create creates conversation', async () => {
+    prisma.conversation.findFirst.mockResolvedValue(null)
     prisma.conversation.create.mockResolvedValue({ id: 3 })
 
     await expect(service.create(1, { receiverId: 2 })).resolves.toEqual({
@@ -146,6 +151,14 @@ describe('ConversationService', () => {
         receiver: { include: { profile: { include: { avatar: true } } } }
       }
     })
+  })
+
+  it('create throws when conversation already exists', async () => {
+    prisma.conversation.findFirst.mockResolvedValue({ id: 9 })
+
+    await expect(service.create(1, { receiverId: 2 })).rejects.toBeInstanceOf(
+      BadRequestException
+    )
   })
 
   it('remove throws when access denied', async () => {

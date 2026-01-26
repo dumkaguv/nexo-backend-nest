@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException
@@ -148,6 +149,20 @@ export class ConversationService {
   }
 
   public async create(senderId: number, dto: CreateConversationDto) {
+    const existing = await this.prisma.conversation.findFirst({
+      where: {
+        OR: [
+          { senderId, receiverId: dto.receiverId },
+          { senderId: dto.receiverId, receiverId: senderId }
+        ]
+      },
+      select: { id: true }
+    })
+
+    if (existing) {
+      throw new BadRequestException('Conversation already exists')
+    }
+
     const conversation = await this.prisma.conversation.create({
       data: { senderId, ...dto },
       include: {

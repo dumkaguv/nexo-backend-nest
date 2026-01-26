@@ -1,4 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+  ForbiddenException,
+  Injectable
+} from '@nestjs/common'
 
 import { Prisma } from '@prisma/client'
 
@@ -43,10 +46,21 @@ export class PostCommentsService {
   }
 
   public async updateComment(
+    userId: number,
     postId: number,
     commentId: number,
     dto: CreatePostCommentDto
   ) {
+    const existingComment = await this.prisma.postComment.findFirstOrThrow({
+      where: { id: commentId, postId }
+    })
+
+    const isMyPost = existingComment.userId === userId
+
+    if (!isMyPost) {
+      throw new ForbiddenException('You are not owner of this comment')
+    }
+
     const sanitizedContent = sanitizeHtmlContent(dto.content)
 
     await this.prisma.postComment.update({
@@ -69,7 +83,7 @@ export class PostCommentsService {
     const isMyPost = existingComment.userId === userId
 
     if (!isMyPost) {
-      throw new BadRequestException('You are not owner of this comment')
+      throw new ForbiddenException('You are not owner of this comment')
     }
 
     return this.prisma.postComment.delete({

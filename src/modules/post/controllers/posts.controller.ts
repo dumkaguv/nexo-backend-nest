@@ -69,12 +69,19 @@ export class PostsController {
 
   @Patch(':id')
   @ApiOkResponseWrapped(ResponsePostDto)
-  public update(@Param('id') id: string, @Body() dto: UpdatePostDto) {
-    return sendResponse(ResponsePostDto, this.postsService.update(+id, dto))
+  public update(
+    @Req() req: AuthRequest,
+    @Param('id') id: string,
+    @Body() dto: UpdatePostDto
+  ) {
+    return sendResponse(
+      ResponsePostDto,
+      this.postsService.update(req.user.id, +id, dto)
+    )
   }
 
   @Delete(':id')
-  public remove(@Param('id') id: string) {
-    return this.postsService.remove(+id)
+  public remove(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.postsService.remove(req.user.id, +id)
   }
 }

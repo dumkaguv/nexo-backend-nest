@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 
+import { Prisma } from '@prisma/client'
+
 import { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
 
@@ -115,8 +117,7 @@ export class SubscriptionService {
     query: FindAllQueryDto<ResponseSubscriptionDto>,
     searchFollowers = true
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: Record<string, any> = searchFollowers
+    const where: Prisma.SubscriptionWhereInput = searchFollowers
       ? { followingId: userId }
       : { userId }
 
@@ -126,13 +127,19 @@ export class SubscriptionService {
       where.OR = [
         {
           [targetField]: {
-            username: { contains: query.search, mode: 'insensitive' }
+            username: {
+              contains: query.search,
+              mode: Prisma.QueryMode.insensitive
+            }
           }
         },
         {
           [targetField]: {
             profile: {
-              fullName: { contains: query.search, mode: 'insensitive' }
+              fullName: {
+                contains: query.search,
+                mode: Prisma.QueryMode.insensitive
+              }
             }
           }
         }

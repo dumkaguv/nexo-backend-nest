@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 
 import { ConfigService } from '@nestjs/config'
 
@@ -94,16 +94,19 @@ export class TokenService {
 
   public async refresh(refreshToken: string) {
     const { id } = await this.validateRefreshToken(refreshToken)
-    const existingToken = await this.prisma.token.findUniqueOrThrow({
+    const existingToken = await this.prisma.token.findUnique({
       where: { userId: id }
     })
-    const user = await this.userService.findOne(id)
 
-    if (!existingToken || !user) {
-      throw new NotFoundException()
+    if (existingToken?.refreshToken !== refreshToken) {
+      throw new UnauthorizedException('Refresh token is not valid')
     }
 
+    const user = await this.userService.findOne(id)
+
     const tokens = await this.generate(user.id)
+
+    await this.save(tokens.refreshToken, user.id)
 
     return { ...tokens, user }
   }

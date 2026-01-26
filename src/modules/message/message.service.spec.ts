@@ -1,4 +1,8 @@
-import { BadRequestException, ForbiddenException } from '@nestjs/common'
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException
+} from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { paginate, sanitizeHtmlContent } from '@/common/utils'
@@ -26,6 +30,10 @@ describe('MessageService', () => {
     messageFile: {
       createMany: jest.Mock
     }
+    conversation: {
+      findFirst: jest.Mock
+      update: jest.Mock
+    }
   }
   let userService: { findOne: jest.Mock }
 
@@ -41,6 +49,10 @@ describe('MessageService', () => {
       },
       messageFile: {
         createMany: jest.fn()
+      },
+      conversation: {
+        findFirst: jest.fn(),
+        update: jest.fn()
       }
     }
     userService = { findOne: jest.fn() }
@@ -98,6 +110,10 @@ describe('MessageService', () => {
   })
 
   it('create throws when files are missing in storage', async () => {
+    prisma.conversation.findFirst.mockResolvedValue({
+      senderId: 1,
+      receiverId: 2
+    })
     userService.findOne.mockResolvedValue({ id: 2 })
     ;(sanitizeHtmlContent as jest.Mock).mockReturnValue('hello')
     prisma.file.findMany.mockResolvedValue([{ id: 1 }])
@@ -113,6 +129,10 @@ describe('MessageService', () => {
   })
 
   it('create stores sanitized content and files', async () => {
+    prisma.conversation.findFirst.mockResolvedValue({
+      senderId: 1,
+      receiverId: 2
+    })
     userService.findOne.mockResolvedValue({ id: 2 })
     ;(sanitizeHtmlContent as jest.Mock).mockReturnValue('hi')
     prisma.file.findMany.mockResolvedValue([{ id: 1 }, { id: 2 }])
@@ -153,6 +173,10 @@ describe('MessageService', () => {
         { id: 1, url: 'u', type: 't', uploadedAt: new Date('2024-01-02') }
       ]
     })
+    expect(prisma.conversation.update).toHaveBeenCalledWith({
+      where: { id: 3 },
+      data: { updatedAt: expect.any(Date) }
+    })
     expect(prisma.message.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -164,6 +188,33 @@ describe('MessageService', () => {
         })
       })
     )
+  })
+
+  it('create throws when conversation is missing', async () => {
+    prisma.conversation.findFirst.mockResolvedValue(null)
+
+    await expect(
+      service.create(1, {
+        receiverId: 2,
+        conversationId: 3,
+        content: 'hi'
+      })
+    ).rejects.toBeInstanceOf(NotFoundException)
+  })
+
+  it('create throws when user is not participant', async () => {
+    prisma.conversation.findFirst.mockResolvedValue({
+      senderId: 5,
+      receiverId: 6
+    })
+
+    await expect(
+      service.create(1, {
+        receiverId: 2,
+        conversationId: 3,
+        content: 'hi'
+      })
+    ).rejects.toBeInstanceOf(ForbiddenException)
   })
 
   it('update forbids editing a message from another sender', async () => {
@@ -187,5 +238,19 @@ describe('MessageService', () => {
       data: [{ messageId: 1, fileId: 1 }],
       skipDuplicates: true
     })
+  })
+
+  it('update does not overwrite content when omitted', async () => {
+    prisma.message.findUnique.mockResolvedValue({ id: 1, senderId: 1 })
+    prisma.message.update.mockResolvedValue({ id: 1 })
+
+    await service.update(1, 1, { id: 1 })
+    expect(prisma.message.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          isEdited: true
+        })
+      })
+    )
   })
 })

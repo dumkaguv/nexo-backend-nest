@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common'
+import { UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { Test, TestingModule } from '@nestjs/testing'
@@ -137,43 +137,42 @@ describe('TokenService', () => {
   })
 
   it('removes refresh token by value', async () => {
-    prisma.token.findFirstOrThrow.mockResolvedValue({ id: 9 })
+    prisma.token.findFirstOrThrow.mockResolvedValue({ id: 9, userId: 3 })
     prisma.token.delete.mockResolvedValue({ id: 9 })
 
-    await expect(service.remove('refresh')).resolves.toBeUndefined()
+    await expect(service.remove('refresh')).resolves.toBe(3)
     expect(prisma.token.delete).toHaveBeenCalledWith({ where: { id: 9 } })
   })
 
   it('refresh returns tokens and user', async () => {
     jwtService.verifyAsync.mockResolvedValue({ id: 11 })
-    prisma.token.findUniqueOrThrow.mockResolvedValue({
-      id: 1,
-      userId: 11,
-      refreshToken: 'refresh'
-    })
+    prisma.token.findUnique.mockResolvedValue({ userId: 11, refreshToken: 'r' })
     userService.findOne.mockResolvedValue({ id: 11 })
     jest
       .spyOn(service, 'generate')
       .mockResolvedValue({ accessToken: 'a', refreshToken: 'r' })
+    prisma.token.update.mockResolvedValue({ id: 1, refreshToken: 'r' })
 
-    await expect(service.refresh('refresh')).resolves.toEqual({
+    await expect(service.refresh('r')).resolves.toEqual({
       accessToken: 'a',
       refreshToken: 'r',
       user: { id: 11 }
     })
+    expect(prisma.token.findUnique).toHaveBeenCalledWith({
+      where: { userId: 11 }
+    })
+    expect(prisma.token.update).toHaveBeenCalledWith({
+      where: { userId: 11 },
+      data: { refreshToken: 'r' }
+    })
   })
 
-  it('refresh throws when user is missing', async () => {
+  it('refresh throws when token is missing', async () => {
     jwtService.verifyAsync.mockResolvedValue({ id: 12 })
-    prisma.token.findUniqueOrThrow.mockResolvedValue({
-      id: 2,
-      userId: 12,
-      refreshToken: 'refresh'
-    })
-    userService.findOne.mockResolvedValue(null)
+    prisma.token.findUnique.mockResolvedValue(null)
 
     await expect(service.refresh('refresh')).rejects.toBeInstanceOf(
-      NotFoundException
+      UnauthorizedException
     )
   })
 })

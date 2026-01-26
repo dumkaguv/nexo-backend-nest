@@ -1,7 +1,8 @@
 import {
   BadRequestException,
   ForbiddenException,
-  Injectable
+  Injectable,
+  NotFoundException
 } from '@nestjs/common'
 
 import { FindAllQueryDto } from '@/common/dtos'
@@ -68,6 +69,25 @@ export class MessageService {
       throw new BadRequestException('Message content or files are required')
     }
 
+    const conversation = await this.prisma.conversation.findFirst({
+      where: { id: conversationId },
+      select: { senderId: true, receiverId: true }
+    })
+
+    if (!conversation) {
+      throw new NotFoundException('Conversation not found')
+    }
+
+    const isParticipant =
+      (conversation.senderId === senderId &&
+        conversation.receiverId === receiverId) ||
+      (conversation.receiverId === senderId &&
+        conversation.senderId === receiverId)
+
+    if (!isParticipant) {
+      throw new ForbiddenException('Access denied')
+    }
+
     await this.userService.findOne(receiverId)
 
     const sanitizedContent = sanitizeHtmlContent(content)
@@ -97,6 +117,11 @@ export class MessageService {
           include: { file: true }
         }
       }
+    })
+
+    await this.prisma.conversation.update({
+      where: { id: conversationId },
+      data: { updatedAt: new Date() }
     })
 
     return {
@@ -130,9 +155,12 @@ export class MessageService {
       await this.createMessageFiles(id, uniqueFileIds)
     }
 
-    const data = {
-      ...rest,
-      content: sanitizeHtmlContent(content)
+    const data: Record<string, unknown> = { ...rest }
+
+    if (typeof content !== 'undefined') {
+      const sanitizedContent = sanitizeHtmlContent(content)
+
+      data.content = sanitizedContent || null
     }
 
     return this.prisma.message.update({

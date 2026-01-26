@@ -1,5 +1,7 @@
-import { BadRequestException } from '@nestjs/common'
+import { ForbiddenException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
+
+import { Prisma } from '@prisma/client'
 
 import { paginate, sanitizeHtmlContent } from '@/common/utils'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -58,13 +60,19 @@ describe('PostCommentsService', () => {
           OR: [
             {
               user: {
-                username: { contains: 'neo', mode: 'insensitive' }
+                username: {
+                  contains: 'neo',
+                  mode: Prisma.QueryMode.insensitive
+                }
               }
             },
             {
               user: {
                 profile: {
-                  fullName: { contains: 'neo', mode: 'insensitive' }
+                  fullName: {
+                    contains: 'neo',
+                    mode: Prisma.QueryMode.insensitive
+                  }
                 }
               }
             }
@@ -87,11 +95,12 @@ describe('PostCommentsService', () => {
   })
 
   it('updateComment stores sanitized content', async () => {
+    prisma.postComment.findFirstOrThrow.mockResolvedValue({ userId: 1 })
     ;(sanitizeHtmlContent as jest.Mock).mockReturnValue('updated')
     prisma.postComment.update.mockResolvedValue({ id: 1 })
 
     await expect(
-      service.updateComment(1, 2, { content: 'updated' })
+      service.updateComment(1, 1, 2, { content: 'updated' })
     ).resolves.toEqual({})
     expect(prisma.postComment.update).toHaveBeenCalledWith({
       data: { content: 'updated' },
@@ -103,7 +112,7 @@ describe('PostCommentsService', () => {
     prisma.postComment.findFirstOrThrow.mockResolvedValue({ userId: 2 })
 
     await expect(service.removeComment(1, 2, 3)).rejects.toBeInstanceOf(
-      BadRequestException
+      ForbiddenException
     )
   })
 })

@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
+import { Prisma } from '@prisma/client'
+
 import { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
 import { UserService } from '@/modules/user/user.service'
@@ -51,20 +53,19 @@ export class PostLikesService {
   }
 
   private getUserSearchWhere({ search }: FindAllQueryDto, userId?: number) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: Record<string, any> = { userId }
+    const where: Prisma.PostLikeWhereInput = { userId }
 
     if (search) {
       where.OR = [
         {
           user: {
-            username: { contains: search, mode: 'insensitive' }
+            username: { contains: search, mode: Prisma.QueryMode.insensitive }
           }
         },
         {
           user: {
             profile: {
-              fullName: { contains: search, mode: 'insensitive' }
+              fullName: { contains: search, mode: Prisma.QueryMode.insensitive }
             }
           }
         }

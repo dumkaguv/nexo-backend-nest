@@ -71,11 +71,14 @@ describe('PostCommentsController', () => {
   it('updateComment returns EmptyResponseDto', async () => {
     postCommentsService.updateComment.mockResolvedValue({})
 
-    const result = await controller.updateComment('1', '2', {
-      content: 'updated'
-    })
+    const result = await controller.updateComment(
+      { user: { id: 1 } } as never,
+      '1',
+      '2',
+      { content: 'updated' }
+    )
 
-    expect(postCommentsService.updateComment).toHaveBeenCalledWith(1, 2, {
+    expect(postCommentsService.updateComment).toHaveBeenCalledWith(1, 1, 2, {
       content: 'updated'
     })
     expect(result).toBeInstanceOf(EmptyResponseDto)

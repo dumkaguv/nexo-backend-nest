@@ -149,18 +149,15 @@ describe('AuthService', () => {
   it('refresh returns access token and sets cookie', async () => {
     const req = { cookies: { refreshToken: 'refresh' } } as unknown as Request
 
-    tokenService.refresh.mockResolvedValue({ user: { id: 3 } })
-    tokenService.generate.mockResolvedValue({
+    tokenService.refresh.mockResolvedValue({
       accessToken: 'access',
       refreshToken: 'new-refresh'
     })
-    tokenService.save.mockResolvedValue({ id: 3 })
 
     await expect(service.refresh(req, res)).resolves.toEqual({
-      user: null,
       accessToken: 'access'
     })
-    expect(tokenService.generate).toHaveBeenCalledWith(3)
+    expect(tokenService.refresh).toHaveBeenCalledWith('refresh')
     expect(res.cookie).toHaveBeenCalledWith(
       'refreshToken',
       'new-refresh',
