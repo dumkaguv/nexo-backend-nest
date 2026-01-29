@@ -168,8 +168,9 @@ export default tseslint.config(
         {
           patterns: [
             {
-              group: ['../../*', '../../**'],
-              message: 'Do not use ../../ in imports. Use @/alias instead.'
+              regex: String.raw`^(\./)*(\.\./){2,}`,
+              message:
+                'Do not use 2+ parent relative imports. Use @/alias instead.'
             }
           ]
         }
