@@ -74,6 +74,67 @@ describe('ConversationService', () => {
     )
   })
 
+  it('findAll applies search filter for participant counterpart', async () => {
+    ;(paginate as jest.Mock).mockResolvedValue({ data: [], total: 0 })
+
+    await service.findAll(1, { page: 1, search: 'anna' })
+    expect(paginate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          AND: [
+            { OR: [{ senderId: 1 }, { receiverId: 1 }] },
+            {
+              OR: [
+                {
+                  senderId: 1,
+                  receiver: {
+                    OR: [
+                      {
+                        username: {
+                          contains: 'anna',
+                          mode: 'insensitive'
+                        }
+                      },
+                      {
+                        profile: {
+                          fullName: {
+                            contains: 'anna',
+                            mode: 'insensitive'
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  receiverId: 1,
+                  sender: {
+                    OR: [
+                      {
+                        username: {
+                          contains: 'anna',
+                          mode: 'insensitive'
+                        }
+                      },
+                      {
+                        profile: {
+                          fullName: {
+                            contains: 'anna',
+                            mode: 'insensitive'
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      })
+    )
+  })
+
   it('findAllConversationMessages delegates to message service', async () => {
     messageService.findAllMyMessages.mockResolvedValue({ data: [], total: 0 })
 

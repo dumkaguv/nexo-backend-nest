@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
 
 import { FindAllQueryDto } from '@/common/dtos'
 import { paginate } from '@/common/utils'
@@ -28,13 +29,15 @@ export class ConversationService {
     userId: number,
     query: FindAllQueryDto<ResponseConversationDto>
   ) {
+    const { search: rawSearch, ...restQuery } = query
+    const search = rawSearch?.trim()
+    const where = this.buildFindAllWhere(userId, search)
+
     const result = await paginate({
       prisma: this.prisma,
       model: 'conversation',
-      ...query,
-      where: {
-        AND: [{ OR: [{ senderId: userId }, { receiverId: userId }] }]
-      },
+      ...restQuery,
+      where,
       include: {
         sender: { include: { profile: { include: { avatar: true } } } },
         receiver: { include: { profile: { include: { avatar: true } } } }
@@ -196,5 +199,65 @@ export class ConversationService {
     this.conversationGateway.emitDeleted(conversation)
 
     return conversation
+  }
+
+  private buildFindAllWhere(
+    userId: number,
+    search?: string
+  ): Prisma.ConversationWhereInput {
+    const andConditions: Prisma.ConversationWhereInput[] = [
+      { OR: [{ senderId: userId }, { receiverId: userId }] }
+    ]
+
+    if (search) {
+      andConditions.push({
+        OR: [
+          {
+            senderId: userId,
+            receiver: {
+              OR: [
+                {
+                  username: {
+                    contains: search,
+                    mode: Prisma.QueryMode.insensitive
+                  }
+                },
+                {
+                  profile: {
+                    fullName: {
+                      contains: search,
+                      mode: Prisma.QueryMode.insensitive
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            receiverId: userId,
+            sender: {
+              OR: [
+                {
+                  username: {
+                    contains: search,
+                    mode: Prisma.QueryMode.insensitive
+                  }
+                },
+                {
+                  profile: {
+                    fullName: {
+                      contains: search,
+                      mode: Prisma.QueryMode.insensitive
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      })
+    }
+
+    return { AND: andConditions }
   }
 }
