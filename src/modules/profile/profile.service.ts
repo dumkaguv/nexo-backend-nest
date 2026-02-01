@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 
-import { connectOrDisconnect } from '@/common/utils'
 import { FileService } from '@/modules/file/file.service'
 import { UserService } from '@/modules/user/user.service'
 import { PrismaService } from '@/prisma/prisma.service'
@@ -41,7 +40,10 @@ export class ProfileService {
     }
 
     return this.prisma.profile.update({
-      data: { ...rest, avatar: connectOrDisconnect(avatarFileId) },
+      data: {
+        ...rest,
+        ...(avatarFileId ? { avatar: { connect: { id: avatarFileId } } } : {})
+      },
       where: { userId }
     })
   }
