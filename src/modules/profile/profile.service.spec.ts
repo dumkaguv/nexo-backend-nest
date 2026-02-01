@@ -66,7 +66,7 @@ describe('ProfileService', () => {
     })
     expect(fileService.findOneForUser).not.toHaveBeenCalled()
     expect(prisma.profile.update).toHaveBeenCalledWith({
-      data: { biography: 'bio', avatar: { disconnect: true } },
+      data: { biography: 'bio' },
       where: { userId: 4 }
     })
   })
