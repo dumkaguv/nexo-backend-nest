@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -81,6 +83,7 @@ export class PostsController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   public remove(@Req() req: AuthRequest, @Param('id') id: string) {
     return this.postsService.remove(req.user.id, +id)
   }

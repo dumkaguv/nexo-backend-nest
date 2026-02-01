@@ -36,6 +36,8 @@ model User {
   following Subscription[] @relation("UserFollowing")
   followers Subscription[] @relation("UserFollowers")
 
+  stories Story[]
+
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @default(now()) @updatedAt
   activatedAt    DateTime?
@@ -195,6 +197,20 @@ model Conversation {
   @@index([receiverId])
 }
 
+model Story {
+  id Int @id @default(autoincrement())
+
+  previewUrl String?
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  files File[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
 model File {
   id       Int     @id @default(autoincrement())
   publicId String
@@ -207,6 +223,9 @@ model File {
   MessageFile MessageFile[]
   PostFile    PostFile[]
   Profile     Profile[]
+
+  storyId Int?
+  story   Story? @relation(fields: [storyId], references: [id], onDelete: Cascade)
 
   uploadedAt DateTime @default(now())
 }

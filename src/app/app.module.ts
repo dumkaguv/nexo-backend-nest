@@ -13,6 +13,7 @@ import { ConversationModule } from '@/modules/conversation/conversation.module'
 import { MessageModule } from '@/modules/message/message.module'
 import { PostModule } from '@/modules/post/post.module'
 import { ProfileModule } from '@/modules/profile/profile.module'
+import { StoryModule } from '@/modules/story/story.module'
 import { SubscriptionModule } from '@/modules/subscription/subscription.module'
 import { TokenModule } from '@/modules/token/token.module'
 import { UploadModule } from '@/modules/upload/upload.module'
@@ -43,7 +44,8 @@ import { AppController } from './app.controller'
     CloudinaryModule,
     MessageModule,
     SubscriptionModule,
-    ConversationModule
+    ConversationModule,
+    StoryModule
   ],
   controllers: [AppController],
   providers: [
