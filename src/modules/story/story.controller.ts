@@ -20,7 +20,12 @@ import { FindAllQueryDto } from '@/common/dtos'
 import type { AuthRequest } from '@/common/types'
 import { sendPaginatedResponse, sendResponse } from '@/common/utils'
 
-import { CreateStoryDto, ResponseStoryDto, UpdateStoryDto } from './dto'
+import {
+  CreateStoryDto,
+  ResponseStoryDto,
+  ResponseStoryViewerDto,
+  UpdateStoryDto
+} from './dto'
 import { StoryService } from './story.service'
 import { Authorization } from '../auth/decorators'
 
@@ -32,29 +37,48 @@ export class StoryController {
 
   @Get()
   @ApiPaginated(ResponseStoryDto)
-  public findAll(@Query() query: FindAllQueryDto<ResponseStoryDto>) {
+  public findAll(
+    @Req() req: AuthRequest,
+    @Query() query: FindAllQueryDto<ResponseStoryDto>
+  ) {
     return sendPaginatedResponse(
       ResponseStoryDto,
-      this.storyService.findALl(query)
+      this.storyService.findAll(req.user.id, query)
+    )
+  }
+
+  @Get('/:id/viewers')
+  @ApiPaginated(ResponseStoryViewerDto)
+  public findAllViewers(
+    @Param('id') id: string,
+    @Query() query: FindAllQueryDto<ResponseStoryViewerDto>
+  ) {
+    return sendPaginatedResponse(
+      ResponseStoryViewerDto,
+      this.storyService.findAllViewers(+id, query)
     )
   }
 
   @Get('/user/:userId')
   @ApiPaginated(ResponseStoryDto)
   public findAllByUserId(
+    @Req() req: AuthRequest,
     @Query() query: FindAllQueryDto<ResponseStoryDto>,
     @Param('userId') userId: string
   ) {
     return sendPaginatedResponse(
       ResponseStoryDto,
-      this.storyService.findALlByUserId(+userId, query)
+      this.storyService.findAllByUserId(+userId, req.user.id, query)
     )
   }
 
   @Get('/:id')
   @ApiOkResponseWrapped(ResponseStoryDto)
-  public findOne(@Param('id') id: string) {
-    return sendResponse(ResponseStoryDto, this.storyService.findOne(+id))
+  public findOne(@Req() req: AuthRequest, @Param('id') id: string) {
+    return sendResponse(
+      ResponseStoryDto,
+      this.storyService.findOne(+id, req.user.id)
+    )
   }
 
   @Post()

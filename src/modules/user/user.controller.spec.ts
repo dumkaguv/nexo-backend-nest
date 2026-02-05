@@ -60,7 +60,7 @@ describe('UserController', () => {
 
     const result = await controller.findOne({ user: { id: 1 } } as never, '1')
 
-    expect(userService.findOneWithRelations).toHaveBeenCalledWith(1)
+    expect(userService.findOneWithRelations).toHaveBeenCalledWith(1, 1)
     expect(result).toBeInstanceOf(ResponseUserDto)
   })
 

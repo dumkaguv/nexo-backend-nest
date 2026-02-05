@@ -14,6 +14,10 @@ export class ResponseStoryDto {
   @Expose()
   previewUrl?: string | null
 
+  @ApiProperty({ type: 'boolean' })
+  @Expose()
+  isViewed: boolean
+
   @ApiProperty({
     type: () => ResponseUserProfileDto
   })

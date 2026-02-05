@@ -78,38 +78,62 @@ export class UserService {
     })
   }
 
-  public async findOne(id: number) {
-    const [user, followingCount, followersCount] = await Promise.all([
-      this.prisma.user.findFirstOrThrow({
-        include: { profile: { include: { avatar: true } } },
-        where: { id }
-      }),
-      this.prisma.subscription.count({
-        where: { userId: id }
-      }),
-      this.prisma.subscription.count({
-        where: { followingId: id }
-      })
-    ])
+  public async findOne(id: number, viewerId?: number) {
+    const [user, followingCount, followersCount, isFollowing] =
+      await Promise.all([
+        this.prisma.user.findFirstOrThrow({
+          include: { profile: { include: { avatar: true } } },
+          where: { id }
+        }),
+        this.prisma.subscription.count({
+          where: { userId: id }
+        }),
+        this.prisma.subscription.count({
+          where: { followingId: id }
+        }),
+        viewerId
+          ? this.prisma.subscription.findFirst({
+              where: { userId: viewerId, followingId: id },
+              select: { id: true }
+            })
+          : null
+      ])
 
-    return { ...user, followingCount, followersCount }
+    return {
+      ...user,
+      followingCount,
+      followersCount,
+      isFollowing: !!isFollowing
+    }
   }
 
-  public async findOneWithRelations(id: number) {
-    const [user, followingCount, followersCount] = await Promise.all([
-      this.prisma.user.findFirstOrThrow({
-        include: includeUserWithRelations,
-        where: { id }
-      }),
-      this.prisma.subscription.count({
-        where: { userId: id }
-      }),
-      this.prisma.subscription.count({
-        where: { followingId: id }
-      })
-    ])
+  public async findOneWithRelations(id: number, viewerId?: number) {
+    const [user, followingCount, followersCount, isFollowing] =
+      await Promise.all([
+        this.prisma.user.findFirstOrThrow({
+          include: includeUserWithRelations,
+          where: { id }
+        }),
+        this.prisma.subscription.count({
+          where: { userId: id }
+        }),
+        this.prisma.subscription.count({
+          where: { followingId: id }
+        }),
+        viewerId
+          ? this.prisma.subscription.findFirst({
+              where: { userId: viewerId, followingId: id },
+              select: { id: true }
+            })
+          : null
+      ])
 
-    return { ...user, followingCount, followersCount }
+    return {
+      ...user,
+      followingCount,
+      followersCount,
+      isFollowing: !!isFollowing
+    }
   }
 
   public async update(

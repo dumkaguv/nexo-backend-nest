@@ -1,15 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing'
 
-import { ResponseStoryDto } from './dto'
+import { ResponseStoryDto, ResponseStoryViewerDto } from './dto'
 import { StoryController } from './story.controller'
 import { StoryService } from './story.service'
 
 describe('StoryController', () => {
   let controller: StoryController
   let storyService: {
-    findALl: jest.Mock
-    findALlByUserId: jest.Mock
+    findAll: jest.Mock
+    findAllByUserId: jest.Mock
     findOne: jest.Mock
+    findAllViewers: jest.Mock
     create: jest.Mock
     update: jest.Mock
     remove: jest.Mock
@@ -17,9 +18,10 @@ describe('StoryController', () => {
 
   beforeEach(async () => {
     storyService = {
-      findALl: jest.fn(),
-      findALlByUserId: jest.fn(),
+      findAll: jest.fn(),
+      findAllByUserId: jest.fn(),
       findOne: jest.fn(),
+      findAllViewers: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       remove: jest.fn()
@@ -38,32 +40,36 @@ describe('StoryController', () => {
   })
 
   it('findAll returns paginated stories', async () => {
-    storyService.findALl.mockResolvedValue({
+    storyService.findAll.mockResolvedValue({
       data: [{ id: 1 }],
       total: 1
     })
 
-    const result = (await controller.findAll({
-      page: 1
-    } as never)) as { data: ResponseStoryDto[]; total: number }
+    const result = (await controller.findAll(
+      { user: { id: 4 } } as never,
+      { page: 1 } as never
+    )) as { data: ResponseStoryDto[]; total: number }
 
-    expect(storyService.findALl).toHaveBeenCalledWith({ page: 1 })
+    expect(storyService.findAll).toHaveBeenCalledWith(4, { page: 1 })
     expect(result.total).toBe(1)
     expect(result.data[0]).toBeInstanceOf(ResponseStoryDto)
   })
 
   it('findAllByUserId returns paginated stories', async () => {
-    storyService.findALlByUserId.mockResolvedValue({
+    storyService.findAllByUserId.mockResolvedValue({
       data: [{ id: 2 }],
       total: 1
     })
 
     const result = (await controller.findAllByUserId(
+      { user: { id: 6 } } as never,
       { page: 2 } as never,
       '5'
     )) as { data: ResponseStoryDto[]; total: number }
 
-    expect(storyService.findALlByUserId).toHaveBeenCalledWith(5, { page: 2 })
+    expect(storyService.findAllByUserId).toHaveBeenCalledWith(5, 6, {
+      page: 2
+    })
     expect(result.total).toBe(1)
     expect(result.data[0]).toBeInstanceOf(ResponseStoryDto)
   })
@@ -71,10 +77,25 @@ describe('StoryController', () => {
   it('findOne returns ResponseStoryDto', async () => {
     storyService.findOne.mockResolvedValue({ id: 3 })
 
-    const result = await controller.findOne('3')
+    const result = await controller.findOne({ user: { id: 8 } } as never, '3')
 
-    expect(storyService.findOne).toHaveBeenCalledWith(3)
+    expect(storyService.findOne).toHaveBeenCalledWith(3, 8)
     expect(result).toBeInstanceOf(ResponseStoryDto)
+  })
+
+  it('findAllViewers returns paginated viewers', async () => {
+    storyService.findAllViewers.mockResolvedValue({
+      data: [{ id: 1 }],
+      total: 1
+    })
+
+    const result = (await controller.findAllViewers('7', {
+      page: 1
+    } as never)) as { data: ResponseStoryViewerDto[]; total: number }
+
+    expect(storyService.findAllViewers).toHaveBeenCalledWith(7, { page: 1 })
+    expect(result.total).toBe(1)
+    expect(result.data[0]).toBeInstanceOf(ResponseStoryViewerDto)
   })
 
   it('create returns ResponseStoryDto', async () => {

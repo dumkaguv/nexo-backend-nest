@@ -49,7 +49,7 @@ export class UserController {
   public findOne(@Req() req: AuthRequest, @Param('id') id: string) {
     return sendResponse(
       ResponseUserDto,
-      this.userService.findOneWithRelations(+id)
+      this.userService.findOneWithRelations(+id, req.user.id)
     )
   }
 

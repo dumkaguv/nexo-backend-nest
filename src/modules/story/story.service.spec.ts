@@ -22,6 +22,10 @@ describe('StoryService', () => {
       update: jest.Mock
       delete: jest.Mock
     }
+    storyView: {
+      findMany: jest.Mock
+      upsert: jest.Mock
+    }
   }
 
   beforeEach(async () => {
@@ -32,6 +36,10 @@ describe('StoryService', () => {
         create: jest.fn(),
         update: jest.fn(),
         delete: jest.fn()
+      },
+      storyView: {
+        findMany: jest.fn(),
+        upsert: jest.fn()
       }
     }
 
@@ -46,22 +54,28 @@ describe('StoryService', () => {
     jest.clearAllMocks()
   })
 
-  it('findALl delegates to paginate', async () => {
+  it('findAll delegates to paginate', async () => {
     ;(paginate as jest.Mock).mockResolvedValue({ data: [], total: 0 })
 
     const query: FindAllQueryDto<ResponseStoryDto> = { page: 1 }
 
-    await service.findALl(query)
+    await service.findAll(7, query)
 
-    expect(paginate).toHaveBeenCalled()
+    expect(paginate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'story',
+        context: { userId: 7 },
+        computedBatch: expect.any(Function)
+      })
+    )
   })
 
-  it('findALlByUserId passes userId filter', async () => {
+  it('findAllByUserId passes userId filter', async () => {
     ;(paginate as jest.Mock).mockResolvedValue({ data: [], total: 0 })
 
     const query: FindAllQueryDto<ResponseStoryDto> = { page: 2 }
 
-    await service.findALlByUserId(5, query)
+    await service.findAllByUserId(5, 11, query)
 
     expect(paginate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -72,20 +86,43 @@ describe('StoryService', () => {
           user: expect.any(Object),
           files: true
         }),
-        page: 2
+        page: 2,
+        context: { userId: 11 },
+        computedBatch: expect.any(Function)
       })
     )
   })
 
-  it('findOne returns story', async () => {
-    prisma.story.findFirstOrThrow.mockResolvedValue({ id: 1 })
+  it('findOne returns story with view meta', async () => {
+    prisma.story.findFirstOrThrow.mockResolvedValue({ id: 1, userId: 2 })
+    prisma.storyView.upsert.mockResolvedValue({ id: 1 })
+    prisma.storyView.findMany.mockResolvedValue([{ storyId: 1 }])
 
-    const result = await service.findOne(1)
+    const result = await service.findOne(1, 5)
 
     expect(prisma.story.findFirstOrThrow).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: 1 } })
     )
-    expect(result).toEqual({ id: 1 })
+    expect(prisma.storyView.upsert).toHaveBeenCalledWith({
+      where: { storyId_userId: { storyId: 1, userId: 5 } },
+      update: {},
+      create: { storyId: 1, userId: 5 }
+    })
+    expect(result).toEqual(expect.objectContaining({ id: 1, isViewed: true }))
+  })
+
+  it('findAllViewers delegates to paginate with ordering', async () => {
+    ;(paginate as jest.Mock).mockResolvedValue({ data: [], total: 0 })
+
+    await service.findAllViewers(3, { page: 1 })
+
+    expect(paginate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'storyView',
+        where: { storyId: 3 },
+        ordering: '-createdAt'
+      })
+    )
   })
 
   it('create saves story with files', async () => {

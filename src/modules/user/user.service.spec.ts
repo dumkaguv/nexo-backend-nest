@@ -167,7 +167,8 @@ describe('UserService', () => {
     await expect(service.findOne(7)).resolves.toEqual({
       ...user,
       followingCount: 11,
-      followersCount: 3
+      followersCount: 3,
+      isFollowing: false
     })
     expect(prisma.user.findFirstOrThrow).toHaveBeenCalledWith({
       include: { profile: { include: { avatar: true } } },
@@ -184,7 +185,8 @@ describe('UserService', () => {
     await expect(service.findOneWithRelations(9)).resolves.toEqual({
       ...user,
       followingCount: 1,
-      followersCount: 2
+      followersCount: 2,
+      isFollowing: false
     })
     expect(prisma.user.findFirstOrThrow).toHaveBeenCalledWith({
       include: includeUserWithRelations,

@@ -37,6 +37,7 @@ model User {
   followers Subscription[] @relation("UserFollowers")
 
   stories Story[]
+  storyViews StoryView[]
 
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @default(now()) @updatedAt
@@ -206,9 +207,25 @@ model Story {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   files File[]
+  views StoryView[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+}
+
+model StoryView {
+  id Int @id @default(autoincrement())
+
+  storyId Int
+  userId  Int
+
+  story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([storyId, userId])
+  @@index([userId])
 }
 
 model File {
