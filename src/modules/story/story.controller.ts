@@ -106,6 +106,6 @@ export class StoryController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   public remove(@Req() req: AuthRequest, @Param('id') id: string) {
-    return this.storyService.remove(req.user.id, +id)
+    return this.storyService.remove(+id, req.user.id)
   }
 }

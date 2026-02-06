@@ -132,6 +132,6 @@ describe('StoryController', () => {
       controller.remove({ user: { id: 3 } } as never, '9')
     ).resolves.toEqual({ id: 9 })
 
-    expect(storyService.remove).toHaveBeenCalledWith(3, 9)
+    expect(storyService.remove).toHaveBeenCalledWith(9, 3)
   })
 })
